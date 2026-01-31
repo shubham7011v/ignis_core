@@ -1,0 +1,95 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+ 
+ # Android Signing
+ **/android/*.jks
+ **/android/*.keystore
+ **/android/key.properties
+ 
+ # Temporary CI/CD helper files
+ *_base64.txt
+ service-account.json
+ 
+# Firebase Configuration (Flavor-specific)
+**/google-services.json
+
+# Firebase Service Account Keys (NEVER COMMIT THESE!)
+*firebase*service*account*.json
+veil-dev-shubham-*.json
+veil-prod-*.json
+firebase-service-account-dev.json
+firebase-service-account-prod.json
+
+# Local Environment
+.env
+.env.local
+docker-compose.override.yml
+
+# Database & Backups
+*.db
+*.db-journal
+*.db-wal
+/backups/
+/veil_data_dev/
+/veil_data_prod/
+
+# Temporary / Debug / Backup files
+*.txt
+*.pem
+*.bak
+nginx_fixed*.conf
+websocket*.conf
+fix_key.py
+previous_*.dart
+test_*.txt
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+
+*.agent
+logs/

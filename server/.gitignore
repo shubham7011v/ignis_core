@@ -1,0 +1,26 @@
+
+# Binaries
+*.exe
+*.test
+*.prof
+server
+veil-server
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+test_output*.txt
+
+# Modules
+vendor/
+
+# IDEs
+.idea/
+.vscode/
+

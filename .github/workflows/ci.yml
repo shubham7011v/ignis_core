@@ -1,0 +1,21 @@
+name: Veil CI (Validation)
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  validate:
+    name: Analyze and Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup environment
+        uses: ./.github/actions/setup-flutter
+        
+      - name: Analyze
+        run: flutter analyze
+        
+      - name: Run Tests
+        run: flutter test

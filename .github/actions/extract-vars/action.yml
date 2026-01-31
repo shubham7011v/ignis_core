@@ -1,0 +1,19 @@
+name: "Extract Tag Variables"
+description: "Extracts version_name from GITHUB_REF and hardcodes track to internal"
+outputs:
+  version_name:
+    description: "Extracted version name"
+    value: ${{ steps.extract.outputs.version_name }}
+  track:
+    description: "Deployment track (hardcoded to internal)"
+    value: "internal"
+
+runs:
+  using: "composite"
+  steps:
+    - id: extract
+      shell: bash
+      run: |
+        TAG=${GITHUB_REF#refs/tags/v}
+        VERSION_NAME=$(echo $TAG | cut -d'-' -f1)
+        echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
