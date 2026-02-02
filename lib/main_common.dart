@@ -166,7 +166,7 @@ Future<void> mainCommon({required String env, required String appName}) async {
 
       _bootStep = '9. Running App';
       AppLogger.info('🚀 [STARTUP] runApp() called');
-      runApp(const BluffApp());
+      runApp(const IgnisApp());
     } catch (e, stack) {
       AppLogger.error(
         '🔥 CRITICAL STARTUP ERROR: $e',
@@ -256,8 +256,8 @@ Future<void> mainCommon({required String env, required String appName}) async {
   });
 }
 
-class BluffApp extends StatelessWidget {
-  const BluffApp({super.key});
+class IgnisApp extends StatelessWidget {
+  const IgnisApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -288,7 +288,7 @@ class BluffApp extends StatelessWidget {
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, themeState) {
           return MaterialApp(
-            title: 'Bluff',
+            title: 'Vivaah',
             debugShowCheckedModeBanner: AppConfig.instance.isDevelopment,
             theme: AppTheme.getTheme(themeState.mode),
             initialRoute: AppRouter.splash,

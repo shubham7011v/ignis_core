@@ -173,7 +173,7 @@ class AppConfig {
     appName =
         injectedAppName ??
         _safeGetEnv('APP_NAME') ??
-        const String.fromEnvironment('APP_NAME', defaultValue: 'Bluff');
+        const String.fromEnvironment('APP_NAME', defaultValue: 'Vivaah');
 
     isProduction = environment == 'production' || environment == 'prod';
     isDevelopment = !isProduction;
@@ -200,14 +200,14 @@ class AppConfig {
           _safeGetEnv('SERVER_URL') ??
           const String.fromEnvironment(
             'SERVER_URL',
-            defaultValue: 'wss://bluffzone.duckdns.org/ws',
+            defaultValue: 'wss://vivaah.duckdns.org/ws',
           );
       apiBaseUrl =
           _customApiUrl ??
           _safeGetEnv('API_URL') ??
           const String.fromEnvironment(
             'API_URL',
-            defaultValue: 'https://bluffzone.duckdns.org/api',
+            defaultValue: 'https://vivaah.duckdns.org/api',
           );
     } else {
       var defaultServerUrl =

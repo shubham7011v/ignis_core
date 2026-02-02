@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Central theme configuration for the Veil card game application.
+/// Central theme configuration for the Ignis application.
 ///
 /// This class provides consistent colors, text styles, and spacing throughout
 /// the app to maintain a premium, cohesive user experience.
-class VeilTheme {
-  VeilTheme._(); // Private constructor to prevent instantiation
+class IgnisTheme {
+  IgnisTheme._(); // Private constructor to prevent instantiation
 
   // ==================== Colors ====================
 

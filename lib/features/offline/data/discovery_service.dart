@@ -4,7 +4,7 @@ import 'dart:io';
 
 class DiscoveryService {
   static const int _port = 44444; // Discovery port
-  static const String _broadcastMsg = 'VEIL_HOST';
+  static const String _broadcastMsg = 'IGNIS_HOST';
 
   RawDatagramSocket? _socket;
   Timer? _broadcastTimer;

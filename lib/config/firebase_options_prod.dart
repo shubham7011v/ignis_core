@@ -43,20 +43,20 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAwyOFtyCXwblxrsOhXj2sImNO5u_FcvI0',
-    appId: '1:233564815800:android:b4957d103e68f88aed4f4d',
-    messagingSenderId: '233564815800',
-    projectId: 'veil-prod-shubham',
-    storageBucket: 'veil-prod-shubham.firebasestorage.app',
+    apiKey: 'AIzaSyDfgtl67m885k5O5IrcY0T4d05-KM4_ncE',
+    appId: '1:892343603637:android:0eefefa9e34528c83889fc',
+    messagingSenderId: '892343603637',
+    projectId: 'vivaah-ignis-prod',
+    storageBucket: 'vivaah-ignis-prod.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAwyOFtyCXwblxrsOhXj2sImNO5u_FcvI0',
-    appId: '1:233564815800:ios:b4957d103e68f88aed4f4d', // Placeholder
-    messagingSenderId: '233564815800',
-    projectId: 'veil-prod-shubham',
-    storageBucket: 'veil-prod-shubham.firebasestorage.app',
-    iosBundleId: 'com.veil.bluff',
+    apiKey: 'AIzaSyADJh5qecD2bpURs4Twe2z5WXiEZpU_IBs',
+    appId: '1:892343603637:ios:1b050c02b0b179743889fc',
+    messagingSenderId: '892343603637',
+    projectId: 'vivaah-ignis-prod',
+    storageBucket: 'vivaah-ignis-prod.firebasestorage.app',
+    iosBundleId: 'com.ignis.vivaah',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(

@@ -14,7 +14,7 @@ class AdminService {
   // In a real app, this would be injected via dart-define or fetched securely
   String get _adminKey => const String.fromEnvironment(
     'ADMIN_API_KEY',
-    defaultValue: 'veil-admin-secret-2024',
+    defaultValue: 'ignis-admin-secret-2026',
   );
 
   Map<String, String> get _headers => {

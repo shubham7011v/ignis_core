@@ -21,7 +21,7 @@ class AppLogger {
 
       if (Platform.isWindows) {
         // Direct path for Windows development as requested
-        logDirPath = r'c:\Users\u32n08\Documents\veil_core\logs';
+        logDirPath = r'c:\Users\u32n08\Documents\ignis_core\logs';
       } else {
         // Fallback for other platforms (would ideally use path_provider if needed)
         // For now, we only implement the specific Windows request

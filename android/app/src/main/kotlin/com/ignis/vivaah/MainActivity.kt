@@ -1,4 +1,4 @@
-package com.example.ignis_core
+package com.ignis.vivaah
 
 import io.flutter.embedding.android.FlutterActivity
 
