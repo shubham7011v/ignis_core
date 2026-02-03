@@ -35,7 +35,6 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   // Audio
   double _masterVolume = 75;
-  double _voiceVolume = 85;
   double _musicVolume = 35;
   double _sfxVolume = 70;
   bool _music = true;
@@ -83,7 +82,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final storage = sl.storageService;
     setState(() {
       _masterVolume = storage.getInt('pref_master_volume')?.toDouble() ?? 75.0;
-      _voiceVolume = storage.getInt('pref_voice_volume')?.toDouble() ?? 85.0;
       _musicVolume = storage.getInt('pref_music_volume')?.toDouble() ?? 35.0;
       _sfxVolume = storage.getInt('pref_sfx_volume')?.toDouble() ?? 70.0;
       _music = storage.getBool('pref_music') ?? true;
@@ -107,10 +105,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         masterVolume: _masterVolume / 100,
         musicVolume: _musicVolume / 100,
         sfxVolume: _sfxVolume / 100,
-        voiceVolume: _voiceVolume / 100,
         isMusicEnabled: _music,
         isSfxEnabled: _sfx,
-        isVoiceEnabled: true,
         isHapticEnabled: _haptics,
         sfxVariantIndex: _sfxVariant,
       ),
@@ -163,7 +159,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 SettingsAudioSection(
                   palette: palette,
                   masterVolume: _masterVolume,
-                  voiceVolume: _voiceVolume,
                   musicVolume: _musicVolume,
                   sfxVolume: _sfxVolume,
                   musicEnabled: _music,
@@ -172,11 +167,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onMasterChanged: (v) => setState(() {
                     _masterVolume = v;
                     _updateSetting('pref_master_volume', v);
-                    _playVolumePreview();
-                  }),
-                  onVoiceChanged: (v) => setState(() {
-                    _voiceVolume = v;
-                    _updateSetting('pref_voice_volume', v);
                     _playVolumePreview();
                   }),
                   onMusicChanged: (v) => setState(() {

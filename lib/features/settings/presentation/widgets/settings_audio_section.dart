@@ -6,14 +6,12 @@ import 'settings_components.dart';
 class SettingsAudioSection extends StatelessWidget {
   final AppColorPalette palette;
   final double masterVolume;
-  final double voiceVolume;
   final double musicVolume;
   final double sfxVolume;
   final bool musicEnabled;
   final bool sfxEnabled;
   final int sfxVariant;
   final ValueChanged<double> onMasterChanged;
-  final ValueChanged<double> onVoiceChanged;
   final ValueChanged<double> onMusicChanged;
   final ValueChanged<double> onSfxChanged;
   final ValueChanged<bool> onMusicToggle;
@@ -24,14 +22,12 @@ class SettingsAudioSection extends StatelessWidget {
     super.key,
     required this.palette,
     required this.masterVolume,
-    required this.voiceVolume,
     required this.musicVolume,
     required this.sfxVolume,
     required this.musicEnabled,
     required this.sfxEnabled,
     required this.sfxVariant,
     required this.onMasterChanged,
-    required this.onVoiceChanged,
     required this.onMusicChanged,
     required this.onSfxChanged,
     required this.onMusicToggle,
@@ -48,12 +44,6 @@ class SettingsAudioSection extends StatelessWidget {
           label: 'Master Volume',
           value: masterVolume,
           onChanged: onMasterChanged,
-          palette: palette,
-        ),
-        SettingsVolumeSlider(
-          label: 'Voice Volume',
-          value: voiceVolume,
-          onChanged: onVoiceChanged,
           palette: palette,
         ),
         SettingsVolumeSlider(

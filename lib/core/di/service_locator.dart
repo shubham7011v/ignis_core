@@ -44,7 +44,6 @@ class ServiceLocator {
 
   // Re-enable these as WebSocketSessionHandler for repurposing
   WebSocketSessionHandler get sessionHandler => _webSocketHandler!;
-  WebSocketSessionHandler? get voiceSessionHandler => _webSocketHandler!;
 
   late final GreetingService greetingService;
   late final SystemStatusService systemStatusService;

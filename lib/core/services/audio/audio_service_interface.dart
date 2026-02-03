@@ -3,10 +3,8 @@ class AudioSettings {
   final double masterVolume; // 0.0 - 1.0
   final double musicVolume; // 0.0 - 1.0
   final double sfxVolume; // 0.0 - 1.0
-  final double voiceVolume; // 0.0 - 1.0
   final bool isMusicEnabled;
   final bool isSfxEnabled;
-  final bool isVoiceEnabled;
   final bool isHapticEnabled;
   final int sfxVariantIndex; // 1-4
 
@@ -14,10 +12,8 @@ class AudioSettings {
     required this.masterVolume,
     required this.musicVolume,
     required this.sfxVolume,
-    required this.voiceVolume,
     required this.isMusicEnabled,
     required this.isSfxEnabled,
-    required this.isVoiceEnabled,
     required this.isHapticEnabled,
     this.sfxVariantIndex = 1,
   });
@@ -58,9 +54,6 @@ abstract class AudioService {
 
   /// Update all volumes based on settings (Master * Channel)
   Future<void> updateVolumes(AudioSettings settings);
-
-  /// "Duck" audio (lower volume) when voice chat is active
-  Future<void> duckAudio(bool isVoiceActive);
 
   /// Trigger haptic feedback
   Future<void> triggerHaptic(HapticType type);

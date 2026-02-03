@@ -19,10 +19,8 @@ class AudioServiceImpl implements AudioService {
     masterVolume: 0.75,
     musicVolume: 0.35,
     sfxVolume: 0.70,
-    voiceVolume: 0.85,
     isMusicEnabled: true,
     isSfxEnabled: true,
-    isVoiceEnabled: true,
     isHapticEnabled: true,
     sfxVariantIndex: 1,
   );
@@ -108,12 +106,10 @@ class AudioServiceImpl implements AudioService {
       final storage = sl.storageService;
       _currentSettings = AudioSettings(
         masterVolume: (storage.getInt('pref_master_volume') ?? 75) / 100,
-        voiceVolume: (storage.getInt('pref_voice_volume') ?? 85) / 100,
         musicVolume: (storage.getInt('pref_music_volume') ?? 35) / 100,
         sfxVolume: (storage.getInt('pref_sfx_volume') ?? 70) / 100,
         isMusicEnabled: storage.getBool('pref_music') ?? true,
         isSfxEnabled: storage.getBool('pref_sfx') ?? true,
-        isVoiceEnabled: storage.getBool('pref_voice') ?? true,
         isHapticEnabled: storage.getBool('pref_haptics') ?? true,
         sfxVariantIndex: storage.getInt('pref_sfx_variant') ?? 1,
       );
@@ -300,17 +296,6 @@ class AudioServiceImpl implements AudioService {
     if (_isDucked) vol *= _duckBgmMultiplier;
 
     await _bgmPlayer.setVolume(vol.clamp(0.0, 1.0));
-  }
-
-  @override
-  Future<void> duckAudio(bool isVoiceActive) async {
-    if (_isDucked == isVoiceActive) return; // No change
-
-    _isDucked = isVoiceActive;
-
-    // Animate volume change?
-    // AudioPlayers doesn't have built-in fade (yet), instant for now.
-    await _updateBgmVolume();
   }
 
   @override

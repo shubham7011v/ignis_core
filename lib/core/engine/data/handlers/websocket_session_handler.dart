@@ -4,7 +4,6 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../../domain/handlers/session_handler.dart';
-import '../../domain/handlers/voice_session_handler.dart';
 import '../../domain/models/session_state.dart';
 import '../../domain/models/session_enums.dart';
 import '../../../../features/auth/domain/models/user_stats.dart';
@@ -23,8 +22,7 @@ class WebSocketSessionHandler extends SessionHandler
         WebSocketSessionActionsMixin,
         WebSocketRoomMixin,
         WebSocketConnectionMixin,
-        WebSocketMessageHandlerMixin
-    implements VoiceSessionHandler {
+        WebSocketMessageHandlerMixin {
   WebSocketChannel? _channel;
 
   final _stateController = StreamController<SessionState>.broadcast();
@@ -89,23 +87,6 @@ class WebSocketSessionHandler extends SessionHandler
 
   Stream<ConnectionStatus> get connectionStatusStream =>
       _connectionStatusController.stream;
-
-  // Voice Callbacks & Managers
-  Function(Map<String, dynamic> data)? _voiceCallback;
-
-  @override
-  void setVoiceCallback(Function(Map<String, dynamic> data)? callback) =>
-      _voiceCallback = callback;
-
-  // VoiceAudioManager? _voiceManager;
-  dynamic _voiceManager;
-
-  @override
-  void setVoiceManager(dynamic manager) {
-    // if (manager is VoiceAudioManager) {
-    _voiceManager = manager;
-    // }
-  }
 
   SessionState _currentState = SessionState.initial();
 
@@ -317,27 +298,6 @@ class WebSocketSessionHandler extends SessionHandler
   UserStats? get lastStats => _lastStats;
   List<FriendRecord> get currentFriends => _friends;
 
-  // --- Voice Interface Bridge ---
-  void receiveVoiceState(Map<String, dynamic> data) {
-    _voiceCallback?.call(data);
-  }
-
-  @override
-  Future<void> raiseHand() async {
-    sendMessage({'type': 'VOICE_RAISE_HAND'});
-  }
-
-  @override
-  void sendVoiceSDP(Map<String, dynamic> data) {
-    sendMessage({'type': 'VOICE_SDP', 'data': data});
-  }
-
-  @override
-  void sendVoiceICE(Map<String, dynamic> data) {
-    sendMessage({'type': 'VOICE_ICE', 'data': data});
-  }
-
-  // --- Bridge Methods for Mixins ---
   @override
   void setupMessageListener(String firebaseToken, {String? displayName}) {
     final curId = _connectionId;
@@ -441,7 +401,6 @@ class WebSocketSessionHandler extends SessionHandler
     _subscription?.cancel();
     await _channel?.sink.close();
     updateConnectionStatus(ConnectionStatus.disconnected);
-    await _voiceManager?.dispose();
     WidgetsBinding.instance.removeObserver(this);
   }
 }
