@@ -13,21 +13,24 @@ class IgnisTheme {
   /// Primary brand color - gold accent used for highlights and key UI elements
   static const Color goldAccent = Color(0xFFE5A043);
 
-  /// Dark background colors
-  static const Color deepBlack = Color(0xFF0F0F0F);
+  /// Vibrant Action Red - used for primary buttons and CTAs
+  static const Color actionRed = Color(0xFFF52D2D);
+
+  /// Dark background colors (Maroon based)
+  static const Color deepMaroon = Color(0xFF1B0D0D);
+  static const Color subtleMaroon = Color(0xFF2D0E0E);
   static const Color pureBlack = Colors.black;
-  static const Color darkGray = Color(0xFF2C2C2C);
 
   /// Text colors
   static const Color textPrimary = Colors.white;
-  static const Color textSecondary = Colors.white70;
-  static const Color textTertiary = Colors.white54;
-  static const Color textQuaternary = Colors.white38;
+  static const Color textSecondary = Color(0xFFE5A043); // Gold secondary
+  static const Color textTertiary = Color(0xFFAFAFAF);
+  static const Color textQuaternary = Colors.white24;
 
   /// Semantic colors
-  static const Color errorColor = Colors.redAccent;
-  static const Color successColor = Colors.greenAccent;
-  static const Color warningColor = Colors.orangeAccent;
+  static const Color errorColor = Color(0xFFD32F2F);
+  static const Color successColor = Color(0xFF388E3C);
+  static const Color warningColor = Color(0xFFFFD700);
 
   // ==================== Text Styles ====================
 
@@ -79,12 +82,19 @@ class IgnisTheme {
   static const LinearGradient backgroundGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [deepBlack, pureBlack],
+    colors: [deepMaroon, pureBlack],
   );
 
   /// Gold gradient for premium elements
   static const LinearGradient goldGradient = LinearGradient(
     colors: [Color(0xFFFFD700), goldAccent],
+  );
+
+  /// Red gradient for primary action buttons
+  static const LinearGradient actionGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [actionRed, Color(0xFFD32F2F)],
   );
 
   // ==================== Spacing ====================

@@ -7,6 +7,8 @@ import '../bloc/auth_state.dart';
 import '../../../../core/di/service_locator.dart' as di;
 import '../../../../core/notifications/bloc/app_notification_bloc.dart';
 import '../../../../core/notifications/bloc/app_notification_event.dart';
+import '../../../../core/navigation/app_router.dart';
+import '../../../../core/theme/ignis_theme.dart';
 
 class IntroEntryPage extends StatefulWidget {
   const IntroEntryPage({super.key});
@@ -45,7 +47,7 @@ class _IntroEntryPageState extends State<IntroEntryPage>
       listener: (context, state) {
         if (state is Authenticated) {
           di.sl.onboardingRepository.markIntroAsSeen();
-          Navigator.of(context).pushReplacementNamed('/court_entry');
+          Navigator.of(context).pushReplacementNamed(AppRouter.celebration);
         } else if (state is AuthFailure) {
           context.read<AppNotificationBloc>().add(
             ShowErrorNotification(state.failure.message),
@@ -53,14 +55,14 @@ class _IntroEntryPageState extends State<IntroEntryPage>
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: IgnisTheme.deepMaroon,
         body: Stack(
           children: [
-            // Background Silhouette Placeholder (Very subtle)
+            // Background Flourish Placeholder
             Positioned.fill(
               child: Opacity(
-                opacity: 0.03, // 2-3%
-                child: CustomPaint(painter: _SilhouettePainter()),
+                opacity: 0.05,
+                child: CustomPaint(painter: _FlourishPainter()),
               ),
             ),
 
@@ -71,17 +73,17 @@ class _IntroEntryPageState extends State<IntroEntryPage>
                 children: [
                   GestureDetector(
                     onLongPress: () {
-                      // Bypass to home for testing
+                      // Bypass to celebration for testing
                       Navigator.of(
                         context,
-                      ).pushReplacementNamed('/court_entry');
+                      ).pushReplacementNamed(AppRouter.celebration);
                     },
                     child: Text(
-                      'Play with real players.',
+                      'Create Memories.',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.cinzel(
-                        color: const Color(0xFFE5A043),
-                        fontSize: 28,
+                        color: IgnisTheme.goldAccent,
+                        fontSize: 32,
                         fontWeight: FontWeight.w500,
                         height: 1.4,
                       ),
@@ -89,11 +91,11 @@ class _IntroEntryPageState extends State<IntroEntryPage>
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Outsmart everyone.',
+                    'Celebrate Love.',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.cinzel(
-                      color: const Color(0xFFE5A043),
-                      fontSize: 28,
+                      color: IgnisTheme.goldAccent,
+                      fontSize: 32,
                       fontWeight: FontWeight.w500,
                       height: 1.4,
                     ),
@@ -117,12 +119,12 @@ class _IntroEntryPageState extends State<IntroEntryPage>
                             ),
                             style: OutlinedButton.styleFrom(
                               side: const BorderSide(
-                                color: Color(0xFFE5A043),
+                                color: IgnisTheme.goldAccent,
                                 width: 1.5,
                               ),
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 40,
-                                vertical: 16,
+                                horizontal: 48,
+                                vertical: 20,
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
@@ -132,18 +134,18 @@ class _IntroEntryPageState extends State<IntroEntryPage>
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 const Icon(
-                                  Icons.login,
-                                  color: Color(0xFFE5A043),
+                                  Icons.favorite,
+                                  color: IgnisTheme.goldAccent,
                                   size: 18,
                                 ),
                                 const SizedBox(width: 12),
                                 Text(
                                   state is AuthLoading
                                       ? 'ASCENDING...'
-                                      : 'ENTER THE COURT',
+                                      : 'GET STARTED',
                                   style: GoogleFonts.inter(
                                     color: Colors.white,
-                                    fontSize: 12,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 2,
                                   ),
@@ -165,7 +167,7 @@ class _IntroEntryPageState extends State<IntroEntryPage>
   }
 }
 
-class _SilhouettePainter extends CustomPainter {
+class _FlourishPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
@@ -173,15 +175,14 @@ class _SilhouettePainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     final path = Path();
-    // Simulate a table and silhouettes at the bottom
-    path.moveTo(0, size.height * 0.85);
-    path.lineTo(size.width * 0.2, size.height * 0.75);
-    path.lineTo(size.width * 0.4, size.height * 0.8);
-    path.lineTo(size.width * 0.6, size.height * 0.72);
-    path.lineTo(size.width * 0.8, size.height * 0.78);
-    path.lineTo(size.width, size.height * 0.7);
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
+    // Subtle mandala-like curve at the bottom
+    path.moveTo(0, size.height);
+    path.quadraticBezierTo(
+      size.width * 0.5,
+      size.height * 0.7,
+      size.width,
+      size.height,
+    );
     path.close();
 
     canvas.drawPath(path, paint);

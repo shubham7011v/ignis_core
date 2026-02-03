@@ -27,17 +27,31 @@ class HomeBottomNavBar extends StatelessWidget {
       showSelectedLabels: false,
       showUnselectedLabels: false,
       items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: ''),
-        BottomNavigationBarItem(icon: Icon(Icons.people_outline), label: ''),
         BottomNavigationBarItem(
-          icon: Icon(Icons.emoji_events_outlined),
-          label: '',
+          icon: Icon(Icons.home_outlined),
+          activeIcon: Icon(Icons.home),
+          label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_bag_outlined),
-          label: '',
+          icon: Icon(Icons.people_outline),
+          activeIcon: Icon(Icons.people),
+          label: 'Guests',
         ),
-        BottomNavigationBarItem(icon: Icon(Icons.settings_outlined), label: ''),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.favorite_outline),
+          activeIcon: Icon(Icons.favorite),
+          label: 'RSVP',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.movie_creation_outlined),
+          activeIcon: Icon(Icons.movie_creation),
+          label: 'Designs',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.settings_outlined),
+          activeIcon: Icon(Icons.settings),
+          label: 'Settings',
+        ),
       ],
     );
   }

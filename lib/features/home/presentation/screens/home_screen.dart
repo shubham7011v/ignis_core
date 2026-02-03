@@ -5,12 +5,7 @@ import '../../../../core/theme/bloc/theme_bloc.dart';
 import '../../../../core/theme/bloc/theme_state.dart';
 import '../../../../core/notifications/widgets/app_notification_listener.dart';
 import '../../../../core/di/service_locator.dart';
-import '../../../social/social.dart';
-import '../../../collection/collection.dart';
 import '../../../settings/settings.dart';
-import '../widgets/coming_soon_modal.dart';
-import '../widgets/rejoin_game_dialog.dart';
-import '../widgets/insufficient_coins_dialog.dart';
 import '../widgets/home_dashboard.dart';
 import '../widgets/home_bottom_nav_bar.dart';
 import '../bloc/home_bloc.dart';
@@ -32,25 +27,6 @@ class _HomeScreenState extends State<HomeScreen> {
   ) {
     if (effect is HomeNavigateTo) {
       Navigator.pushNamed(context, effect.route);
-    } else if (effect is HomeShowRejoinDialog) {
-      RejoinGameDialog.show(
-        context: context,
-        palette: palette,
-        onResume: () => context.read<HomeBloc>().add(HomeRejoinGameConfirmed()),
-        onNewGame: () => context.read<HomeBloc>().add(HomeNewGameConfirmed()),
-      );
-    } else if (effect is HomeShowInsufficientCoinsDialog) {
-      InsufficientCoinsDialog.show(context: context, palette: palette);
-    } else if (effect is HomeShowComingSoonDialog) {
-      showDialog(
-        context: context,
-        builder: (context) => ComingSoonModal(
-          featureName: effect.featureName,
-          description: effect.description,
-          icon: effect.icon,
-          palette: palette,
-        ),
-      );
     } else if (effect is HomeShowSnackBar) {
       ScaffoldMessenger.of(
         context,
@@ -106,11 +82,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               palette: palette,
                               homeState: homeState,
                             ),
-                            FriendsScreen(onBack: () => _goHome(context)),
-                            LeaderboardScreen(onBack: () => _goHome(context)),
-                            DeckCollectionScreen(
-                              onBack: () => _goHome(context),
-                            ),
+                            const Center(child: Text('Guests Coming Soon')),
+                            const Center(child: Text('RSVP Coming Soon')),
+                            const Center(child: Text('Designs Coming Soon')),
                             SettingsScreen(onBack: () => _goHome(context)),
                           ],
                         ),

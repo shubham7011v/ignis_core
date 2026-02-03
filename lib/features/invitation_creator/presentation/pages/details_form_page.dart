@@ -33,7 +33,7 @@ class _DetailsFormPageState extends State<DetailsFormPage> {
               surface: palette.surface,
               onSurface: palette.textPrimary,
             ),
-            dialogBackgroundColor: palette.surface,
+            dialogTheme: DialogThemeData(backgroundColor: palette.surface),
           ),
           child: child!,
         );
@@ -169,10 +169,10 @@ class _DetailsFormPageState extends State<DetailsFormPage> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: palette.warn.withOpacity(0.1),
+                        color: palette.warn.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: palette.warn.withOpacity(0.3),
+                          color: palette.warn.withValues(alpha: 0.3),
                         ),
                       ),
                       child: Row(

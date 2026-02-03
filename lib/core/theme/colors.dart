@@ -109,20 +109,20 @@ class AppColors {
         );
       case AppThemeMode.royal:
         return const AppColorPalette(
-          background: Color(0xFF1A0A0A), // Dark warm background
-          surface: Color(0xFF2C1515), // Deep maroon surface
-          surfaceLight: Color(0xFF4A2020), // Brighter maroon
-          primary: Color(0xFFC41E3A), // Deep Red (Primary Action)
-          primaryDim: Color(0xFF800020), // Burgundy
-          activeGlow: Color(0x66FFD700), // Gold glow
+          background: Color(0xFF1B0D0D), // Deep Maroon/Chocolate
+          surface: Color(0xFF2D0E0E), // Subtle maroon surface
+          surfaceLight: Color(0xFF3F1616), // Lighter maroon
+          primary: Color(0xFFF52D2D), // Vibrant Action Red
+          primaryDim: Color(0xFFB71C1C), // Deep Red
+          activeGlow: Color(0x66E5A043), // Gold highlight
           warn: Color(0xFFFFD700), // Gold
-          danger: Color(0xFFCF6679),
-          success: Color(0xFF4CAF50),
-          textPrimary: Color(0xFFFFD700), // Gold Text (Premium feel)
-          textSecondary: Color(0xFFE5E5E5), // Off-white for readability
-          textTertiary: Color(0xFFA0A0A0),
-          cardBack: Color(0xFF2C1515),
-          divider: Color(0xFF4A2020),
+          danger: Color(0xFFD32F2F),
+          success: Color(0xFF388E3C),
+          textPrimary: Color(0xFFFFFFFF), // Pure White
+          textSecondary: Color(0xFFE5A043), // Gold secondary
+          textTertiary: Color(0xFFAFAFAF), // Muted light gray
+          cardBack: Color(0xFF2D0E0E),
+          divider: Color(0xFF3F1616),
         );
     }
   }

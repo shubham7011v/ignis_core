@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/ignis_theme.dart';
 
 class IntroHintPage extends StatefulWidget {
   const IntroHintPage({super.key});
@@ -68,24 +69,24 @@ class _IntroHintPageState extends State<IntroHintPage>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Lie with confidence.',
+                    'Design Your Dream',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.cinzel(
-                      color: const Color(0xFFE5A043),
+                      color: IgnisTheme.goldAccent,
                       fontSize: 32,
                       fontWeight: FontWeight.w500,
                       height: 1.6,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
                   Text(
-                    'Call bluffs\nat the right moment.',
+                    'Craft beautiful invitations\nthat reflect your unique style.',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.cinzel(
-                      color: const Color(0xFFE5A043),
-                      fontSize: 32,
-                      fontWeight: FontWeight.w500,
-                      height: 1.6,
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontSize: 18,
+                      height: 1.5,
+                      fontWeight: FontWeight.w300,
                     ),
                   ),
                 ],
@@ -99,24 +100,26 @@ class _IntroHintPageState extends State<IntroHintPage>
 
   Widget _buildSlidingCard(double startX, double y, double speedFactor) {
     double progress = (_controller.value * speedFactor + startX) % 1.2;
-    // Map progress to screen width with some overflow
     double xPos = (progress - 0.2) * MediaQuery.of(context).size.width * 1.2;
 
     return Positioned(
       left: xPos,
       top: MediaQuery.of(context).size.height * y,
       child: Opacity(
-        opacity: 0.04, // 3-4% opacity
+        opacity: 0.08, // Slightly more visible for the new icons
         child: Container(
           width: 140,
           height: 200,
           decoration: BoxDecoration(
-            color: const Color(0xFFE5A043),
+            color: IgnisTheme.goldAccent,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white, width: 1),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.5),
+              width: 1,
+            ),
           ),
           child: const Center(
-            child: Icon(Icons.shield, color: Colors.white, size: 40),
+            child: Icon(Icons.auto_awesome, color: Colors.white, size: 40),
           ),
         ),
       ),

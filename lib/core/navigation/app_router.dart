@@ -3,8 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../di/service_locator.dart' as di;
 import '../../features/voice/presentation/bloc/voice_bloc.dart';
 import '../../features/session/session.dart';
-import '../../features/invitation_creator/presentation/pages/home_page.dart'
-    as wedding_home;
+import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/invitation_creator/presentation/pages/style_selection_page.dart';
 import '../../features/invitation_creator/presentation/pages/details_form_page.dart';
 import '../../features/invitation_creator/presentation/pages/preview_page.dart';
@@ -24,7 +23,7 @@ import '../../features/offline/presentation/screens/offline_lobby_screen.dart';
 class AppRouter {
   static const String splash = '/splash';
   static const String intro = '/intro';
-  static const String courtEntry = '/court_entry';
+  static const String celebration = '/celebration';
   static const String home = '/home';
   static const String createRoom = '/create_room';
   static const String joinRoom = '/join_room';
@@ -43,8 +42,8 @@ class AppRouter {
   static Map<String, WidgetBuilder> get routes => {
     splash: (context) => const SplashScreen(),
     intro: (context) => const IntroScreen(initialPage: 0),
-    courtEntry: (context) => const CourtEntryScreen(),
-    home: (context) => const wedding_home.HomeScreen(),
+    celebration: (context) => const CelebrationEntryScreen(),
+    home: (context) => const HomeScreen(),
     '/style_selection': (context) => const StyleSelectionPage(),
     '/details_form': (context) => const DetailsFormPage(),
     '/preview': (context) => const PreviewPage(),

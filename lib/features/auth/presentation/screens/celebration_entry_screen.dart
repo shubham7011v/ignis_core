@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/ignis_theme.dart';
 
-class CourtEntryScreen extends StatefulWidget {
-  const CourtEntryScreen({super.key});
+class CelebrationEntryScreen extends StatefulWidget {
+  const CelebrationEntryScreen({super.key});
 
   @override
-  State<CourtEntryScreen> createState() => _CourtEntryScreenState();
+  State<CelebrationEntryScreen> createState() => _CelebrationEntryScreenState();
 }
 
-class _CourtEntryScreenState extends State<CourtEntryScreen>
+class _CelebrationEntryScreenState extends State<CelebrationEntryScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _scaleAnimation;
@@ -26,7 +27,7 @@ class _CourtEntryScreenState extends State<CourtEntryScreen>
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
-    // Auto-advance after 1.2s to 1.5s
+    // Auto-advance after 1.4s
     Timer(const Duration(milliseconds: 1400), () {
       if (mounted) {
         Navigator.of(context).pushReplacementNamed('/home');
@@ -43,7 +44,7 @@ class _CourtEntryScreenState extends State<CourtEntryScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: IgnisTheme.deepMaroon,
       body: Stack(
         children: [
           // Background Vignette
@@ -74,34 +75,34 @@ class _CourtEntryScreenState extends State<CourtEntryScreen>
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFE5A043).withValues(alpha: 0.1),
+                          color: IgnisTheme.goldAccent.withValues(alpha: 0.1),
                           blurRadius: 40,
                           spreadRadius: 10,
                         ),
                       ],
                     ),
                     child: const Icon(
-                      Icons.security, // Shield Icon
+                      Icons.favorite, // Heart Icon for Vivaah
                       size: 100,
-                      color: Color(0xFFE5A043),
+                      color: IgnisTheme.goldAccent,
                     ),
                   ),
                 ),
                 const SizedBox(height: 60),
                 Text(
-                  'ENTERING THE LOBBY',
+                  'WELCOME TO VIVAAH',
                   style: GoogleFonts.cinzel(
-                    color: const Color(0xFFE5A043).withValues(alpha: 0.9),
-                    fontSize: 20,
+                    color: IgnisTheme.goldAccent.withValues(alpha: 0.9),
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 4,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Preparing your seat…',
+                  'Preparing your celebration…',
                   style: GoogleFonts.inter(
-                    color: Colors.grey[500],
+                    color: Colors.white70,
                     fontSize: 16,
                     letterSpacing: 1.2,
                   ),

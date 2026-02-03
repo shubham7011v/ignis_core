@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/ignis_theme.dart';
 
 class IntroMoodPage extends StatefulWidget {
   const IntroMoodPage({super.key});
@@ -20,15 +21,15 @@ class _IntroMoodPageState extends State<IntroMoodPage>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 10),
+      duration: const Duration(seconds: 15), // Slower, more elegant
     )..repeat();
 
     // Sequence animations
-    Future.delayed(const Duration(milliseconds: 100), () {
+    Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) setState(() => _showTitle = true);
     });
 
-    Future.delayed(const Duration(milliseconds: 300), () {
+    Future.delayed(const Duration(milliseconds: 800), () {
       if (mounted) setState(() => _showSubtitle = true);
     });
   }
@@ -42,10 +43,10 @@ class _IntroMoodPageState extends State<IntroMoodPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: IgnisTheme.deepMaroon,
       body: Stack(
         children: [
-          // Background Particles (Simulating Lottie)
+          // Background "Glitter" Particles
           Positioned.fill(
             child: AnimatedBuilder(
               animation: _controller,
@@ -53,7 +54,7 @@ class _IntroMoodPageState extends State<IntroMoodPage>
                 return CustomPaint(
                   painter: _ParticlePainter(
                     progress: _controller.value,
-                    color: const Color(0xFFE5A043).withValues(alpha: 0.05),
+                    color: IgnisTheme.goldAccent.withValues(alpha: 0.1),
                   ),
                 );
               },
@@ -67,29 +68,33 @@ class _IntroMoodPageState extends State<IntroMoodPage>
               children: [
                 AnimatedOpacity(
                   opacity: _showTitle ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 150),
+                  duration: const Duration(milliseconds: 800),
                   child: Text(
-                    'BLUFF',
+                    'VIVAAH',
                     style: GoogleFonts.cinzel(
-                      color: const Color(0xFFE5A043),
-                      fontSize: 64,
+                      color: IgnisTheme.goldAccent,
+                      fontSize: 56,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 12,
+                      letterSpacing: 10,
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
                 AnimatedOpacity(
                   opacity: _showSubtitle ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 200),
-                  child: Text(
-                    'Where lies rule\nand truth burns',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
-                      color: Colors.grey[600],
-                      fontSize: 18,
-                      height: 1.5,
-                      letterSpacing: 1.2,
+                  duration: const Duration(milliseconds: 1000),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: Text(
+                      'Your digital companion for the\nperfect wedding journey.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: 18,
+                        height: 1.6,
+                        letterSpacing: 0.8,
+                        fontWeight: FontWeight.w300,
+                      ),
                     ),
                   ),
                 ),
@@ -105,9 +110,9 @@ class _IntroMoodPageState extends State<IntroMoodPage>
 class _ParticlePainter extends CustomPainter {
   final double progress;
   final Color color;
-  final List<math.Point> _points = List.generate(
+  final List<Offset> _points = List.generate(
     20,
-    (index) => math.Point(
+    (index) => Offset(
       math.Random(index).nextDouble(),
       math.Random(index + 100).nextDouble(),
     ),
@@ -122,8 +127,8 @@ class _ParticlePainter extends CustomPainter {
     for (var i = 0; i < _points.length; i++) {
       final p = _points[i];
       // Slow float upwards
-      double x = p.x * size.width;
-      double y = ((p.y - progress) % 1.0) * size.height;
+      double x = p.dx * size.width;
+      double y = ((p.dy - progress) % 1.0) * size.height;
 
       canvas.drawCircle(Offset(x, y), 1.5, paint);
     }

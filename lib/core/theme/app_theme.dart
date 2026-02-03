@@ -18,8 +18,8 @@ class AppTheme {
         secondary: palette.primaryDim,
         surface: palette.surface,
         error: palette.danger,
-        onPrimary: Colors.black,
-        onSurface: palette.textPrimary,
+        onPrimary: Colors.white,
+        tertiary: palette.activeGlow,
       ),
 
       textTheme: TextTheme(
@@ -46,13 +46,19 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: palette.primary,
-          foregroundColor: Colors.black,
+          foregroundColor: Colors.white,
+          elevation: 4,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppDimens.radiusM),
+            borderRadius: BorderRadius.circular(AppDimens.radiusFull),
           ),
           padding: const EdgeInsets.symmetric(
-            horizontal: AppDimens.paddingL,
+            horizontal: AppDimens.paddingXL,
             vertical: AppDimens.paddingM,
+          ),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.1,
           ),
         ),
       ),

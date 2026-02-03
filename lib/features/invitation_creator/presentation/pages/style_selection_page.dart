@@ -145,7 +145,9 @@ class _StyleSelectionPageState extends State<StyleSelectionPage> {
                               boxShadow: isSelected
                                   ? [
                                       BoxShadow(
-                                        color: palette.primary.withOpacity(0.3),
+                                        color: palette.primary.withValues(
+                                          alpha: 0.3,
+                                        ),
                                         blurRadius: 12,
                                         offset: const Offset(0, 4),
                                       ),
@@ -157,18 +159,19 @@ class _StyleSelectionPageState extends State<StyleSelectionPage> {
                                 // Color Placeholder (Replace with Image later)
                                 Container(
                                   decoration: BoxDecoration(
-                                    color: (style['color'] as Color)
-                                        .withOpacity(0.2),
+                                    color: (style['color'] as Color).withValues(
+                                      alpha: 0.2,
+                                    ),
                                     borderRadius: BorderRadius.circular(14),
                                     gradient: LinearGradient(
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                       colors: [
-                                        (style['color'] as Color).withOpacity(
-                                          0.4,
+                                        (style['color'] as Color).withValues(
+                                          alpha: 0.4,
                                         ),
-                                        (style['color'] as Color).withOpacity(
-                                          0.1,
+                                        (style['color'] as Color).withValues(
+                                          alpha: 0.1,
                                         ),
                                       ],
                                     ),
@@ -194,8 +197,8 @@ class _StyleSelectionPageState extends State<StyleSelectionPage> {
                                             vertical: 4,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: Colors.black.withOpacity(
-                                              0.6,
+                                            color: Colors.black.withValues(
+                                              alpha: 0.6,
                                             ),
                                             borderRadius: BorderRadius.circular(
                                               4,

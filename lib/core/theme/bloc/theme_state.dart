@@ -8,7 +8,7 @@ class ThemeState extends Equatable {
   const ThemeState({required this.mode, required this.isLoaded});
 
   factory ThemeState.initial() =>
-      const ThemeState(mode: AppThemeMode.classic, isLoaded: false);
+      const ThemeState(mode: AppThemeMode.royal, isLoaded: false);
 
   ThemeState copyWith({AppThemeMode? mode, bool? isLoaded}) {
     return ThemeState(

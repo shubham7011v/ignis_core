@@ -144,7 +144,7 @@ class _PreviewPageState extends State<PreviewPage>
               border: Border.all(color: palette.divider),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                   blurRadius: 20,
                   spreadRadius: 2,
                 ),
@@ -159,14 +159,13 @@ class _PreviewPageState extends State<PreviewPage>
                   fit: BoxFit.cover,
                   width: double.infinity,
                   height: double.infinity,
-                  errorBuilder: (_, __, ___) =>
-                      Container(color: palette.surface),
+                  errorBuilder: (_, _, _) => Container(color: palette.surface),
                 ),
-                Container(color: Colors.black.withOpacity(0.3)),
+                Container(color: Colors.black.withValues(alpha: 0.3)),
                 Icon(
                   Icons.play_circle_fill,
                   size: 64,
-                  color: palette.textPrimary.withOpacity(0.8),
+                  color: palette.textPrimary.withValues(alpha: 0.8),
                 ),
 
                 Positioned(

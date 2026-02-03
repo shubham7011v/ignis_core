@@ -7,6 +7,8 @@ import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import 'intro_screen.dart';
+import '../../../../core/navigation/app_router.dart';
+import '../../../../core/theme/ignis_theme.dart';
 import '../../../../core/di/service_locator.dart' as di;
 
 class SplashScreen extends StatefulWidget {
@@ -61,7 +63,7 @@ class _SplashScreenState extends State<SplashScreen> {
     AppLogger.info('🔍 [SplashScreen] Final State Decision: $state');
 
     if (state is Authenticated) {
-      Navigator.of(context).pushReplacementNamed('/court_entry');
+      Navigator.of(context).pushReplacementNamed(AppRouter.celebration);
     } else {
       final hasSeenIntro = onboardingRepo.hasSeenIntro();
       if (!hasSeenIntro) {
@@ -80,7 +82,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: IgnisTheme.deepMaroon,
       body: Center(
         child: TweenAnimationBuilder<double>(
           tween: Tween(begin: 0.0, end: 1.0),
@@ -105,9 +107,9 @@ class _SplashScreenState extends State<SplashScreen> {
                   ],
                 ),
                 child: const Icon(
-                  Icons.security, // Shield-like icon
+                  Icons.auto_awesome, // Sparkles icon
                   size: 80,
-                  color: Color(0xFFE5A043),
+                  color: IgnisTheme.goldAccent,
                 ),
               ),
             ],

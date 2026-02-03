@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../auth/domain/models/user_stats.dart';
 import '../../../../core/models/system_status.dart';
-import '../bloc/home_bloc.dart';
-import '../bloc/home_event.dart';
 import 'system_status_capsule.dart';
 
 class HomeTopBar extends StatelessWidget {
@@ -32,8 +29,7 @@ class HomeTopBar extends StatelessWidget {
         user?.displayName ?? stats?.name ?? 'Mysterious Player';
     final String displayName = rawName.split(' ').first;
     final String photoUrl = user?.photoURL ?? '';
-    final String rank = stats?.rank ?? 'Novice';
-    final int coins = stats?.coins ?? 1000;
+    // Legacy stats removed for Vivaah
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -45,12 +41,12 @@ class HomeTopBar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                'BLUFF',
+                'VIVAAH',
                 style: GoogleFonts.cinzel(
-                  color: palette.primary,
-                  fontSize: 30,
+                  color: palette.warn, // Using gold color
+                  fontSize: 28,
                   fontWeight: FontWeight.w900,
-                  letterSpacing: 5,
+                  letterSpacing: 3,
                 ),
               ),
               SystemStatusCapsule(systemStatus: systemStatus, palette: palette),
@@ -70,7 +66,7 @@ class HomeTopBar extends StatelessWidget {
                         color: palette.textTertiary,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        letterSpacing: 1.5,
+                        letterSpacing: 1,
                       ),
                     ),
                     Text(
@@ -108,89 +104,9 @@ class HomeTopBar extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildInfoChip(context, 'Rank', rank, palette.primary, palette),
-              _buildInfoChip(
-                context,
-                'Coins',
-                coins.toString(),
-                palette.primary,
-                palette,
-              ),
-            ],
-          ),
+          // User info chips removed to focus on Wedding Planning Dashboard
         ],
       ),
-    );
-  }
-
-  Widget _buildInfoChip(
-    BuildContext context,
-    String label,
-    String value,
-    Color color,
-    AppColorPalette palette,
-  ) {
-    // Only show refill button for Coins if value < 100
-    final needsRefill =
-        label == 'Coins' &&
-        int.tryParse(value) != null &&
-        int.parse(value) < 100;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label.toUpperCase(),
-          style: GoogleFonts.inter(
-            color: palette.textTertiary,
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
-          ),
-        ),
-        Row(
-          children: [
-            Text(
-              value,
-              style: GoogleFonts.cinzel(
-                color: color,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            if (needsRefill)
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: GestureDetector(
-                  onTap: () {
-                    context.read<HomeBloc>().add(HomeRefillCoinsClicked());
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: palette.primaryDim,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      'REFILL',
-                      style: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ],
     );
   }
 }
