@@ -10,6 +10,8 @@ class InvitationState extends Equatable {
   final InvitationStyle? selectedStyle;
   final WeddingDetails details;
   final String? jobId;
+  final double renderProgress;
+  final String? renderOutputPath;
   final String? errorMessage;
 
   const InvitationState({
@@ -18,6 +20,8 @@ class InvitationState extends Equatable {
     this.selectedStyle,
     required this.details,
     this.jobId,
+    this.renderProgress = 0.0,
+    this.renderOutputPath,
     this.errorMessage,
   });
 
@@ -28,6 +32,8 @@ class InvitationState extends Equatable {
     selectedStyle,
     details,
     jobId,
+    renderProgress,
+    renderOutputPath,
     errorMessage,
   ];
 
@@ -37,6 +43,8 @@ class InvitationState extends Equatable {
     InvitationStyle? selectedStyle,
     WeddingDetails? details,
     String? jobId,
+    double? renderProgress,
+    String? renderOutputPath,
     String? errorMessage,
   }) {
     return InvitationState(
@@ -45,6 +53,8 @@ class InvitationState extends Equatable {
       selectedStyle: selectedStyle ?? this.selectedStyle,
       details: details ?? this.details,
       jobId: jobId ?? this.jobId,
+      renderProgress: renderProgress ?? this.renderProgress,
+      renderOutputPath: renderOutputPath ?? this.renderOutputPath,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }

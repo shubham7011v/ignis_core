@@ -2,12 +2,9 @@ import 'dart:async';
 import 'dart:io';
 import '../../utils/app_logger.dart';
 import '../../models/system_status.dart';
-import '../../engine/domain/models/session_enums.dart';
-import '../../engine/data/handlers/websocket_session_handler.dart';
 import '../../../features/auth/auth.dart';
 
 class SystemStatusService {
-  final WebSocketSessionHandler _sessionHandler;
   final AuthBloc _authBloc;
 
   final _statusController = StreamController<SystemStatus>.broadcast();
@@ -26,18 +23,12 @@ class SystemStatusService {
   Duration _currentPingInterval = const Duration(seconds: 30);
   int _consecutiveFailures = 0;
 
-  SystemStatusService({
-    required WebSocketSessionHandler sessionHandler,
-    required AuthBloc authBloc,
-  }) : _sessionHandler = sessionHandler,
-       _authBloc = authBloc {
+  SystemStatusService({required AuthBloc authBloc}) : _authBloc = authBloc {
     _init();
   }
 
   void _init() {
-    _sessionSub = _sessionHandler.connectionStatusStream.listen((_) {
-      _updateStatus();
-    });
+    _authSub = _authBloc.stream.listen((_) => _updateStatus());
     _authSub = _authBloc.stream.listen((_) => _updateStatus());
 
     // Start dynamic ping loop
@@ -87,7 +78,6 @@ class SystemStatusService {
 
     // Fetch latest states AFTER completing the async internet check
     final authState = _authBloc.state;
-    final gameStatus = _sessionHandler.connectionStatus;
 
     if (!hasInternet) {
       _emit(SystemStatus.noInternet());
@@ -105,34 +95,11 @@ class SystemStatusService {
       return;
     }
 
-    // 3. Handle Game Server Status
-    switch (gameStatus) {
-      case ConnectionStatus.connected:
-        _emit(SystemStatus.healthy());
-        break;
-      case ConnectionStatus.connecting:
-        _emit(SystemStatus.syncing());
-        break;
-      case ConnectionStatus.reconnecting:
-        _emit(SystemStatus.reconnecting());
-        break;
-      case ConnectionStatus.disconnected:
-        // If we are disconnected but have internet and auth, we are "Healthy" (just idle)
-        _emit(SystemStatus.healthy());
-        break;
-      case ConnectionStatus.failed:
-        _emit(SystemStatus.serverDown());
-        break;
-    }
+    // 3. Handle Backend Server Status (Simplified)
+    _emit(SystemStatus.healthy());
   }
 
   Future<bool> _checkInternet() async {
-    // If we are already connected to the game server, we definitely have some connectivity.
-    if (_sessionHandler.connectionStatus == ConnectionStatus.connected) {
-      // If we are connected, we can reset backoff implicitly effectively
-      return true;
-    }
-
     try {
       // Use a short timeout to prevent long DNS hangs that pin the UI to "Initializing..."
       final result = await InternetAddress.lookup(
@@ -164,14 +131,9 @@ class SystemStatusService {
   }
 
   void _handleSyncTimeout() {
-    final gameStatus = _sessionHandler.connectionStatus;
     final authState = _authBloc.state;
 
-    if (gameStatus == ConnectionStatus.connecting) {
-      _emit(
-        SystemStatus.serverDown(),
-      ); // Assume server is unreachable if connecting > 3s
-    } else if (authState is AuthLoading || authState is AuthInitial) {
+    if (authState is AuthLoading || authState is AuthInitial) {
       _emit(SystemStatus.authIssue()); // Assume auth is stuck
     }
   }

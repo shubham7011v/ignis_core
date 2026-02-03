@@ -4,9 +4,8 @@ import '../../utils/app_logger.dart';
 class UserRepository {
   UserRepository();
 
-  /// No-op for now as Firestore is removed.
+  /// No-op for now.
   /// User basic info is managed by FirebaseAuth.
-  /// Game stats are managed by WebSocketSessionHandler.
   Future<void> syncUser(auth.User firebaseUser) async {
     AppLogger.info('User: Syncing user info', data: {'uid': firebaseUser.uid});
     // Migration: We no longer sync to Firestore.

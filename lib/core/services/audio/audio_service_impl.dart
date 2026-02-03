@@ -24,7 +24,7 @@ class AudioServiceImpl implements AudioService {
     isHapticEnabled: true,
     sfxVariantIndex: 1,
   );
-  bool _isDucked = false;
+  final bool _isDucked = false;
   bool _isInitialized = false;
 
   @override

@@ -1,16 +1,27 @@
-# veil_core
+# Vivaah - Premium Wedding Invitations
 
-A new Flutter project.
+[![Flutter](https://img.shields.io/badge/Flutter-3.10-blue.svg)](https://flutter.dev)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-## Getting Started
+**Vivaah** is a premium, offline-first wedding invitation video creator. It allows users to download cinematic templates, customize them with their wedding details, and render high-quality MP4 invitations directly on their device.
 
-This project is a starting point for a Flutter application.
+## 🚀 Key Features (v1.0)
+*   **Offline Rendering**: Zero-server video generation using `FFmpegKit`.
+*   **Cinematic Templates**: Professional 1080p templates powered by YouTube CDN.
+*   **Privacy First**: All data stays on your device. No login required.
+*   **Instant Sharing**: Share directly to WhatsApp or Instagram.
 
-A few resources to get you started if this is your first Flutter project:
+## 🛠️ Tech Stack
+*   **Framework**: Flutter (Dart)
+*   **Video Engine**: FFmpegKit (LTS)
+*   **Template Source**: YouTube (via `youtube_explode_dart`)
+*   **Architecture**: BLoC + Clean Architecture
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 📱 Getting Started
+1.  Clone the repository
+2.  Run `flutter pub get`
+3.  Run `flutter run` on an Android device
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📄 Documentation
+*   [Roadmap](docs/roadmap.md): Release schedule and future plans.
+*   [Architecture](docs/architecture.md): Technical deep-dive.

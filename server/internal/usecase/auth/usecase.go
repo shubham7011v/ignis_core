@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"veil_server/internal/domain/user"
+	"ignis_server/internal/domain/user"
 )
 
 // IdentityProvider handles 3rd party auth verification (Firebase)
@@ -58,7 +58,7 @@ func (uc *UseCase) Authenticate(ctx context.Context, token, providedName, provid
 
 	// 2. Fallback Name
 	if name == "" {
-		name = "Player"
+		name = "User"
 	}
 
 	u, err := uc.userRepo.GetOrCreate(uid, name)
@@ -80,26 +80,7 @@ func (uc *UseCase) UpdateName(uid, newName string) (*user.User, error) {
 	if err := uc.userRepo.UpdateProfile(uid, newName, ""); err != nil {
 		return nil, err
 	}
-	return uc.userRepo.GetOrCreate(uid, "") // Refetch to get stats
-}
-
-func (uc *UseCase) RefillCoins(uid string) (*user.User, error) {
-	u, err := uc.userRepo.GetOrCreate(uid, "")
-	if err != nil {
-		return nil, err
-	}
-
-	if u.Coins >= 100 {
-		return nil, errors.New("REFILL_DENIED") // You have enough
-	}
-
-	topUp := 1000 - u.Coins
-	if err := uc.userRepo.UpdateCoins(uid, topUp); err != nil {
-		return nil, err
-	}
-
-	u.Coins = 1000
-	return u, nil
+	return uc.userRepo.GetOrCreate(uid, "")
 }
 
 func (uc *UseCase) DeleteAccount(uid string) error {

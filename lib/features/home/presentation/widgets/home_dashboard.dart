@@ -49,6 +49,10 @@ class HomeDashboard extends StatelessWidget {
                     _buildSectionHeader('Trending Collections'),
                     const SizedBox(height: 16),
                     _buildTrendingList(),
+                    const SizedBox(height: 32),
+                    _buildSectionHeader('Your Recent Creations'),
+                    const SizedBox(height: 16),
+                    _buildRecentCreationsList(),
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -231,41 +235,126 @@ class HomeDashboard extends StatelessWidget {
 
   Widget _buildTrendingList() {
     return SizedBox(
-      height: 220,
+      height: 240,
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
-          _buildTrendingCard('Royal Heritage', 'Gold & Maroon', Colors.amber),
+          _buildCollectionCard(
+            'Royal Mughal',
+            'Heritage Collection',
+            'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=400',
+          ),
           const SizedBox(width: 16),
-          _buildTrendingCard('Vintage Bollywood', 'Classic Retro', Colors.red),
+          _buildCollectionCard(
+            'Minimalist Pastel',
+            'Contemporary Style',
+            'https://images.unsplash.com/photo-1522673607200-16489a6955c8?auto=format&fit=crop&q=80&w=400',
+          ),
           const SizedBox(width: 16),
-          _buildTrendingCard('Modern Floral', 'Pastel Elegance', Colors.pink),
+          _buildCollectionCard(
+            'Bollywood Glitz',
+            'Celebrity Special',
+            'https://images.unsplash.com/photo-1544027993-37dbfe43562a?auto=format&fit=crop&q=80&w=400',
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTrendingCard(String title, String theme, Color color) {
+  Widget _buildRecentCreationsList() {
+    return SizedBox(
+      height: 120,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          _buildRecentItem('Ananya & Rohan', 'Complete'),
+          const SizedBox(width: 12),
+          _buildRecentItem('Sanya & Vikram', 'Draft'),
+          const SizedBox(width: 12),
+          _buildRecentItem('Pooja & Sameer', 'Complete'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecentItem(String names, String status) {
     return Container(
-      width: 160,
+      width: 200,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.divider),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: IgnisTheme.goldAccent.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.favorite,
+              color: IgnisTheme.goldAccent,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  names,
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  status,
+                  style: GoogleFonts.inter(
+                    color: status == 'Complete'
+                        ? Colors.greenAccent
+                        : Colors.amberAccent,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCollectionCard(String title, String category, String imageUrl) {
+    return Container(
+      width: 180,
+      decoration: BoxDecoration(
+        color: palette.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: palette.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.2),
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(20),
-                ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
               ),
-              child: Center(
-                child: Icon(Icons.image_outlined, color: color, size: 40),
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                width: double.infinity,
               ),
             ),
           ),
@@ -276,18 +365,19 @@ class HomeDashboard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.cinzel(
                     color: Colors.white,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 4),
                 Text(
-                  theme,
-                  style: GoogleFonts.inter(color: Colors.white38, fontSize: 12),
+                  category,
+                  style: GoogleFonts.inter(
+                    color: IgnisTheme.goldAccent.withValues(alpha: 0.7),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),

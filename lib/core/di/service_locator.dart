@@ -1,26 +1,20 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/data.dart';
 import '../services/services.dart';
-import '../engine/data/handlers/websocket_session_handler.dart';
 import '../repositories/session_repository.dart';
-import '../repositories/websocket_session_repository.dart';
+import '../repositories/session_repository_impl.dart';
 import '../notifications/bloc/app_notification_bloc.dart';
 import '../../features/auth/auth.dart';
 import '../../features/profile/profile.dart';
 import '../../features/invitation_creator/domain/repositories/invitation_repository.dart';
 import '../../features/invitation_creator/data/repositories/invitation_repository_impl.dart';
 import '../../features/invitation_creator/presentation/bloc/invitation_bloc.dart';
+import '../../features/invitation_creator/data/services/client_render_service.dart';
 import '../../features/admin/data/admin_repository.dart';
-import '../../features/session/session.dart';
+import '../../features/templates/presentation/bloc/templates_bloc.dart';
 import '../../features/templates/domain/repositories/templates_repository.dart';
 import '../../features/templates/data/repositories/templates_repository_impl.dart';
-import '../../features/templates/presentation/bloc/templates_bloc.dart';
-import '../../features/guests/domain/repositories/guests_repository.dart';
-import '../../features/guests/data/repositories/guests_repository_impl.dart';
-import '../../features/guests/presentation/bloc/guests_bloc.dart';
-import '../../features/creations/domain/repositories/creations_repository.dart';
-import '../../features/creations/data/repositories/creations_repository_impl.dart';
-import '../../features/creations/presentation/bloc/creations_bloc.dart';
+import '../../features/templates/data/services/template_download_service.dart';
 
 class ServiceLocator {
   static final ServiceLocator _instance = ServiceLocator._internal();
@@ -39,11 +33,9 @@ class ServiceLocator {
   late final NotificationService notificationService;
   late final AdminRepository adminRepository;
   late final TemplatesRepository templatesRepository;
-  late final GuestsRepository guestsRepository;
-  late final CreationsRepository creationsRepository;
+  late final TemplateDownloadService templateDownloadService;
 
-  // Re-enable these as WebSocketSessionHandler for repurposing
-  WebSocketSessionHandler get sessionHandler => _webSocketHandler!;
+  // Session Handling (Removed WebSocket Engine)
 
   late final GreetingService greetingService;
   late final SystemStatusService systemStatusService;
@@ -51,16 +43,9 @@ class ServiceLocator {
   late final AppNotificationBloc notificationBloc;
   late final InvitationBloc invitationBloc;
   late final TemplatesBloc templatesBloc;
-  late final GuestsBloc guestsBloc;
-  late final CreationsBloc creationsBloc;
-  late final SessionBloc sessionBloc;
+  late final ClientRenderService clientRenderService;
 
-  // Explicitly expose WebSocket handler for specialized calls (like updateNickname)
-  WebSocketSessionHandler? _webSocketHandler;
-
-  WebSocketSessionHandler get webSocketSessionHandler => _webSocketHandler!;
-  set webSocketSessionHandler(WebSocketSessionHandler handler) =>
-      _webSocketHandler = handler;
+  // WebSocket handler removed
 
   Future<void> setup() async {
     final prefs = await SharedPreferences.getInstance();
@@ -69,20 +54,16 @@ class ServiceLocator {
     storageService = StorageService(prefs);
     greetingService = GreetingService();
 
-    // Initialize the singleton WS handler
-    _webSocketHandler = WebSocketSessionHandler();
-
     // Initialize Repositories
     authRepository = AuthRepository();
     userRepository = UserRepository();
     onboardingRepository = OnboardingRepository(prefs);
-    sessionRepository = WebSocketSessionRepository(_webSocketHandler!);
-    profileRepository = ProfileRepository(_webSocketHandler!);
+    sessionRepository = SessionRepositoryImpl();
+    profileRepository = ProfileRepository();
     adminRepository = AdminRepository();
     invitationRepository = InvitationRepositoryImpl();
     templatesRepository = TemplatesRepositoryImpl();
-    guestsRepository = GuestsRepositoryImpl();
-    creationsRepository = CreationsRepositoryImpl();
+    templateDownloadService = TemplateDownloadService();
 
     // YouTube & Notifications
     youtubeRepository = YouTubeServiceImpl();
@@ -94,23 +75,16 @@ class ServiceLocator {
 
     // Initialize Blocs (depend on services/repositories)
     notificationBloc = AppNotificationBloc();
-    invitationBloc = InvitationBloc(repository: invitationRepository);
+    invitationBloc = InvitationBloc(
+      repository: invitationRepository,
+      renderService: clientRenderService,
+      downloadService: templateDownloadService,
+    );
     templatesBloc = TemplatesBloc(repository: templatesRepository);
-    guestsBloc = GuestsBloc(repository: guestsRepository);
-    creationsBloc = CreationsBloc(repository: creationsRepository);
-    sessionBloc = SessionBloc();
   }
 
   void initializeSystemStatus(AuthBloc authBloc) {
-    systemStatusService = SystemStatusService(
-      sessionHandler: _webSocketHandler!,
-      authBloc: authBloc,
-    );
-  }
-
-  /// Factory method to create session handler (Repurposed for WebSocket by default)
-  WebSocketSessionHandler createSessionHandler({bool online = true}) {
-    return _webSocketHandler!;
+    systemStatusService = SystemStatusService(authBloc: authBloc);
   }
 }
 

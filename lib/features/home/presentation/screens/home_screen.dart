@@ -9,14 +9,8 @@ import '../../../settings/settings.dart';
 import '../widgets/home_dashboard.dart';
 import '../widgets/home_bottom_nav_bar.dart';
 import '../bloc/home_bloc.dart';
-import '../bloc/home_event.dart';
-import '../bloc/home_state.dart';
 import '../../../../features/templates/presentation/screens/template_gallery_screen.dart';
 import '../../../../features/templates/presentation/bloc/templates_event.dart';
-import '../../../../features/guests/presentation/screens/guest_list_screen.dart';
-import '../../../../features/guests/presentation/bloc/guests_event.dart';
-import '../../../../features/creations/presentation/screens/creations_gallery_screen.dart';
-import '../../../../features/creations/presentation/bloc/creations_event.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -48,7 +42,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => HomeBloc(
-        sessionHandler: sl.webSocketSessionHandler,
         systemStatusService: sl.systemStatusService,
         audioService: sl.audioService,
         greetingService: sl.greetingService,
@@ -87,14 +80,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             HomeDashboard(
                               palette: palette,
                               homeState: homeState,
-                            ),
-                            BlocProvider.value(
-                              value: sl.guestsBloc..add(LoadGuests()),
-                              child: const GuestListScreen(),
-                            ),
-                            BlocProvider.value(
-                              value: sl.creationsBloc..add(LoadCreations()),
-                              child: const CreationsGalleryScreen(),
                             ),
                             BlocProvider.value(
                               value: sl.templatesBloc

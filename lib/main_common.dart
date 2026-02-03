@@ -279,8 +279,6 @@ class IgnisApp extends StatelessWidget {
         BlocProvider(
           create: (context) => ProfileBloc(repository: di.sl.profileRepository),
         ),
-
-        BlocProvider.value(value: di.sl.sessionBloc),
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, themeState) {

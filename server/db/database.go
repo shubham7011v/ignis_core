@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"veil_server/internal/domain/challenge"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite"
@@ -57,9 +56,6 @@ func InitDB(dbPath string) (*sql.DB, error) {
 		return nil, err
 	}
 
-	// Seed some challenges if empty
-	go seedChallenges(dbConn)
-
 	return dbConn, nil
 }
 
@@ -85,40 +81,4 @@ func runMigrations(dbConn *sql.DB) error {
 
 	log.Println("Migrations applied successfully")
 	return nil
-}
-
-func seedChallenges(dbConn *sql.DB) {
-	challenges := []challenge.Challenge{
-		{
-			ID:          "win_3",
-			Title:       "Victory Streak",
-			Description: "Win 3 matches today",
-			Goal:        3,
-			Reward:      500,
-			Type:        "wins",
-		},
-		{
-			ID:          "play_5",
-			Title:       "Card Shark",
-			Description: "Play 5 matches today",
-			Goal:        5,
-			Reward:      200,
-			Type:        "games_played",
-		},
-		{
-			ID:          "win_1000_coins",
-			Title:       "Gold Digger",
-			Description: "Win 1000 coins in matches",
-			Goal:        1000,
-			Reward:      300,
-			Type:        "coins_won",
-		},
-	}
-
-	for _, c := range challenges {
-		dbConn.Exec(`INSERT INTO challenges (id, title, description, goal, reward, type) 
-				 VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET
-				 goal=excluded.goal, reward=excluded.reward`,
-			c.ID, c.Title, c.Description, c.Goal, c.Reward, c.Type)
-	}
 }

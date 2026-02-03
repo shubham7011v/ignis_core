@@ -3,13 +3,10 @@ import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../domain/models/user_profile.dart';
 import '../../../auth/domain/models/user_stats.dart';
-import '../../../../core/engine/data/handlers/websocket_session_handler.dart';
 import '../../../../core/config/app_config.dart';
 
 class ProfileRepository {
-  final WebSocketSessionHandler _handler;
-
-  ProfileRepository(this._handler);
+  ProfileRepository();
 
   /// Get a user's profile by their ID
   Future<UserProfile> getProfile(String userId) async {
@@ -18,16 +15,13 @@ class ProfileRepository {
     final isOwnProfile = currentUser?.uid == userId;
 
     if (isOwnProfile && currentUser != null) {
-      // Use cached stats from WebSocket handler if available
-      final stats =
-          _handler.lastStats ??
-          const UserStats(
-            userId: '',
-            name: '',
-            invitationsCreated: 0,
-            guestsCount: 0,
-            rsvpsReceived: 0,
-          );
+      final stats = const UserStats(
+        userId: '',
+        name: '',
+        invitationsCreated: 0,
+        guestsCount: 0,
+        rsvpsReceived: 0,
+      );
 
       return UserProfile(
         userId: currentUser.uid,
@@ -90,16 +84,17 @@ class ProfileRepository {
 
   /// Check if a user is your friend
   Future<bool> isFriend(String userId) async {
-    return _handler.currentFriends.any((f) => f.friendId == userId);
+    // TODO: Implement friend check via REST API
+    return false;
   }
 
   /// Add a user as a friend
   Future<void> addFriend(String userId) async {
-    _handler.addFriend(userId);
+    // TODO: Implement add friend via REST API
   }
 
   /// Remove a friend
   Future<void> removeFriend(String userId) async {
-    _handler.removeFriend(userId);
+    // TODO: Implement remove friend via REST API
   }
 }

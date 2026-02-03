@@ -17,7 +17,7 @@ COPY . .
 ARG VERSION=dev
 
 # Build the binary with CGO enabled for SQLite and embed version
-RUN CGO_ENABLED=1 GOOS=linux go build -ldflags "-X veil_server/version.Version=${VERSION}" -o veil-server ./cmd/server
+RUN CGO_ENABLED=1 GOOS=linux go build -ldflags "-X ignis_server/version.Version=${VERSION}" -o ignis-server ./cmd/server
 
 # Runtime stage
 FROM alpine:latest
@@ -28,7 +28,7 @@ RUN apk add --no-cache ca-certificates sqlite
 WORKDIR /root/
 
 # Copy binary from builder
-COPY --from=builder /app/veil-server .
+COPY --from=builder /app/ignis-server .
 
 # Create data directory for SQLite persistence
 RUN mkdir -p /root/data
@@ -44,4 +44,4 @@ EXPOSE 8080
 VOLUME ["/root/data"]
 
 # Run
-CMD ["./veil-server"]
+CMD ["./ignis-server"]

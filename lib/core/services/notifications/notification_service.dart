@@ -2,8 +2,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:ignis_core/core/utils/app_logger.dart';
 import 'package:ignis_core/core/di/service_locator.dart';
 import 'package:ignis_core/core/notifications/bloc/app_notification_event.dart';
-import 'package:ignis_core/core/config/app_config.dart';
-import 'package:ignis_core/core/engine/domain/models/session_enums.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -84,9 +82,7 @@ class NotificationService {
     // 6. Get Token
     final token = await _fcm.getToken();
     AppLogger.info("FCM Token: $token");
-    if (token != null) {
-      sl.webSocketSessionHandler.setFcmToken(token);
-    }
+    // Token can be sent to backend via REST API if needed
   }
 
   Future<void> _handleMessageInteraction(RemoteMessage message) async {
@@ -96,40 +92,13 @@ class NotificationService {
     // This is critical because auth state may not be ready immediately
     await Future.delayed(const Duration(milliseconds: 500));
 
-    // Ensure WebSocket is connected before handling notification
-    final handler = sl.webSocketSessionHandler;
-    final currentStatus = handler.connectionStatus;
-
-    AppLogger.info('📊 Current connection status: $currentStatus');
-
-    if (currentStatus != ConnectionStatus.connected) {
-      AppLogger.info('🔌 Reconnecting WebSocket after notification tap...');
-      try {
-        final user = sl.authRepository.currentUser;
-        if (user == null) {
-          AppLogger.info('❌ No user found, cannot reconnect');
-          return;
-        }
-
-        // ✅ FIX: Force token refresh in case it's expired after long background
-        final token = await user.getIdToken(true);
-        final displayName = user.displayName;
-
-        if (token != null) {
-          final serverUrl = AppConfig.instance.serverUrl;
-          await handler.connect(serverUrl, token, displayName: displayName);
-          AppLogger.info('✅ WebSocket reconnected successfully');
-        } else {
-          AppLogger.info('❌ Failed to get auth token');
-        }
-      } catch (e) {
-        AppLogger.error('❌ Failed to reconnect WebSocket', exception: e);
-        // Show error notification to user
-        sl.notificationBloc.add(
-          ShowErrorNotification('Failed to connect to server'),
-        );
-        return;
-      }
+    // Auth check only
+    final user = sl.authRepository.currentUser;
+    if (user == null) {
+      AppLogger.info(
+        '❌ No user found, cannot process notification interaction',
+      );
+      return;
     }
 
     // Handle specific notification types

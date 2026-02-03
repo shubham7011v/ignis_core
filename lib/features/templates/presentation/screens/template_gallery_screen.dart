@@ -6,6 +6,8 @@ import '../bloc/templates_bloc.dart';
 import '../bloc/templates_event.dart';
 import '../bloc/templates_state.dart';
 import '../widgets/template_card.dart';
+import '../../../invitation_creator/presentation/bloc/invitation_bloc.dart';
+import '../../../invitation_creator/presentation/bloc/invitation_event.dart';
 
 class TemplateGalleryScreen extends StatelessWidget {
   const TemplateGalleryScreen({super.key});
@@ -66,7 +68,10 @@ class TemplateGalleryScreen extends StatelessWidget {
                       return TemplateCard(
                         template: template,
                         onTap: () {
-                          // Navigate to detail or selection logic
+                          context.read<InvitationBloc>().add(
+                            TemplateSelected(template),
+                          );
+                          Navigator.pushNamed(context, '/details_form');
                         },
                       );
                     },

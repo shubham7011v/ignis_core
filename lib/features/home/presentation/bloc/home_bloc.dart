@@ -1,28 +1,25 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/engine/data/handlers/websocket_session_handler.dart';
 import '../../../../core/services/services.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/constants/sound_assets.dart';
-import '../../../../core/engine/domain/models/session_state.dart';
 import 'home_event.dart';
 import 'home_state.dart';
 
+export 'home_event.dart';
+export 'home_state.dart';
+
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  final WebSocketSessionHandler _sessionHandler;
   final SystemStatusService _systemStatusService;
   final AudioService _audioService;
   final GreetingService _greetingService;
   late StreamSubscription _statusSubscription;
-  late StreamSubscription _sessionSubscription;
 
   HomeBloc({
-    required WebSocketSessionHandler sessionHandler,
     required SystemStatusService systemStatusService,
     required AudioService audioService,
     required GreetingService greetingService,
-  }) : _sessionHandler = sessionHandler,
-       _systemStatusService = systemStatusService,
+  }) : _systemStatusService = systemStatusService,
        _audioService = audioService,
        _greetingService = greetingService,
        super(
@@ -35,29 +32,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<HomeStarted>(_onHomeStarted);
     on<HomeBottomNavTapped>(_onBottomNavTapped);
     on<HomeSystemStatusChanged>(_onSystemStatusChanged);
-    on<HomeSessionStateChanged>(_onSessionStateChanged);
 
     // Subscribe to System Status
-    _statusSubscription = _systemStatusService.statusStream.listen((
-      SystemStatus status,
-    ) {
+    _statusSubscription = _systemStatusService.statusStream.listen((status) {
       add(HomeSystemStatusChanged(status));
     });
-
-    // Subscribe to Session Updates (keeping it for future wedding session logic)
-    _sessionSubscription = _sessionHandler.sessionStateStream.listen((session) {
-      add(HomeSessionStateChanged(_checkActiveSession(session)));
-    });
-  }
-
-  static bool _checkActiveSession(SessionState session) {
-    return session.roomId != '0' && session.roomId != '000';
   }
 
   @override
   Future<void> close() {
     _statusSubscription.cancel();
-    _sessionSubscription.cancel();
     return super.close();
   }
 
@@ -91,12 +75,5 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     Emitter<HomeState> emit,
   ) async {
     emit(state.copyWith(systemStatus: event.status));
-  }
-
-  Future<void> _onSessionStateChanged(
-    HomeSessionStateChanged event,
-    Emitter<HomeState> emit,
-  ) async {
-    // placeholder for future session logic
   }
 }

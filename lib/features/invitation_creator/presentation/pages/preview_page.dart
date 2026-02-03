@@ -4,6 +4,8 @@ import '../../../../core/theme/colors.dart';
 import '../bloc/invitation_bloc.dart';
 import '../bloc/invitation_event.dart';
 import '../bloc/invitation_state.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:open_file_plus/open_file_plus.dart';
 
 class PreviewPage extends StatefulWidget {
   const PreviewPage({super.key});
@@ -48,14 +50,14 @@ class _PreviewPageState extends State<PreviewPage> {
                   iconTheme: IconThemeData(color: palette.textPrimary),
                 ),
           body: isGenerating
-              ? _buildGeneratingState(palette)
+              ? _buildGeneratingState(palette, state)
               : _buildReviewState(palette, state),
         );
       },
     );
   }
 
-  Widget _buildGeneratingState(AppColorPalette palette) {
+  Widget _buildGeneratingState(AppColorPalette palette, InvitationState state) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -68,14 +70,28 @@ class _PreviewPageState extends State<PreviewPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(
-            width: 100,
-            height: 100,
-            child: CircularProgressIndicator(
-              strokeWidth: 6,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                Color(0xFFFFD700),
-              ), // Gold
+          SizedBox(
+            width: 120,
+            height: 120,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CircularProgressIndicator(
+                  value: state.renderProgress,
+                  strokeWidth: 8,
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    Color(0xFFFFD700),
+                  ), // Gold
+                ),
+                Text(
+                  '${(state.renderProgress * 100).toInt()}%',
+                  style: TextStyle(
+                    color: palette.textPrimary,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 48),
@@ -93,7 +109,9 @@ class _PreviewPageState extends State<PreviewPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Text(
-              'Our AI is weaving your love story into a royal celebration. This may take a minute...',
+              state.renderProgress < 0.3
+                  ? 'Downloading Royal Template...'
+                  : 'Overlaying Golden Details...',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: palette.textSecondary,
@@ -164,9 +182,116 @@ class _PreviewPageState extends State<PreviewPage> {
           ),
         ),
 
-        // Bottom Action Buttons
-        _buildActionButtons(palette, context, state),
+        // Success View
+        if (state.status == InvitationStatus.success)
+          _buildSuccessState(palette, state)
+        else
+          _buildActionButtons(palette, context, state),
       ],
+    );
+  }
+
+  Widget _buildSuccessState(AppColorPalette palette, InvitationState state) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      color: palette.surface,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.green.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.check_circle,
+              color: Colors.green,
+              size: 64,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Your Invitation is Ready!',
+            style: TextStyle(
+              color: palette.textPrimary,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Cinzel',
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'A masterpiece has been created and saved to your gallery.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: palette.textSecondary, fontSize: 14),
+          ),
+          const SizedBox(height: 32),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    if (state.renderOutputPath != null) {
+                      final result = await OpenFile.open(
+                        state.renderOutputPath!,
+                      );
+                      if (result.type != ResultType.done) {
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Could not open video: ${result.message}',
+                            ),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  icon: const Icon(Icons.play_arrow),
+                  label: const Text('Play Now'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: palette.textPrimary,
+                    side: BorderSide(color: palette.divider),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    if (state.renderOutputPath != null) {
+                      final file = XFile(state.renderOutputPath!);
+                      await Share.shareXFiles(
+                        [file],
+                        text:
+                            'You are cordially invited to our wedding celebration! 💍✨',
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.share),
+                  label: const Text('Share'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: palette.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          TextButton(
+            onPressed: () =>
+                Navigator.popUntil(context, (route) => route.isFirst),
+            child: Text(
+              'Return to Home',
+              style: TextStyle(color: palette.accent),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
