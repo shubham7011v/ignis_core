@@ -7,8 +7,16 @@ import 'package:google_fonts/google_fonts.dart';
 class TemplateCard extends StatefulWidget {
   final Template template;
   final VoidCallback onTap;
+  final bool isLocked;
+  final VoidCallback? onUnlock;
 
-  const TemplateCard({super.key, required this.template, required this.onTap});
+  const TemplateCard({
+    super.key,
+    required this.template,
+    required this.onTap,
+    this.isLocked = false,
+    this.onUnlock,
+  });
 
   @override
   State<TemplateCard> createState() => _TemplateCardState();
@@ -144,13 +152,16 @@ class _TemplateCardState extends State<TemplateCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.onTap,
+      onTap: widget.isLocked ? widget.onUnlock : widget.onTap,
       child: Container(
         decoration: BoxDecoration(
           color: const Color(0xFF251616), // Slightly lighter maroon
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: widget.template.isPremium
+            color: widget.isLocked
+                ? Colors
+                      .white12 // Dim border if locked
+                : widget.template.isPremium
                 ? IgnisTheme.goldAccent
                 : Colors.white10,
             width: 1,
@@ -232,6 +243,35 @@ class _TemplateCardState extends State<TemplateCard> {
                   ),
                 ],
               ),
+
+              // Lock Overlay
+              if (widget.isLocked)
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.8),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: IgnisTheme.goldAccent,
+                            width: 2,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.lock_outline,
+                          color: IgnisTheme.goldAccent,
+                          size: 32,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
 
               // Details
               Padding(

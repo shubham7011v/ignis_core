@@ -2,7 +2,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/data.dart';
 import '../services/services.dart';
 import '../repositories/session_repository.dart';
-import '../repositories/session_repository_impl.dart';
 import '../notifications/bloc/app_notification_bloc.dart';
 import '../../features/auth/auth.dart';
 import '../../features/profile/profile.dart';
@@ -15,6 +14,10 @@ import '../../features/templates/presentation/bloc/templates_bloc.dart';
 import '../../features/templates/domain/repositories/templates_repository.dart';
 import '../../features/templates/data/repositories/templates_repository_impl.dart';
 import '../../features/templates/data/services/template_download_service.dart';
+// Billing
+import '../../features/billing/domain/repositories/billing_repository.dart';
+import '../../features/billing/data/repositories/billing_repository_impl.dart';
+import '../../features/billing/presentation/bloc/billing_bloc.dart';
 
 class ServiceLocator {
   static final ServiceLocator _instance = ServiceLocator._internal();
@@ -34,6 +37,7 @@ class ServiceLocator {
   late final AdminRepository adminRepository;
   late final TemplatesRepository templatesRepository;
   late final TemplateDownloadService templateDownloadService;
+  late final BillingRepository billingRepository;
 
   // Session Handling (Removed WebSocket Engine)
 
@@ -44,6 +48,7 @@ class ServiceLocator {
   late final InvitationBloc invitationBloc;
   late final TemplatesBloc templatesBloc;
   late final ClientRenderService clientRenderService;
+  late final BillingBloc billingBloc;
 
   // WebSocket handler removed
 
@@ -54,6 +59,7 @@ class ServiceLocator {
     storageService = StorageService(prefs);
     greetingService = GreetingService();
 
+    /*
     // Initialize Repositories
     authRepository = AuthRepository();
     userRepository = UserRepository();
@@ -61,9 +67,13 @@ class ServiceLocator {
     sessionRepository = SessionRepositoryImpl();
     profileRepository = ProfileRepository();
     adminRepository = AdminRepository();
+    */
+    // v1.0 MVP: Only local repositories
     invitationRepository = InvitationRepositoryImpl();
     templatesRepository = TemplatesRepositoryImpl();
     templateDownloadService = TemplateDownloadService();
+    // Billing
+    billingRepository = BillingRepositoryImpl();
 
     // YouTube & Notifications
     youtubeRepository = YouTubeServiceImpl();
@@ -81,6 +91,7 @@ class ServiceLocator {
       downloadService: templateDownloadService,
     );
     templatesBloc = TemplatesBloc(repository: templatesRepository);
+    billingBloc = BillingBloc(billingRepository: billingRepository);
   }
 
   void initializeSystemStatus(AuthBloc authBloc) {

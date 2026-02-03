@@ -65,6 +65,7 @@ dependencies:
   connectivity_plus: ^7.0.0
   share_plus: ^10.1.0
   open_file_plus: ^3.4.1+1
+  in_app_purchase: ^3.2.0
 
   # Video Rendering Dependencies
   youtube_explode_dart: ^2.3.4

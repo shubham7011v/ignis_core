@@ -20,14 +20,14 @@
 ### 🔄 **Phase 3: v1.0 MVP Preparation** (IN PROGRESS)
 **Goal**: Ship a standalone Android app with zero backend dependencies.
 
-- [ ] **Remove Firebase Dependencies**
-    - [ ] Strip `firebase_auth`, `firebase_crashlytics`, `firebase_analytics`
-    - [ ] Remove `FirebaseAppCheck` and all Firebase initialization from `main_common.dart`
+- [ ] **Disable Firebase Integration** (Do not remove code)
+    - [ ] Comment out `firebase_auth`, `firebase_crashlytics`, `firebase_analytics` usage
+    - [ ] Comment out `FirebaseAppCheck` and Firebase initialization in `main_common.dart`
     - [ ] Simplify app boot to skip server config sync
-- [ ] **Remove Auth & Profile Features**
-    - [ ] Disable login/logout flows
-    - [ ] Remove `AuthBloc`, `ProfileBloc`, and related UI screens
-    - [ ] Simplify navigation to skip onboarding
+- [ ] **Disable Auth & Profile Features** (Do not remove code)
+    - [ ] Disable login/logout flows (Hidden UI)
+    - [ ] Detach `AuthBloc`, `ProfileBloc`, and related UI screens from active flow
+    - [ ] Bypass onboarding in navigation (Keep code intact)
 - [ ] **Integrate Google Play Billing**
     - [ ] Add `in_app_purchase` package
     - [ ] Implement one-time payment for "Premium Templates" pack

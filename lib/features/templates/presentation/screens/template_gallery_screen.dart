@@ -8,6 +8,9 @@ import '../bloc/templates_state.dart';
 import '../widgets/template_card.dart';
 import '../../../invitation_creator/presentation/bloc/invitation_bloc.dart';
 import '../../../invitation_creator/presentation/bloc/invitation_event.dart';
+import '../../../billing/presentation/bloc/billing_bloc.dart';
+import '../../../billing/presentation/bloc/billing_state.dart';
+import '../../../billing/presentation/bloc/billing_event.dart';
 
 class TemplateGalleryScreen extends StatelessWidget {
   const TemplateGalleryScreen({super.key});
@@ -53,25 +56,41 @@ class TemplateGalleryScreen extends StatelessWidget {
                       ),
                     );
                   }
-                  return GridView.builder(
-                    padding: const EdgeInsets.all(16),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 0.8,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                        ),
-                    itemCount: state.templates.length,
-                    itemBuilder: (context, index) {
-                      final template = state.templates[index];
-                      return TemplateCard(
-                        template: template,
-                        onTap: () {
-                          context.read<InvitationBloc>().add(
-                            TemplateSelected(template),
+                  return BlocBuilder<BillingBloc, BillingState>(
+                    builder: (context, billingState) {
+                      final isPremiumUser =
+                          billingState is BillingAvailable &&
+                          billingState.isPremium;
+
+                      return GridView.builder(
+                        padding: const EdgeInsets.all(16),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 0.8,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                            ),
+                        itemCount: state.templates.length,
+                        itemBuilder: (context, index) {
+                          final template = state.templates[index];
+                          final isLocked = template.isPremium && !isPremiumUser;
+
+                          return TemplateCard(
+                            template: template,
+                            isLocked: isLocked,
+                            onUnlock: () {
+                              context.read<BillingBloc>().add(
+                                PurchasePremiumRequested(),
+                              );
+                            },
+                            onTap: () {
+                              context.read<InvitationBloc>().add(
+                                TemplateSelected(template),
+                              );
+                              Navigator.pushNamed(context, '/details_form');
+                            },
                           );
-                          Navigator.pushNamed(context, '/details_form');
                         },
                       );
                     },

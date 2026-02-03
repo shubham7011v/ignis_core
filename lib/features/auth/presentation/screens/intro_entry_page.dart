@@ -47,7 +47,9 @@ class _IntroEntryPageState extends State<IntroEntryPage>
       listener: (context, state) {
         if (state is Authenticated) {
           di.sl.onboardingRepository.markIntroAsSeen();
-          Navigator.of(context).pushReplacementNamed(AppRouter.celebration);
+          di.sl.onboardingRepository.markIntroAsSeen();
+          // v1.0 MVP: Direct to Template Gallery
+          Navigator.of(context).pushReplacementNamed(AppRouter.templateGallery);
         } else if (state is AuthFailure) {
           context.read<AppNotificationBloc>().add(
             ShowErrorNotification(state.failure.message),
@@ -76,7 +78,7 @@ class _IntroEntryPageState extends State<IntroEntryPage>
                       // Bypass to celebration for testing
                       Navigator.of(
                         context,
-                      ).pushReplacementNamed(AppRouter.celebration);
+                      ).pushReplacementNamed(AppRouter.templateGallery);
                     },
                     child: Text(
                       'Create Memories.',

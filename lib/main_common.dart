@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,8 +8,7 @@ import 'core/theme/bloc/theme_bloc.dart';
 import 'core/theme/bloc/theme_state.dart';
 import 'core/theme/bloc/theme_event.dart';
 
-import 'features/auth/auth.dart';
-import 'features/profile/profile.dart';
+import 'features/billing/presentation/bloc/billing_event.dart';
 
 import 'core/di/service_locator.dart' as di;
 import 'core/navigation/app_router.dart';
@@ -24,10 +21,7 @@ import 'shared/components/error_boundary.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
-import 'config/firebase_options_dev.dart' as dev;
-import 'config/firebase_options_prod.dart' as prod;
 
 // Boot progress tracking for debugging production crashes
 String _bootStep = 'Startup';
@@ -52,6 +46,7 @@ Future<void> mainCommon({required String env, required String appName}) async {
       // Initialize File Logging for development
       await AppLogger.initFileLogging();
 
+      /*
       // Initialize Core Configuration Singleton
       _bootStep = '1. Initializing AppConfig';
       try {
@@ -91,12 +86,21 @@ Future<void> mainCommon({required String env, required String appName}) async {
       } catch (e) {
         throw 'Firebase Initialization Failed: $e';
       }
+      */
 
+      /*
       // Fully load config
       _bootStep = '4. Loading Config';
       config.load();
       AppLogger.info('🚀 [STARTUP] 4. Config loaded');
+      */
 
+      // Initialize minimum config manually since we skip full sync
+      _bootStep = '4. Loading Manual Config';
+      await AppConfig.initialize(env: env, appName: appName);
+      AppConfig.instance.load();
+
+      /*
       // Connectivity Doctor & Server Config Sync
       _bootStep = '5. Syncing Server Config';
       AppLogger.info('🚀 [STARTUP] $_bootStep...');
@@ -123,7 +127,9 @@ Future<void> mainCommon({required String env, required String appName}) async {
           '🚀 [STARTUP] 5. Server Config Sync Failed (continuing): $e',
         );
       }
+      */
 
+      /*
       _bootStep = '6. Activating App Check';
       AppLogger.info('🚀 [STARTUP] $_bootStep...');
       try {
@@ -144,6 +150,7 @@ Future<void> mainCommon({required String env, required String appName}) async {
         // For debugging, let's catch it but log clearly.
         AppLogger.info('🚀 [STARTUP] 6. App Check Failed (WARNING): $e');
       }
+      */
 
       // Initialize Service Locator
       _bootStep = '7. Setting up Service Locator';
@@ -174,6 +181,7 @@ Future<void> mainCommon({required String env, required String appName}) async {
         stackTrace: stack,
       );
 
+      /*
       // Report to Crashlytics if available and initialized
       try {
         if (Firebase.apps.isNotEmpty) {
@@ -182,6 +190,7 @@ Future<void> mainCommon({required String env, required String appName}) async {
       } catch (_) {
         // Ignore crash reporting failure if Firebase isn't ready
       }
+      */
 
       FlutterNativeSplash.remove(); // Force remove splash to show error
       runApp(
@@ -263,6 +272,7 @@ class IgnisApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        /*
         BlocProvider(create: (_) => di.sl.notificationBloc),
         BlocProvider(create: (_) => ThemeBloc()..add(ThemeLoadRequested())),
         BlocProvider(
@@ -279,6 +289,9 @@ class IgnisApp extends StatelessWidget {
         BlocProvider(
           create: (context) => ProfileBloc(repository: di.sl.profileRepository),
         ),
+        */
+        BlocProvider(create: (_) => ThemeBloc()..add(ThemeLoadRequested())),
+        BlocProvider(create: (_) => di.sl.billingBloc..add(BillingStarted())),
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, themeState) {
