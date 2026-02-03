@@ -1,53 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/colors.dart';
+import '../bloc/invitation_bloc.dart';
+import '../bloc/invitation_event.dart';
+import '../bloc/invitation_state.dart';
+import '../../domain/entities/invitation_style.dart';
 
-class StyleSelectionPage extends StatefulWidget {
+class StyleSelectionPage extends StatelessWidget {
   const StyleSelectionPage({super.key});
-
-  @override
-  State<StyleSelectionPage> createState() => _StyleSelectionPageState();
-}
-
-class _StyleSelectionPageState extends State<StyleSelectionPage> {
-  String? _selectedStyleId;
-
-  final List<Map<String, dynamic>> _styles = [
-    {
-      'id': 'royal_indian',
-      'title': 'Royal Indian',
-      'subtitle': 'Gold & Maroon Accents',
-      'color': Color(0xFFC41E3A),
-      'isPopular': true,
-    },
-    {
-      'id': 'traditional',
-      'title': 'Traditional Hindu',
-      'subtitle': 'Vermillion & Turmeric',
-      'color': Color(0xFFFF9800),
-      'isPopular': false,
-    },
-    {
-      'id': 'cinematic',
-      'title': 'Cinematic Modern',
-      'subtitle': 'Sleek Photography',
-      'color': Color(0xFF424242),
-      'isPopular': false,
-    },
-    {
-      'id': 'pastel',
-      'title': 'Minimal Elegant',
-      'subtitle': 'Soft Pastels',
-      'color': Color(0xFFF8BBD0),
-      'isPopular': false,
-    },
-    {
-      'id': 'vintage',
-      'title': 'Vintage Bollywood',
-      'subtitle': 'Retro 70s Glamour',
-      'color': Color(0xFFD84315),
-      'isNew': true,
-    },
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -58,247 +18,287 @@ class _StyleSelectionPageState extends State<StyleSelectionPage> {
       appBar: AppBar(
         title: Text(
           'Style Selection',
-          style: TextStyle(color: palette.textPrimary),
+          style: TextStyle(
+            color: palette.textPrimary,
+            fontFamily: 'Cinzel',
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.transparent,
         iconTheme: IconThemeData(color: palette.textPrimary),
-        actions: [
-          TextButton(
-            onPressed: () {
-              // Skip logic
-            },
-            child: Text('Skip', style: TextStyle(color: palette.textTertiary)),
-          ),
-        ],
       ),
-      body: Column(
-        children: [
-          // Progress Bar
-          LinearProgressIndicator(
-            value: 0.4,
-            backgroundColor: palette.surfaceLight,
-            valueColor: AlwaysStoppedAnimation<Color>(palette.primary),
-            minHeight: 4,
-          ),
+      body: BlocBuilder<InvitationBloc, InvitationState>(
+        builder: (context, state) {
+          if (state.status == InvitationStatus.loading) {
+            return Center(
+              child: CircularProgressIndicator(color: palette.primary),
+            );
+          }
 
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Step 2 of 5',
-                    style: TextStyle(color: palette.textTertiary, fontSize: 14),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Choose your aesthetic',
-                    style: TextStyle(
-                      color: palette.textPrimary,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Playfair Display',
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Select the visual style that best matches your wedding theme.',
-                    style: TextStyle(
-                      color: palette.textSecondary,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Grid
-                  Expanded(
-                    child: GridView.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.75,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                          ),
-                      itemCount: _styles.length,
-                      itemBuilder: (context, index) {
-                        final style = _styles[index];
-                        final isSelected = _selectedStyleId == style['id'];
-
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _selectedStyleId = style['id'];
-                            });
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: palette.surface,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: isSelected
-                                    ? palette.primary
-                                    : palette.divider,
-                                width: isSelected ? 3 : 1,
-                              ),
-                              boxShadow: isSelected
-                                  ? [
-                                      BoxShadow(
-                                        color: palette.primary.withValues(
-                                          alpha: 0.3,
-                                        ),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ]
-                                  : [],
-                            ),
-                            child: Stack(
-                              children: [
-                                // Color Placeholder (Replace with Image later)
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: (style['color'] as Color).withValues(
-                                      alpha: 0.2,
-                                    ),
-                                    borderRadius: BorderRadius.circular(14),
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        (style['color'] as Color).withValues(
-                                          alpha: 0.4,
-                                        ),
-                                        (style['color'] as Color).withValues(
-                                          alpha: 0.1,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-
-                                // Content
-                                Positioned(
-                                  left: 12,
-                                  right: 12,
-                                  bottom: 12,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      if (style['isPopular'] == true)
-                                        Container(
-                                          margin: const EdgeInsets.only(
-                                            bottom: 8,
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 4,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.black.withValues(
-                                              alpha: 0.6,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              4,
-                                            ),
-                                          ),
-                                          child: const Text(
-                                            'MOST POPULAR',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-
-                                      Text(
-                                        style['title'],
-                                        style: TextStyle(
-                                          color: palette.textPrimary,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        style['subtitle'],
-                                        style: TextStyle(
-                                          color: palette.textSecondary,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-                                // Selection Checkmark
-                                if (isSelected)
-                                  Positioned(
-                                    top: 12,
-                                    right: 12,
-                                    child: CircleAvatar(
-                                      radius: 12,
-                                      backgroundColor: palette.primary,
-                                      child: const Icon(
-                                        Icons.check,
-                                        size: 16,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
+          if (state.status == InvitationStatus.failure) {
+            return Center(
+              child: Text(
+                'Error: ${state.errorMessage}',
+                style: TextStyle(color: palette.error),
               ),
-            ),
-          ),
+            );
+          }
 
-          // Bottom Continue Button
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _selectedStyleId == null
-                    ? null
-                    : () {
-                        Navigator.pushNamed(context, '/details_form');
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: palette.primary,
-                  disabledBackgroundColor: palette.surfaceLight,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
+          return Column(
+            children: [
+              // Progress Bar
+              LinearProgressIndicator(
+                value: 0.2, // Step 1 of 3
+                backgroundColor: palette.surfaceLight,
+                valueColor: AlwaysStoppedAnimation<Color>(palette.primary),
+                minHeight: 4,
+              ),
+
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'STEP 1 OF 3',
+                        style: TextStyle(
+                          color: palette.textTertiary,
+                          fontSize: 12,
+                          letterSpacing: 2,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Choose your aesthetic',
+                        style: TextStyle(
+                          color: palette.textPrimary,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Cinzel',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Select the visual style that best matches your wedding theme.',
+                        style: TextStyle(
+                          color: palette.textSecondary,
+                          fontSize: 16,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Grid
+                      Expanded(
+                        child: GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                childAspectRatio: 0.75,
+                                crossAxisSpacing: 16,
+                                mainAxisSpacing: 16,
+                              ),
+                          itemCount: state.availableStyles.length,
+                          itemBuilder: (context, index) {
+                            final style = state.availableStyles[index];
+                            final isSelected =
+                                state.selectedStyle?.id == style.id;
+
+                            return StyleCard(
+                              style: style,
+                              isSelected: isSelected,
+                              palette: palette,
+                              onTap: () {
+                                context.read<InvitationBloc>().add(
+                                  StyleSelected(style),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Continue',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+              ),
+
+              // Bottom Continue Button
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: state.selectedStyle == null
+                        ? null
+                        : () {
+                            Navigator.pushNamed(context, '/details_form');
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: palette.primary,
+                      disabledBackgroundColor: palette.surfaceLight,
+                      foregroundColor: Colors.white,
+                      elevation: 8,
+                      shadowColor: palette.primary.withValues(alpha: 0.4),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28),
                       ),
                     ),
-                    SizedBox(width: 8),
-                    Icon(Icons.arrow_forward),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Continue',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Icon(Icons.arrow_forward),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class StyleCard extends StatelessWidget {
+  final InvitationStyle style;
+  final bool isSelected;
+  final dynamic palette;
+  final VoidCallback onTap;
+
+  const StyleCard({
+    super.key,
+    required this.style,
+    required this.isSelected,
+    required this.palette,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: palette.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? palette.accent : palette.divider,
+            width: isSelected ? 3 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: palette.accent.withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [],
+        ),
+        child: Stack(
+          children: [
+            // Thumbnail
+            ClipRRect(
+              borderRadius: BorderRadius.circular(13),
+              child: Image.network(
+                style.thumbnailUrl,
+                fit: BoxFit.cover,
+                height: double.infinity,
+                width: double.infinity,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: palette.surfaceLight,
+                  child: Icon(Icons.broken_image, color: palette.textTertiary),
+                ),
+              ),
+            ),
+
+            // Gradient Overlay
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(13),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.8),
                   ],
                 ),
               ),
             ),
-          ),
-        ],
+
+            // Content
+            Positioned(
+              left: 12,
+              right: 12,
+              bottom: 12,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    style.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      fontFamily: 'Cinzel',
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Wrap(
+                    spacing: 4,
+                    children: style.categories.map((cat) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: palette.accent.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          cat,
+                          style: TextStyle(
+                            color: palette.accent,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+
+            // Selection Checkmark
+            if (isSelected)
+              Positioned(
+                top: 10,
+                right: 10,
+                child: CircleAvatar(
+                  radius: 12,
+                  backgroundColor: palette.accent,
+                  child: const Icon(Icons.check, size: 16, color: Colors.white),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

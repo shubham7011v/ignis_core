@@ -33,8 +33,6 @@ class _SessionScreenState extends State<SessionScreen>
   late NavigationHandler _navigation;
   late VisualSyncManager _visualSync;
 
-  bool _showChat = false;
-  bool _showEmoji = false;
   final List<FloatingEmoji> _activeEmojis = [];
   bool? _isWebSocket;
 
@@ -187,18 +185,8 @@ class _SessionScreenState extends State<SessionScreen>
               turnPopups: _turnPopups,
               navigation: _navigation,
               activeEmojis: _activeEmojis,
-              showChat: _showChat,
-              showEmoji: _showEmoji,
-              onToggleChat: () => setState(() {
-                _showChat = !_showChat;
-                if (_showChat) _showEmoji = false;
-              }),
-              onToggleEmoji: () => setState(() {
-                _showEmoji = !_showEmoji;
-                if (_showEmoji) _showChat = false;
-              }),
-              onSetChatVisible: (show) => setState(() => _showChat = show),
-              onSetEmojiVisible: (show) => setState(() => _showEmoji = show),
+              onSetChatVisible: (show) => {}, // No-op for now
+              onSetEmojiVisible: (show) => {}, // No-op for now
             ),
           );
         },

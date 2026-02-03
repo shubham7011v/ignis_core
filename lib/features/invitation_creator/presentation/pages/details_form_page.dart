@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/colors.dart';
+import '../bloc/invitation_bloc.dart';
+import '../bloc/invitation_event.dart';
+import '../bloc/invitation_state.dart';
+import '../../domain/entities/wedding_details.dart';
 
 class DetailsFormPage extends StatefulWidget {
   const DetailsFormPage({super.key});
@@ -10,10 +15,30 @@ class DetailsFormPage extends StatefulWidget {
 
 class _DetailsFormPageState extends State<DetailsFormPage> {
   final _formKey = GlobalKey<FormState>();
-  final _brideNameController = TextEditingController();
-  final _groomNameController = TextEditingController();
-  final _cityController = TextEditingController();
+  late TextEditingController _brideNameController;
+  late TextEditingController _groomNameController;
+  late TextEditingController _venueController;
   DateTime? _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    final state = context.read<InvitationBloc>().state;
+    _brideNameController = TextEditingController(text: state.details.brideName);
+    _groomNameController = TextEditingController(text: state.details.groomName);
+    _venueController = TextEditingController(text: state.details.venue);
+    _selectedDate = state.details.brideName.isEmpty
+        ? null
+        : state.details.weddingDate;
+  }
+
+  @override
+  void dispose() {
+    _brideNameController.dispose();
+    _groomNameController.dispose();
+    _venueController.dispose();
+    super.dispose();
+  }
 
   Future<void> _selectDate(
     BuildContext context,
@@ -21,19 +46,25 @@ class _DetailsFormPageState extends State<DetailsFormPage> {
   ) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now().add(const Duration(days: 30)),
+      initialDate:
+          _selectedDate ?? DateTime.now().add(const Duration(days: 30)),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.dark(
-              primary: palette.primary,
-              onPrimary: Colors.white,
+              primary: palette.accent, // Gold for date picker
+              onPrimary: palette.background,
               surface: palette.surface,
               onSurface: palette.textPrimary,
             ),
-            dialogTheme: DialogThemeData(backgroundColor: palette.surface),
+            dialogTheme: DialogThemeData(
+              backgroundColor: palette.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
           ),
           child: child!,
         );
@@ -55,215 +86,137 @@ class _DetailsFormPageState extends State<DetailsFormPage> {
       appBar: AppBar(
         title: Text(
           'Wedding Details',
-          style: TextStyle(color: palette.textPrimary),
+          style: TextStyle(
+            color: palette.textPrimary,
+            fontFamily: 'Cinzel',
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.transparent,
         iconTheme: IconThemeData(color: palette.textPrimary),
       ),
-      body: Column(
-        children: [
-          // Progress Bar (Step 3 of 5 -> 60%)
-          LinearProgressIndicator(
-            value: 0.6,
-            backgroundColor: palette.surfaceLight,
-            valueColor: AlwaysStoppedAnimation<Color>(palette.primary),
-            minHeight: 4,
-          ),
-
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Step 3 of 5',
-                      style: TextStyle(
-                        color: palette.textTertiary,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Enter Details',
-                      style: TextStyle(
-                        color: palette.textPrimary,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Playfair Display',
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Please enter the auspicious details for the couple.',
-                      style: TextStyle(
-                        color: palette.textSecondary,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-
-                    // Form Fields
-                    _buildLabel(palette, "Bride's Name", Icons.female),
-                    _buildTextField(
-                      palette,
-                      _brideNameController,
-                      'e.g. Ananya Sharma',
-                    ),
-                    const SizedBox(height: 24),
-
-                    _buildLabel(palette, "Groom's Name", Icons.male),
-                    _buildTextField(
-                      palette,
-                      _groomNameController,
-                      'e.g. Rohan Mehta',
-                    ),
-                    const SizedBox(height: 24),
-
-                    _buildLabel(palette, "Wedding Date", Icons.calendar_today),
-                    GestureDetector(
-                      onTap: () => _selectDate(context, palette),
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: palette.surfaceLight,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: palette.divider),
-                        ),
-                        child: Row(
-                          children: [
-                            Text(
-                              _selectedDate == null
-                                  ? 'mm/dd/yyyy'
-                                  : "${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}",
-                              style: TextStyle(
-                                color: _selectedDate == null
-                                    ? palette.textTertiary
-                                    : palette.textPrimary,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const Spacer(),
-                            Icon(
-                              Icons.calendar_month,
-                              color: palette.textSecondary,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    _buildLabel(palette, "City", Icons.location_on),
-                    _buildTextField(
-                      palette,
-                      _cityController,
-                      'e.g. Udaipur, Rajasthan',
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    // Info Box
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: palette.warn.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: palette.warn.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            color: palette.warn,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'These names will appear in the main invitation video sequence. Ensure spelling matches government ID proofs if used for formal invites.',
-                              style: TextStyle(
-                                color: palette.textSecondary,
-                                fontSize: 12,
-                                height: 1.5,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 40),
-                  ],
-                ),
+      body: BlocBuilder<InvitationBloc, InvitationState>(
+        builder: (context, state) {
+          return Column(
+            children: [
+              // Progress Bar (Step 2 of 3 -> ~66%)
+              LinearProgressIndicator(
+                value: 0.6,
+                backgroundColor: palette.surfaceLight,
+                valueColor: AlwaysStoppedAnimation<Color>(palette.primary),
+                minHeight: 4,
               ),
-            ),
-          ),
 
-          // Next Button
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate() &&
-                      _selectedDate != null) {
-                    Navigator.pushNamed(context, '/preview');
-                  } else if (_selectedDate == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Please select a wedding date')),
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: palette.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'STEP 2 OF 3',
+                          style: TextStyle(
+                            color: palette.textTertiary,
+                            fontSize: 12,
+                            letterSpacing: 2,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Enter Auspicious Details',
+                          style: TextStyle(
+                            color: palette.textPrimary,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Cinzel',
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Please provide the essential information for your cinematic invitation.',
+                          style: TextStyle(
+                            color: palette.textSecondary,
+                            fontSize: 16,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+
+                        // Form Fields
+                        _buildLabel(
+                          palette,
+                          'Bride\'s Name',
+                          Icons.auto_awesome,
+                        ),
+                        _buildTextField(
+                          palette,
+                          _brideNameController,
+                          'Ex: Ananya Sharma',
+                        ),
+                        const SizedBox(height: 24),
+
+                        _buildLabel(palette, 'Groom\'s Name', Icons.favorite),
+                        _buildTextField(
+                          palette,
+                          _groomNameController,
+                          'Ex: Rohan Mehta',
+                        ),
+                        const SizedBox(height: 24),
+
+                        _buildLabel(
+                          palette,
+                          'Wedding Date',
+                          Icons.calendar_today,
+                        ),
+                        _buildDatePickerField(palette),
+                        const SizedBox(height: 24),
+
+                        _buildLabel(palette, 'Venue / City', Icons.location_on),
+                        _buildTextField(
+                          palette,
+                          _venueController,
+                          'Ex: The Palace, Udaipur',
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        // Info Box
+                        _buildInfoBox(palette),
+
+                        const SizedBox(height: 40),
+                      ],
+                    ),
                   ),
                 ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Next Step',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Icon(Icons.arrow_forward),
-                  ],
-                ),
               ),
-            ),
-          ),
-        ],
+
+              // Bottom Next Button
+              _buildNextButton(palette, context),
+            ],
+          );
+        },
       ),
     );
   }
 
   Widget _buildLabel(AppColorPalette palette, String text, IconData icon) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 8, left: 4),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: palette.warn),
+          Icon(icon, size: 14, color: palette.accent),
           const SizedBox(width: 8),
           Text(
-            text,
+            text.toUpperCase(),
             style: TextStyle(
-              color: palette.warn,
+              color: palette.accent,
               fontWeight: FontWeight.bold,
-              fontSize: 14,
+              fontSize: 11,
+              letterSpacing: 1,
+              fontFamily: 'Inter',
             ),
           ),
         ],
@@ -278,12 +231,18 @@ class _DetailsFormPageState extends State<DetailsFormPage> {
   ) {
     return TextFormField(
       controller: controller,
-      style: TextStyle(color: palette.textPrimary),
+      style: TextStyle(color: palette.textPrimary, fontFamily: 'Inter'),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: palette.textTertiary),
+        hintStyle: TextStyle(
+          color: palette.textTertiary.withValues(alpha: 0.5),
+        ),
         filled: true,
-        fillColor: palette.surfaceLight,
+        fillColor: palette.surface,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 18,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: palette.divider),
@@ -294,8 +253,9 @@ class _DetailsFormPageState extends State<DetailsFormPage> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: palette.primary),
+          borderSide: BorderSide(color: palette.accent, width: 2),
         ),
+        errorStyle: TextStyle(color: palette.error),
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
@@ -303,6 +263,127 @@ class _DetailsFormPageState extends State<DetailsFormPage> {
         }
         return null;
       },
+    );
+  }
+
+  Widget _buildDatePickerField(AppColorPalette palette) {
+    return GestureDetector(
+      onTap: () => _selectDate(context, palette),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        decoration: BoxDecoration(
+          color: palette.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: palette.divider),
+        ),
+        child: Row(
+          children: [
+            Text(
+              _selectedDate == null
+                  ? 'Select Date'
+                  : "${_selectedDate!.day} / ${_selectedDate!.month} / ${_selectedDate!.year}",
+              style: TextStyle(
+                color: _selectedDate == null
+                    ? palette.textTertiary.withValues(alpha: 0.5)
+                    : palette.textPrimary,
+                fontSize: 16,
+                fontFamily: 'Inter',
+              ),
+            ),
+            const Spacer(),
+            Icon(Icons.calendar_month, color: palette.accent, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoBox(AppColorPalette palette) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: palette.primary.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: palette.accent.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.tips_and_updates_outlined,
+            color: palette.accent,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'These details will be used to generate your personalized video invitation. Double-check all spellings before proceeding.',
+              style: TextStyle(
+                color: palette.textSecondary,
+                fontSize: 12,
+                height: 1.5,
+                fontFamily: 'Inter',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNextButton(AppColorPalette palette, BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: ElevatedButton(
+          onPressed: () {
+            if (_formKey.currentState!.validate() && _selectedDate != null) {
+              final details = WeddingDetails(
+                brideName: _brideNameController.text.trim(),
+                groomName: _groomNameController.text.trim(),
+                weddingDate: _selectedDate!,
+                venue: _venueController.text.trim(),
+              );
+
+              context.read<InvitationBloc>().add(DetailsUpdated(details));
+              Navigator.pushNamed(context, '/preview');
+            } else if (_selectedDate == null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Please select a wedding date'),
+                  backgroundColor: palette.error,
+                ),
+              );
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: palette.primary,
+            foregroundColor: Colors.white,
+            elevation: 8,
+            shadowColor: palette.primary.withValues(alpha: 0.4),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
+            ),
+          ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Review Preview',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Inter',
+                ),
+              ),
+              SizedBox(width: 8),
+              Icon(Icons.arrow_forward),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

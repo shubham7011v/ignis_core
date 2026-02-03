@@ -8,10 +8,7 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/bloc/theme_bloc.dart';
 import '../../../../core/theme/bloc/theme_state.dart';
 import '../../../../shared/components/app_error_widget.dart';
-import '../../../../core/notifications/bloc/app_notification_bloc.dart';
-import '../../../../core/notifications/bloc/app_notification_event.dart';
 import '../../../../core/di/service_locator.dart' as di;
-import '../widgets/match_history_list.dart';
 
 class ProfileViewScreen extends StatelessWidget {
   final String userId;
@@ -106,26 +103,7 @@ class ProfileViewScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
 
-          // Rank Badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: palette.primaryDim,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              profile.stats.rank.toUpperCase(),
-              style: GoogleFonts.inter(
-                color: palette.primary,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.5,
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // Online Status
+          // Online Status (Repurposed as Wedding Planning Status)
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -133,76 +111,72 @@ class ProfileViewScreen extends StatelessWidget {
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: profile.isOnline
-                      ? palette.success
-                      : palette.textTertiary,
+                  color: palette.success,
                   shape: BoxShape.circle,
                 ),
               ),
               const SizedBox(width: 8),
               Text(
-                profile.isOnline ? 'ONLINE' : 'OFFLINE',
+                'PREMIUM PLANNER',
                 style: GoogleFonts.inter(
-                  color: profile.isOnline
-                      ? palette.success
-                      : palette.textTertiary,
+                  color: palette.success,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
+                  letterSpacing: 2,
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 40),
 
-          // Stats Grid
+          // Stats Grid (Repurposed for Wedding Planning)
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: palette.surfaceLight,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: palette.divider),
+              border: Border.all(
+                color: palette.textSecondary.withValues(alpha: 0.2),
+              ),
             ),
             child: Column(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildStatItem(
-                        'WINS',
-                        '${profile.stats.wins}',
-                        const Color(0xFF4CAF50),
-                        palette,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildStatItem(
-                        'LOSSES',
-                        '${profile.stats.losses}',
-                        palette.danger,
-                        palette,
-                      ),
-                    ),
-                  ],
+                Text(
+                  'WEDDING PROJECTS',
+                  style: GoogleFonts.cinzel(
+                    color: palette.textSecondary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                  ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 Row(
                   children: [
                     Expanded(
                       child: _buildStatItem(
-                        'GAMES',
-                        '${profile.stats.gamesPlayed}',
-                        Colors.blueAccent,
+                        'INVITATIONS',
+                        '${profile.stats.invitationsCreated}',
+                        palette.textSecondary,
                         palette,
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    Container(height: 40, width: 1, color: palette.divider),
                     Expanded(
                       child: _buildStatItem(
-                        'WIN RATE',
-                        '${profile.stats.winRate.toStringAsFixed(1)}%',
-                        palette.primary,
+                        'GUESTS',
+                        '${profile.stats.guestsCount}',
+                        palette.textSecondary,
+                        palette,
+                      ),
+                    ),
+                    Container(height: 40, width: 1, color: palette.divider),
+                    Expanded(
+                      child: _buildStatItem(
+                        'RSVPS',
+                        '${profile.stats.rsvpsReceived}',
+                        palette.success,
                         palette,
                       ),
                     ),
@@ -212,105 +186,54 @@ class ProfileViewScreen extends StatelessWidget {
             ),
           ),
 
-          // Match History (Only for own profile)
-          if (state.isOwnProfile) ...[
-            const SizedBox(height: 32),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'MATCH HISTORY',
-                style: GoogleFonts.inter(
-                  color: palette.textSecondary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
-                ),
+          const SizedBox(height: 40),
+
+          // Premium Badge / Subscription Status
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [palette.primaryDim, palette.primary],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: palette.primary.withValues(alpha: 0.2),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            MatchHistoryList(
-              history: state.matchHistory,
-              currentUserId: profile.userId,
+            child: Column(
+              children: [
+                const Icon(Icons.stars_rounded, color: Colors.white, size: 32),
+                const SizedBox(height: 12),
+                Text(
+                  'GO PREMIUM',
+                  style: GoogleFonts.cinzel(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Unlock unlimited video renders and guest analytics.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
 
           const SizedBox(height: 32),
-
-          // Action Buttons
-          if (!state.isOwnProfile) ...[
-            if (!profile.isFriend)
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    context.read<ProfileBloc>().add(ProfileFriendAdded(userId));
-                    context.read<AppNotificationBloc>().add(
-                      const ShowInfoNotification('Friend request sent'),
-                    );
-                  },
-                  icon: const Icon(Icons.person_add),
-                  label: const Text('ADD FRIEND'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: palette.primary,
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              )
-            else ...[
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: profile.isOnline
-                      ? () {
-                          context.read<AppNotificationBloc>().add(
-                            const ShowInfoNotification(
-                              'Challenge feature coming soon!',
-                            ),
-                          );
-                        }
-                      : null,
-                  icon: const Icon(Icons.sports_esports),
-                  label: const Text('CHALLENGE'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: palette.primary,
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    context.read<ProfileBloc>().add(
-                      ProfileFriendRemoved(userId),
-                    );
-                    context.read<AppNotificationBloc>().add(
-                      const ShowInfoNotification('Friend removed'),
-                    );
-                  },
-                  icon: const Icon(Icons.person_remove),
-                  label: const Text('REMOVE FRIEND'),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: palette.danger),
-                    foregroundColor: palette.danger,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ],
         ],
       ),
     );

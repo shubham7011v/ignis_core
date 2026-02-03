@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/models/user_profile.dart';
-import '../../domain/models/match_history_item.dart';
 import '../../../../core/error/failure.dart';
 
 abstract class ProfileState extends Equatable {
@@ -17,28 +16,18 @@ class ProfileLoading extends ProfileState {}
 class ProfileLoaded extends ProfileState {
   final UserProfile profile;
   final bool isOwnProfile;
-  final List<MatchHistoryItem> matchHistory;
 
-  const ProfileLoaded({
-    required this.profile,
-    required this.isOwnProfile,
-    this.matchHistory = const [],
-  });
+  const ProfileLoaded({required this.profile, required this.isOwnProfile});
 
-  ProfileLoaded copyWith({
-    UserProfile? profile,
-    bool? isOwnProfile,
-    List<MatchHistoryItem>? matchHistory,
-  }) {
+  ProfileLoaded copyWith({UserProfile? profile, bool? isOwnProfile}) {
     return ProfileLoaded(
       profile: profile ?? this.profile,
       isOwnProfile: isOwnProfile ?? this.isOwnProfile,
-      matchHistory: matchHistory ?? this.matchHistory,
     );
   }
 
   @override
-  List<Object?> get props => [profile, isOwnProfile, matchHistory];
+  List<Object?> get props => [profile, isOwnProfile];
 }
 
 class ProfileError extends ProfileState {

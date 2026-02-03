@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../domain/models/user_profile.dart';
-import '../../domain/models/match_history_item.dart';
 import '../../../auth/domain/models/user_stats.dart';
 import '../../../../core/engine/data/handlers/websocket_session_handler.dart';
 import '../../../../core/config/app_config.dart';
@@ -25,11 +24,9 @@ class ProfileRepository {
           const UserStats(
             userId: '',
             name: '',
-            gamesPlayed: 0,
-            wins: 0,
-            losses: 0,
-            rank: 'Novice',
-            coins: 1000,
+            invitationsCreated: 0,
+            guestsCount: 0,
+            rsvpsReceived: 0,
           );
 
       return UserProfile(
@@ -71,20 +68,18 @@ class ProfileRepository {
         throw Exception('Failed to load profile: ${response.statusCode}');
       }
     } catch (e) {
-      // Fallback for demo / offline
+      // Fallback for demo
       return UserProfile(
         userId: userId,
-        name: 'Player',
+        name: 'User',
         photoUrl: null,
-        bio: 'Could not load profile.',
+        bio: 'Wedding planning journey started.',
         stats: const UserStats(
           userId: '',
           name: '',
-          gamesPlayed: 0,
-          wins: 0,
-          losses: 0,
-          rank: '?',
-          coins: 0,
+          invitationsCreated: 0,
+          guestsCount: 0,
+          rsvpsReceived: 0,
         ),
         isOnline: false,
         isFriend: false,
@@ -106,14 +101,5 @@ class ProfileRepository {
   /// Remove a friend
   Future<void> removeFriend(String userId) async {
     _handler.removeFriend(userId);
-  }
-
-  // --- Match History ---
-
-  Stream<List<MatchHistoryItem>> get myMatchHistoryStream =>
-      _handler.matchHistoryController.stream;
-
-  Future<void> fetchMyMatchHistory() async {
-    _handler.requestMatchHistory();
   }
 }

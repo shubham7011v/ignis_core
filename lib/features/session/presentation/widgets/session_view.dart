@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/engine/engine.dart' as engine;
 import '../../../../core/theme/colors.dart';
 import '../../../../core/config/feature_flags.dart';
-import '../../../../core/di/service_locator.dart' as di;
 import '../bloc/session_state.dart';
 import '../utils/session_constants.dart';
 import '../widgets/session_top_bar.dart';
@@ -14,10 +13,7 @@ import '../widgets/session_staging_area.dart';
 import '../widgets/session_bottom_controls.dart';
 import '../widgets/flying_cards_layer.dart';
 import '../widgets/floating_emoji_layer.dart';
-import '../../../game/presentation/widgets/chat_widget.dart';
-import '../../../game/presentation/widgets/emoji_picker.dart';
 import '../widgets/rank_selector_modal.dart';
-import '../../../voice/presentation/widgets/voice_overlay.dart';
 import '../managers/card_animation_manager.dart';
 import '../managers/turn_popup_manager.dart';
 import '../handlers/navigation_handler.dart';
@@ -30,10 +26,6 @@ class SessionView extends StatelessWidget {
   final TurnPopupManager turnPopups;
   final NavigationHandler navigation;
   final List<FloatingEmoji> activeEmojis;
-  final bool showChat;
-  final bool showEmoji;
-  final VoidCallback onToggleChat;
-  final VoidCallback onToggleEmoji;
   final void Function(bool show) onSetChatVisible;
   final void Function(bool show) onSetEmojiVisible;
 
@@ -46,10 +38,6 @@ class SessionView extends StatelessWidget {
     required this.turnPopups,
     required this.navigation,
     required this.activeEmojis,
-    required this.showChat,
-    required this.showEmoji,
-    required this.onToggleChat,
-    required this.onToggleEmoji,
     required this.onSetChatVisible,
     required this.onSetEmojiVisible,
   });
@@ -77,7 +65,7 @@ class SessionView extends StatelessWidget {
                   slideBegin: const Offset(0, -0.5),
                   child: SessionTopBar(
                     state: visualState,
-                    onChatTap: onToggleChat,
+                    onChatTap: () {}, // Chat disabled for now
                   ),
                 ),
 
@@ -171,12 +159,6 @@ class SessionView extends StatelessWidget {
             _buildWinOverlay(),
 
           _buildActionLayers(),
-
-          // Voice Overlay
-          if (di.sl.voiceSessionHandler != null && FeatureFlags.enableVoiceChat)
-            Positioned.fill(
-              child: VoiceOverlay(sessionHandler: di.sl.voiceSessionHandler!),
-            ),
         ],
       ),
     );
@@ -184,12 +166,6 @@ class SessionView extends StatelessWidget {
     return Stack(
       children: [
         content,
-        if (showChat && FeatureFlags.enableGameChat) _buildChatOverlay(),
-        if (showEmoji && FeatureFlags.enableGameChat)
-          _buildEmojiOverlay(context),
-        if (!showSpectatorView && FeatureFlags.enableGameChat)
-          _buildEmojiToggle(context),
-
         // Rank Selection Modal
         RankSelectorModal(state: state),
       ],
@@ -265,35 +241,6 @@ class SessionView extends StatelessWidget {
               FloatingEmojiLayer(activeEmojis: activeEmojis),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildChatOverlay() {
-    return Positioned(
-      bottom: 100,
-      left: 16,
-      child: ChatWidget(onClose: () => onSetChatVisible(false)),
-    );
-  }
-
-  Widget _buildEmojiOverlay(BuildContext context) {
-    return Positioned(
-      top: MediaQuery.of(context).size.height / 2 - 140,
-      right: 16,
-      child: EmojiPicker(onClose: () => onSetEmojiVisible(false)),
-    );
-  }
-
-  Widget _buildEmojiToggle(BuildContext context) {
-    return Positioned(
-      right: 16,
-      top: MediaQuery.of(context).size.height / 2 - 24,
-      child: FloatingActionButton.small(
-        heroTag: 'emoji_btn_fixed',
-        backgroundColor: AppColors.surfaceLight,
-        onPressed: onToggleEmoji,
-        child: const Icon(Icons.emoji_emotions_outlined, color: Colors.white),
       ),
     );
   }

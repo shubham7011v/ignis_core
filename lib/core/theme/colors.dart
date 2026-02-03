@@ -34,6 +34,10 @@ class AppColorPalette {
     required this.cardBack,
     required this.divider,
   });
+
+  // Semantic aliases for easier theme usage
+  Color get accent => warn; // In Royal theme, gold is our accent
+  Color get error => danger;
 }
 
 class AppColors {

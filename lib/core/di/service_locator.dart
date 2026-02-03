@@ -1,22 +1,28 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import '../config/feature_flags.dart';
 import '../data/data.dart';
 import '../services/services.dart';
-import '../engine/engine.dart';
 import '../engine/data/handlers/websocket_session_handler.dart';
 import '../repositories/session_repository.dart';
 import '../repositories/websocket_session_repository.dart';
-import '../services/audio/audio_service_interface.dart';
-import '../services/audio/audio_service_impl.dart';
-import '../services/system_status_service.dart';
 import '../notifications/bloc/app_notification_bloc.dart';
 import '../../features/auth/auth.dart';
 import '../../features/profile/profile.dart';
+import '../../features/invitation_creator/domain/repositories/invitation_repository.dart';
+import '../../features/invitation_creator/data/repositories/invitation_repository_impl.dart';
+import '../../features/invitation_creator/presentation/bloc/invitation_bloc.dart';
 import '../../features/challenges/data/challenges_repository.dart';
 import '../../features/admin/data/admin_repository.dart';
 import '../../features/offline/offline.dart';
 import '../../features/session/session.dart';
-import '../services/notification_service.dart';
+import '../../features/templates/domain/repositories/templates_repository.dart';
+import '../../features/templates/data/repositories/templates_repository_impl.dart';
+import '../../features/templates/presentation/bloc/templates_bloc.dart';
+import '../../features/guests/domain/repositories/guests_repository.dart';
+import '../../features/guests/data/repositories/guests_repository_impl.dart';
+import '../../features/guests/presentation/bloc/guests_bloc.dart';
+import '../../features/creations/domain/repositories/creations_repository.dart';
+import '../../features/creations/data/repositories/creations_repository_impl.dart';
+import '../../features/creations/presentation/bloc/creations_bloc.dart';
 
 class ServiceLocator {
   static final ServiceLocator _instance = ServiceLocator._internal();
@@ -30,15 +36,27 @@ class ServiceLocator {
   late final OnboardingRepository onboardingRepository;
   late final SessionRepository sessionRepository;
   late final ProfileRepository profileRepository;
+  late final InvitationRepository invitationRepository;
+  late final YouTubeRepository youtubeRepository;
+  late final NotificationService notificationService;
   late final ChallengesRepository challengesRepository;
   late final AdminRepository adminRepository;
-  late final GameSessionHandler gameSessionHandler;
-  late final VoiceSessionHandler? voiceSessionHandler; // Nullable when disabled
+  late final TemplatesRepository templatesRepository;
+  late final GuestsRepository guestsRepository;
+  late final CreationsRepository creationsRepository;
+
+  // Re-enable these as WebSocketSessionHandler for repurposing
+  WebSocketSessionHandler get gameSessionHandler => _webSocketHandler!;
+  WebSocketSessionHandler? get voiceSessionHandler => _webSocketHandler!;
+
   late final GreetingService greetingService;
   late final SystemStatusService systemStatusService;
   late final AudioService audioService;
   late final AppNotificationBloc notificationBloc;
-  late final NotificationService notificationService;
+  late final InvitationBloc invitationBloc;
+  late final TemplatesBloc templatesBloc;
+  late final GuestsBloc guestsBloc;
+  late final CreationsBloc creationsBloc;
   late final SessionBloc sessionBloc;
 
   // Offline Services
@@ -71,26 +89,25 @@ class ServiceLocator {
     profileRepository = ProfileRepository(_webSocketHandler!);
     challengesRepository = ChallengesRepository(_webSocketHandler!);
     adminRepository = AdminRepository();
+    invitationRepository = InvitationRepositoryImpl();
+    templatesRepository = TemplatesRepositoryImpl();
+    guestsRepository = GuestsRepositoryImpl();
+    creationsRepository = CreationsRepositoryImpl();
 
-    // Default to local, but the app can switch
-    gameSessionHandler = LocalBotSessionHandler();
-
-    // Conditionally register voice based on feature flag
-    if (FeatureFlags.enableVoiceChat) {
-      voiceSessionHandler = _webSocketHandler!;
-    } else {
-      voiceSessionHandler = null; // Voice disabled
-    }
+    // YouTube & Notifications
+    youtubeRepository = YouTubeServiceImpl();
+    notificationService = NotificationService();
 
     // Initialize Audio Service
     audioService = AudioServiceImpl();
     await audioService.initialize();
 
-    // Initialize Notification Service
-    notificationService = NotificationService();
-
     // Initialize Blocs (depend on services/repositories)
     notificationBloc = AppNotificationBloc();
+    invitationBloc = InvitationBloc(repository: invitationRepository);
+    templatesBloc = TemplatesBloc(repository: templatesRepository);
+    guestsBloc = GuestsBloc(repository: guestsRepository);
+    creationsBloc = CreationsBloc(repository: creationsRepository);
     sessionBloc = SessionBloc();
 
     // Initialize Offline Services
@@ -106,12 +123,9 @@ class ServiceLocator {
     );
   }
 
-  /// Factory method to create session handler based on mode
-  GameSessionHandler createSessionHandler({bool online = false}) {
-    if (online) {
-      return _webSocketHandler!;
-    }
-    return LocalBotSessionHandler();
+  /// Factory method to create session handler (Repurposed for WebSocket by default)
+  WebSocketSessionHandler createSessionHandler({bool online = true}) {
+    return _webSocketHandler!;
   }
 }
 

@@ -6,7 +6,6 @@ import '../../../../core/utils/responsive.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../shared/components/primary_button.dart';
 import '../../../../core/di/service_locator.dart' as di;
-import '../../../../core/engine/data/handlers/websocket_session_handler.dart';
 import '../../../session/presentation/bloc/session_bloc.dart';
 import '../../../session/presentation/bloc/session_event.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -49,8 +48,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
           : 'mock_token_${DateTime.now().millisecondsSinceEpoch}';
 
       // 2. Connect
-      final handler =
-          di.sl.createSessionHandler(online: true) as WebSocketSessionHandler;
+      final handler = di.sl.createSessionHandler(online: true);
       await handler.connect(AppConfig.instance.serverUrl, token!);
       // 3. Update Bloc
       if (!mounted) return;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../auth/auth.dart';
 import '../../../../core/engine/data/handlers/websocket_session_handler.dart';
+import '../../../auth/auth.dart';
 import '../../../session/session.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/bloc/theme_bloc.dart';
@@ -191,7 +191,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                     ),
                   ),
                   Text(
-                    player.rank.toUpperCase(),
+                    'CELEBRATION HOST',
                     style: GoogleFonts.inter(
                       color: palette.textTertiary,
                       fontSize: 10,
@@ -206,7 +206,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '${player.wins} WINS',
+                  '${player.invitationsCreated} INVITES',
                   style: GoogleFonts.cinzel(
                     color: palette.primary,
                     fontSize: 14,
@@ -214,7 +214,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   ),
                 ),
                 Text(
-                  '${player.winRate.toStringAsFixed(1)}% WR',
+                  '${player.rsvpsReceived} RSVPS',
                   style: GoogleFonts.inter(
                     color: palette.textTertiary,
                     fontSize: 10,

@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/models/match_history_item.dart';
 
 abstract class ProfileEvent extends Equatable {
   const ProfileEvent();
@@ -33,16 +32,4 @@ class ProfileFriendRemoved extends ProfileEvent {
 
   @override
   List<Object?> get props => [userId];
-}
-
-class ProfileMatchHistoryRequested extends ProfileEvent {
-  const ProfileMatchHistoryRequested();
-}
-
-class ProfileMatchHistoryUpdated extends ProfileEvent {
-  final List<MatchHistoryItem> history;
-
-  const ProfileMatchHistoryUpdated(this.history);
-  @override
-  List<Object?> get props => [history];
 }

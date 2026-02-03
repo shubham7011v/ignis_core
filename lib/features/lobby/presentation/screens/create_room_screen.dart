@@ -6,13 +6,12 @@ import '../../../../core/utils/responsive.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../shared/components/primary_button.dart';
 import '../../../../core/di/service_locator.dart' as di;
-import '../../../../core/engine/data/handlers/websocket_session_handler.dart';
 import '../../../session/presentation/bloc/session_bloc.dart';
 import '../../../session/presentation/bloc/session_event.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/engine/domain/models/room_event.dart';
 import '../../../../core/config/app_config.dart';
-import '../../../../features/auth/auth.dart';
+// import '../../../../features/auth/auth.dart';
 
 class CreateRoomScreen extends StatefulWidget {
   const CreateRoomScreen({super.key});
@@ -51,19 +50,9 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
       return;
     }
 
-    final authState = context.read<AuthBloc>().state;
-    final userCoins = authState is Authenticated
-        ? (authState.stats?.coins ?? 0)
-        : 0;
-
-    if (userCoins < _bootAmount) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Insufficient coins for this boot amount!'),
-        ),
-      );
-      return;
-    }
+    // Coin check removed for wedding app transition
+    final user = FirebaseAuth.instance.currentUser;
+    final displayName = user?.displayName ?? 'Anonymous';
 
     setState(() => _isCreating = true);
 
@@ -75,12 +64,11 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
           : 'mock_token_${DateTime.now().millisecondsSinceEpoch}';
 
       // 2. Connect
-      final handler =
-          di.sl.createSessionHandler(online: true) as WebSocketSessionHandler;
+      final handler = di.sl.createSessionHandler(online: true);
       await handler.connect(
         AppConfig.instance.serverUrl,
         token!,
-        displayName: user?.displayName,
+        displayName: displayName,
       ); // 3. Update Bloc
       if (!mounted) return;
       context.read<SessionBloc>().add(SessionHandlerSwapped(handler));
