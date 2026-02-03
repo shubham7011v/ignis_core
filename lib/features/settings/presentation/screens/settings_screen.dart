@@ -17,7 +17,7 @@ import 'dart:async';
 import '../widgets/settings_about_section.dart';
 import '../widgets/settings_components.dart';
 import '../widgets/settings_audio_section.dart';
-import '../widgets/settings_gameplay_section.dart';
+import '../widgets/settings_session_section.dart';
 import '../widgets/settings_appearance_section.dart';
 import '../widgets/settings_account_section.dart';
 import '../widgets/settings_performance_section.dart';
@@ -42,13 +42,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _sfx = true;
   int _sfxVariant = 1;
 
-  // Gameplay
-  bool _shuffleAnimation = true;
+  // Session & Interactions
+  bool _transitions = true;
   bool _haptics = true;
   bool _notifications = true;
   bool _showAvatars = true;
-  bool _confirmBluff = true;
-  bool _autoSort = true;
 
   // Performance
   String _graphics = 'Medium';
@@ -90,12 +88,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _sfxVolume = storage.getInt('pref_sfx_volume')?.toDouble() ?? 70.0;
       _music = storage.getBool('pref_music') ?? true;
       _sfx = storage.getBool('pref_sfx') ?? true;
-      _shuffleAnimation = storage.getBool('pref_shuffle_animation') ?? true;
+      _transitions = storage.getBool('pref_transitions') ?? true;
       _haptics = storage.getBool('pref_haptics') ?? true;
       _notifications = storage.getBool('pref_notifications') ?? true;
       _showAvatars = storage.getBool('pref_show_avatars') ?? true;
-      _confirmBluff = storage.getBool('pref_confirm_bluff') ?? true;
-      _autoSort = storage.getBool('pref_auto_sort') ?? true;
       _graphics = storage.getString('pref_graphics') ?? 'Medium';
       _dataSaver = storage.getBool('pref_data_saver') ?? false;
       _sfxVariant = storage.getInt('pref_sfx_variant') ?? 1;
@@ -208,30 +204,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
 
                 const SizedBox(height: AppDimens.paddingXL),
-                SettingsSectionHeader(title: 'GAMEPLAY', palette: palette),
-                SettingsGameplaySection(
+                SettingsSectionHeader(
+                  title: 'SESSION & INTERACTIONS',
                   palette: palette,
-                  shuffleAnimation: _shuffleAnimation,
+                ),
+                SettingsSessionSection(
+                  palette: palette,
+                  transitions: _transitions,
                   haptics: _haptics,
-                  confirmBluff: _confirmBluff,
-                  autoSort: _autoSort,
                   notifications: _notifications,
                   showAvatars: _showAvatars,
-                  onShuffleAnimationChanged: (v) => setState(() {
-                    _shuffleAnimation = v;
-                    _updateSetting('pref_shuffle_animation', v);
+                  onTransitionsChanged: (v) => setState(() {
+                    _transitions = v;
+                    _updateSetting('pref_transitions', v);
                   }),
                   onHapticsChanged: (v) => setState(() {
                     _haptics = v;
                     _updateSetting('pref_haptics', v);
-                  }),
-                  onConfirmBluffChanged: (v) => setState(() {
-                    _confirmBluff = v;
-                    _updateSetting('pref_confirm_bluff', v);
-                  }),
-                  onAutoSortChanged: (v) => setState(() {
-                    _autoSort = v;
-                    _updateSetting('pref_auto_sort', v);
                   }),
                   onNotificationsChanged: (v) => setState(() {
                     _notifications = v;
@@ -430,7 +419,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           style: TextStyle(color: Colors.red),
         ),
         content: const Text(
-          'This action is permanent and cannot be undone. All your progress, coins, and stats will be lost forever.',
+          'This action is permanent and cannot be undone. All your progress and stats will be lost forever.',
         ),
         actions: [
           TextButton(

@@ -1,6 +1,5 @@
 import '../engine/domain/models/session_state.dart';
 import '../engine/domain/models/session_enums.dart';
-import '../engine/domain/models/unit.dart';
 
 /// Repository interface for session/game state management
 abstract class SessionRepository {
@@ -15,18 +14,6 @@ abstract class SessionRepository {
 
   /// Disconnect from current session
   Future<void> disconnect();
-
-  /// Start a new game
-  Future<void> startGame({int playerCount = 5, int thinkingTimeS = 10});
-
-  /// Play cards
-  Future<void> playCards(List<String> cardIds, UnitRank declaredRank);
-
-  /// Pass turn
-  Future<void> pass();
-
-  /// Challenge the current play
-  Future<void> challenge();
 
   /// Leave the current room
   Future<void> leaveRoom();

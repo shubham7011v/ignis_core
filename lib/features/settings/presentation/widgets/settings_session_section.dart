@@ -2,34 +2,26 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
 import 'settings_components.dart';
 
-class SettingsGameplaySection extends StatelessWidget {
+class SettingsSessionSection extends StatelessWidget {
   final AppColorPalette palette;
-  final bool shuffleAnimation;
+  final bool transitions;
   final bool haptics;
-  final bool confirmBluff;
-  final bool autoSort;
   final bool notifications;
   final bool showAvatars;
-  final ValueChanged<bool> onShuffleAnimationChanged;
+  final ValueChanged<bool> onTransitionsChanged;
   final ValueChanged<bool> onHapticsChanged;
-  final ValueChanged<bool> onConfirmBluffChanged;
-  final ValueChanged<bool> onAutoSortChanged;
   final ValueChanged<bool> onNotificationsChanged;
   final ValueChanged<bool> onShowAvatarsChanged;
 
-  const SettingsGameplaySection({
+  const SettingsSessionSection({
     super.key,
     required this.palette,
-    required this.shuffleAnimation,
+    required this.transitions,
     required this.haptics,
-    required this.confirmBluff,
-    required this.autoSort,
     required this.notifications,
     required this.showAvatars,
-    required this.onShuffleAnimationChanged,
+    required this.onTransitionsChanged,
     required this.onHapticsChanged,
-    required this.onConfirmBluffChanged,
-    required this.onAutoSortChanged,
     required this.onNotificationsChanged,
     required this.onShowAvatarsChanged,
   });
@@ -41,10 +33,10 @@ class SettingsGameplaySection extends StatelessWidget {
       children: [
         SettingsSwitchTile(
           icon: Icons.auto_awesome_rounded,
-          title: 'Shuffle Animation',
-          value: shuffleAnimation,
+          title: 'Smooth Transitions',
+          value: transitions,
           palette: palette,
-          onChanged: onShuffleAnimationChanged,
+          onChanged: onTransitionsChanged,
         ),
         SettingsDivider(palette: palette),
         SettingsSwitchTile(
@@ -56,25 +48,8 @@ class SettingsGameplaySection extends StatelessWidget {
         ),
         SettingsDivider(palette: palette),
         SettingsSwitchTile(
-          icon: Icons.warning_amber_rounded,
-          title: 'Confirm Before Bluff',
-          subtitle: 'Prevents accidental taps',
-          value: confirmBluff,
-          palette: palette,
-          onChanged: onConfirmBluffChanged,
-        ),
-        SettingsDivider(palette: palette),
-        SettingsSwitchTile(
-          icon: Icons.sort_rounded,
-          title: 'Card Auto-Sort',
-          value: autoSort,
-          palette: palette,
-          onChanged: onAutoSortChanged,
-        ),
-        SettingsDivider(palette: palette),
-        SettingsSwitchTile(
           icon: Icons.notifications_rounded,
-          title: 'Game Notifications',
+          title: 'App Notifications',
           value: notifications,
           palette: palette,
           onChanged: onNotificationsChanged,
@@ -82,7 +57,7 @@ class SettingsGameplaySection extends StatelessWidget {
         SettingsDivider(palette: palette),
         SettingsSwitchTile(
           icon: Icons.face_rounded,
-          title: 'Show Player Avatars',
+          title: 'Show Participant Avatars',
           value: showAvatars,
           palette: palette,
           onChanged: onShowAvatarsChanged,

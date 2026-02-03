@@ -5,16 +5,6 @@ import 'websocket_handler_base.dart';
 mixin WebSocketSocialMixin on WebSocketHandlerBase {
   // -- Social & Competitive Methods --
 
-  /// Request coins refill from server
-  void refillCoins() {
-    sendMessage({'type': 'REFILL_COINS'});
-  }
-
-  /// Request leaderboard data from server
-  void requestLeaderboard() {
-    sendMessage({'type': 'LEADERBOARD_GET'});
-  }
-
   /// Request friends list from server
   void requestFriends() {
     sendMessage({'type': 'FRIEND_LIST'});

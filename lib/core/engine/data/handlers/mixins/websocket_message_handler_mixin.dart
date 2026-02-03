@@ -2,16 +2,12 @@ import 'dart:convert';
 import '../../../../di/service_locator.dart';
 import '../../../../error/failure.dart';
 import '../../../../../../features/auth/domain/models/user_stats.dart';
-import '../../../../../../features/challenges/domain/models/daily_challenge.dart';
 import '../../../../../../features/social/domain/models/friend_record.dart';
 import '../../../../constants/sound_assets.dart';
-import '../../../../services/audio/audio_service_interface.dart';
-import '../../../domain/models/game_move.dart';
 import '../../../domain/models/participant.dart';
 import '../../../domain/models/room_event.dart';
 import '../../../domain/models/session_enums.dart';
 import '../../../domain/models/session_state.dart';
-import '../../../domain/models/unit.dart';
 import '../../../../utils/app_logger.dart';
 import 'websocket_handler_base.dart';
 
@@ -65,10 +61,6 @@ mixin WebSocketMessageHandlerMixin on WebSocketHandlerBase {
           handleGameState(msg['data'] as Map<String, dynamic>);
           break;
 
-        case 'GAME_ACTION':
-          handleGameAction(msg['data'] as Map<String, dynamic>);
-          break;
-
         case 'ERROR':
           _processError(msg['data'] as Map<String, dynamic>);
           break;
@@ -91,10 +83,6 @@ mixin WebSocketMessageHandlerMixin on WebSocketHandlerBase {
 
         case 'ROOM_UPDATE':
           _processRoomUpdate(msg['data'] as Map<String, dynamic>);
-          break;
-
-        case 'CHALLENGES_DATA':
-          _processChallengesData((msg['data'] as List<dynamic>?) ?? []);
           break;
 
         case 'CHALLENGE_CLAIM_OK':
@@ -221,19 +209,6 @@ mixin WebSocketMessageHandlerMixin on WebSocketHandlerBase {
     }
   }
 
-  void _processChallengesData(List<dynamic> data) {
-    try {
-      final challenges = data
-          .map((c) => DailyChallenge.fromJson(c as Map<String, dynamic>))
-          .toList();
-      if (!challengesController.isClosed) {
-        challengesController.add(challenges);
-      }
-    } catch (e) {
-      AppLogger.sessionError('Failed to parse challenges', exception: e);
-    }
-  }
-
   void _processChallengeClaimOk(Map<String, dynamic> data) {
     try {
       if (!challengeClaimResultController.isClosed) {
@@ -309,81 +284,18 @@ mixin WebSocketMessageHandlerMixin on WebSocketHandlerBase {
         sessionId: sessionId,
         name: participantName,
         avatarUrl: pMap['avatarUrl'] as String?,
-        rank: pMap['rank'] as String?,
-        unitCount: pMap['cardCount'] as int,
         isMe: isMe,
         isActive: pMap['isActive'] as bool? ?? false,
         isDisconnected: pMap['isDisconnected'] as bool? ?? false,
-      );
-    }).toList();
-
-    // Parse my hand
-    final myHandList = stateData['myHand'] as List<dynamic>? ?? [];
-    final myHand = myHandList.map((c) {
-      final card = c as Map<String, dynamic>;
-      return Unit(
-        id: card['id'] as String,
-        type: UnitType.values.firstWhere(
-          (t) => t.name == card['type'],
-          orElse: () => UnitType.spades,
-        ),
-        rank: UnitRank.values.firstWhere(
-          (r) => r.name == card['rank'],
-          orElse: () => UnitRank.two,
-        ),
+        unitCount: 0, // Default to 0 as legacy field is removed from server
       );
     }).toList();
 
     // Parse phase
     final phase = SessionPhase.values.firstWhere(
       (p) => p.name == phaseStr,
-      orElse: () => SessionPhase.lobby,
+      orElse: () => SessionPhase.idle,
     );
-
-    // Audio Triggers based on State Changes
-    final previousPhase = currentSessionState.currentPhase;
-    // Detect Turn Start
-    if (previousPhase != SessionPhase.thinking &&
-        phase == SessionPhase.thinking) {
-      final activeId = stateData['activePlayerId'] as String?;
-      // myId is already defined above
-      if (activeId == myId) {
-        try {
-          sl.audioService.playSfx(SoundAssets.turnAlert);
-          sl.audioService.triggerHaptic(HapticType.heavy);
-        } catch (e) {
-          AppLogger.sessionError('Audio error (turn alert)', exception: e);
-        }
-      }
-    }
-    // Detect Challenge
-    if (previousPhase != SessionPhase.challenging &&
-        phase == SessionPhase.challenging) {
-      try {
-        sl.audioService.playSfx(SoundAssets.challenge);
-        sl.audioService.triggerHaptic(HapticType.error); // Alert vibration
-      } catch (e) {
-        AppLogger.sessionError('Audio error (challenge)', exception: e);
-      }
-    }
-
-    // BGM Lifecycle
-    if (previousPhase == SessionPhase.lobby && phase != SessionPhase.lobby) {
-      try {
-        sl.audioService.stopBgm();
-      } catch (e) {
-        AppLogger.sessionError('Audio error (stop bgm)', exception: e);
-      }
-    }
-    if (previousPhase != SessionPhase.lobby && phase == SessionPhase.lobby) {
-      try {
-        sl.audioService.playBgm(SoundAssets.lobbyAmbience);
-      } catch (e) {
-        AppLogger.sessionError('Audio error (resume bgm)', exception: e);
-      }
-    }
-
-    final activeId = stateData['activePlayerId'] as String?;
 
     // Parse rich event data
     final lastEvent = stateData['lastEvent'] as String?;
@@ -410,249 +322,20 @@ mixin WebSocketMessageHandlerMixin on WebSocketHandlerBase {
       }
       AppLogger.sessionEvent(logMsg);
     }
-    final cardCount = stateData['lastEventCardCount'] as int? ?? 0;
-    isBluffSuccessful = stateData['isBluffSuccessful'] as bool?;
-
-    // Parse gameLog
-    final logData = stateData['gameLog'] as List<dynamic>?;
-    if (logData != null) {
-      gameLog.clear();
-      gameLog.addAll(logData.map((e) => e.toString()));
-      AppLogger.sessionEvent(
-        '📜 [WebSocket] Game Log History (${gameLog.length} entries):',
-      );
-      for (final entry in gameLog) {
-        AppLogger.info('   - $entry');
-      }
-    }
-
-    // Map actor IDs to 'me'
-    activeEventActorId = actorId == myId ? 'me' : actorId;
-    lastCountClaimed = cardCount;
-    isRevealingBluff = phase == SessionPhase.revealing;
-
-    // Parse lastMove if present
-    final lastMoveData = stateData['lastMove'] as Map<String, dynamic>?;
-    if (lastMoveData != null) {
-      final movePlayerId = lastMoveData['playerId'] as String;
-      final declaredRankStr = lastMoveData['declaredRank'] as String;
-
-      lastMove = GameMove(
-        playerId: movePlayerId == myId ? 'me' : movePlayerId,
-        declaredRank: UnitRank.values.firstWhere(
-          (r) => r.name == declaredRankStr,
-          orElse: () => UnitRank.two,
-        ),
-        actualUnits: [], // Server doesn't send actual cards for security
-      );
-      lastRankClaimed = lastMove?.declaredRank;
-    } else {
-      lastMove = null; // Clear it if null
-      lastRankClaimed = null;
-    }
 
     final newState = SessionState(
       roomId: 'online',
       participants: participants,
-      myHand: myHand,
-      pileCount: stateData['pileCount'] as int? ?? 0,
       currentPhase: phase,
-      activeParticipantId:
-          participants.any(
-            (p) => p.isMe && (p.id == activeId || p.sessionId == activeId),
-          )
-          ? 'me'
-          : activeId,
-      startTime: stateData['startTime'] != null
-          ? (stateData['startTime'] as int)
-          : null,
-      turnStartTime: stateData['turnStartTime'] != null
-          ? (stateData['turnStartTime'] as int)
-          : null,
-      turnTimerS: null, // Timer logic handled via turnStartTime
-      isSpectator: stateData['isSpectator'] as bool? ?? false,
-      isSyncing: false, // Reset syncing flag on full state sync
+      isSyncing: false,
       createdAt: stateData['createdAt'] as int?,
-      winnerId: stateData['winnerId'] as String?,
     );
 
     currentSessionState = newState;
     if (!stateStreamController.isClosed) {
       stateStreamController.add(newState);
 
-      // Log Active Player Name
-      String activeName = newState.activeParticipantId ?? 'None';
-      if (newState.activeParticipantId != null) {
-        if (newState.activeParticipantId == 'me') {
-          activeName = 'You';
-        } else {
-          activeName = participants
-              .firstWhere(
-                (p) => p.id == newState.activeParticipantId,
-                orElse: () => Participant(
-                  id: 'unknown',
-                  sessionId: 'unknown',
-                  name: newState.activeParticipantId!,
-                  unitCount: 0,
-                  isMe: false,
-                ),
-              )
-              .name;
-        }
-      }
-      AppLogger.sessionEvent('🧑 [WebSocket] Active Player: $activeName');
-    }
-
-    // Emit events based on lastEvent from server
-    final lastEventId = stateData['lastEventId'] as String?;
-
-    if (lastEvent != null && !eventController.isClosed) {
-      if (lastEventId != null && lastEventId == lastProcessedEventId) {
-        // Duplicate event, ignore
-      } else {
-        if (lastEventId != null) {
-          lastProcessedEventId = lastEventId;
-        }
-
-        switch (lastEvent) {
-          case 'cardsPlayed':
-            _lastEventType = SessionEventType.cardsPlayed;
-            _lastEventTimestamp = DateTime.now().millisecondsSinceEpoch;
-            eventController.add(SessionEventType.cardsPlayed);
-            break;
-          case 'passed':
-            _lastEventType = SessionEventType.passed;
-            _lastEventTimestamp = DateTime.now().millisecondsSinceEpoch;
-            eventController.add(SessionEventType.passed);
-            break;
-          case 'bluffCalled':
-            _lastEventType = SessionEventType.bluffCalled;
-            _lastEventTimestamp = DateTime.now().millisecondsSinceEpoch;
-            eventController.add(SessionEventType.bluffCalled);
-            break;
-          case 'pileDiscarded':
-            _lastEventType = SessionEventType.pileDiscarded;
-            _lastEventTimestamp = DateTime.now().millisecondsSinceEpoch;
-            eventController.add(SessionEventType.pileDiscarded);
-            break;
-          case 'cardsPickedUp':
-            _lastEventType = SessionEventType.cardsPickedUp;
-            _lastEventTimestamp = DateTime.now().millisecondsSinceEpoch;
-            eventController.add(SessionEventType.cardsPickedUp);
-            break;
-          case 'shuffling':
-            _lastEventType = SessionEventType.shuffling;
-            _lastEventTimestamp = DateTime.now().millisecondsSinceEpoch;
-            eventController.add(SessionEventType.shuffling);
-            break;
-        }
-      }
-    }
-
-    // fallback for phase changes if lastEvent is missing
-    if (lastEvent == null) {
-      if (phase == SessionPhase.thinking) {
-        if (!eventController.isClosed) {
-          eventController.add(SessionEventType.turnChanged);
-        }
-      }
-    }
-  }
-
-  void handleGameAction(Map<String, dynamic> actionData) {
-    try {
-      final action = actionData['action'] as String?;
-      final data = actionData['data'] as Map<String, dynamic>? ?? {};
-
-      if (action == null) return;
-
-      AppLogger.sessionEvent(
-        '⚙️ [WebSocket] Game Action: $action | Data: $data',
-      );
-
-      final myId = sl.authRepository.currentUser?.uid;
-
-      switch (action) {
-        case 'PLAY_CARDS':
-          final playerId = data['playerId'] as String?;
-          final count = data['count'] as int? ?? 0;
-          final newPileCount = data['newPileCount'] as int? ?? 0;
-          final nextPlayerId = data['nextPlayerId'] as String?;
-          final turnStartTime = data['turnStartTime'] as int?;
-          final playerNewCardCount = data['playerNewCardCount'] as int?;
-
-          List<Participant> updatedParticipants =
-              currentSessionState.participants;
-          if (playerId != null && playerNewCardCount != null) {
-            updatedParticipants = currentSessionState.participants.map((p) {
-              final pId = p.isMe ? myId : p.id;
-              if (pId == playerId) {
-                return Participant(
-                  id: p.id,
-                  sessionId: p.sessionId,
-                  name: p.name,
-                  avatarUrl: p.avatarUrl,
-                  rank: p.rank,
-                  unitCount: playerNewCardCount,
-                  isMe: p.isMe,
-                  isActive: p.isActive,
-                  isDisconnected: p.isDisconnected,
-                );
-              }
-              return p;
-            }).toList();
-          }
-
-          currentSessionState = currentSessionState.copyWith(
-            pileCount: newPileCount,
-            activeParticipantId: nextPlayerId == myId ? 'me' : nextPlayerId,
-            currentPhase: SessionPhase.challenging,
-            turnStartTime: turnStartTime,
-            participants: updatedParticipants,
-          );
-
-          if (!stateStreamController.isClosed) {
-            stateStreamController.add(currentSessionState);
-          }
-
-          activeEventActorId = playerId == myId ? 'me' : playerId;
-          lastCountClaimed = count;
-
-          if (!eventController.isClosed) {
-            _lastEventType = SessionEventType.cardsPlayed;
-            _lastEventTimestamp = DateTime.now().millisecondsSinceEpoch;
-            eventController.add(SessionEventType.cardsPlayed);
-          }
-          break;
-
-        case 'PASS':
-          final nextPlayerId = data['nextPlayerId'] as String?;
-          final turnStartTime = data['turnStartTime'] as int?;
-
-          currentSessionState = currentSessionState.copyWith(
-            activeParticipantId: nextPlayerId == myId ? 'me' : nextPlayerId,
-            turnStartTime: turnStartTime,
-          );
-
-          if (!stateStreamController.isClosed) {
-            stateStreamController.add(currentSessionState);
-          }
-
-          final playerId = data['playerId'] as String?;
-          activeEventActorId = playerId == myId ? 'me' : playerId;
-
-          if (!eventController.isClosed) {
-            _lastEventType = SessionEventType.passed;
-            _lastEventTimestamp = DateTime.now().millisecondsSinceEpoch;
-            eventController.add(SessionEventType.passed);
-          }
-          break;
-
-        default:
-          AppLogger.warning('Unknown game action: $action');
-      }
-    } catch (e) {
-      AppLogger.sessionError('❌ Error patching game action', exception: e);
+      AppLogger.sessionEvent('🧑 [WebSocket] Session Sync Complete');
     }
   }
 

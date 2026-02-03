@@ -3,11 +3,8 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../../domain/models/session_state.dart';
 import '../../../domain/models/session_enums.dart';
 import '../../../domain/models/room_event.dart';
-import '../../../domain/models/game_move.dart';
-import '../../../domain/models/unit.dart';
 import '../../../../../features/auth/domain/models/user_stats.dart';
 import '../../../../../features/social/domain/models/friend_record.dart';
-import '../../../../../features/challenges/domain/models/daily_challenge.dart';
 import '../../../../error/failure.dart';
 
 /// Base mixin that defines the interface required by all WebSocket handler mixins.
@@ -53,7 +50,6 @@ mixin WebSocketHandlerBase {
   StreamController<List<UserStats>> get leaderboardController;
   StreamController<List<FriendRecord>> get friendsController;
   StreamController<RoomEvent> get roomEventController;
-  StreamController<List<DailyChallenge>> get challengesController;
   StreamController<Map<String, dynamic>> get challengeClaimResultController;
   StreamController<Map<String, dynamic>> get chatController;
   StreamController<Failure> get errorController;
@@ -74,7 +70,7 @@ mixin WebSocketHandlerBase {
   Timer? get reconnectTimer;
   set reconnectTimer(Timer? value);
 
-  // --- Rich Game State ---
+  // --- Rich Session State ---
   bool? get isBluffSuccessful;
   set isBluffSuccessful(bool? value);
   List<String> get gameLog;
@@ -84,10 +80,6 @@ mixin WebSocketHandlerBase {
   set lastCountClaimed(int value);
   bool get isRevealingBluff;
   set isRevealingBluff(bool value);
-  GameMove? get lastMove;
-  set lastMove(GameMove? value);
-  UnitRank? get lastRankClaimed;
-  set lastRankClaimed(UnitRank? value);
   String? get lastProcessedEventId;
   set lastProcessedEventId(String? value);
   String? get lastBluffWinnerId;

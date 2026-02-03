@@ -10,9 +10,7 @@ import '../../features/profile/profile.dart';
 import '../../features/invitation_creator/domain/repositories/invitation_repository.dart';
 import '../../features/invitation_creator/data/repositories/invitation_repository_impl.dart';
 import '../../features/invitation_creator/presentation/bloc/invitation_bloc.dart';
-import '../../features/challenges/data/challenges_repository.dart';
 import '../../features/admin/data/admin_repository.dart';
-import '../../features/offline/offline.dart';
 import '../../features/session/session.dart';
 import '../../features/templates/domain/repositories/templates_repository.dart';
 import '../../features/templates/data/repositories/templates_repository_impl.dart';
@@ -39,14 +37,13 @@ class ServiceLocator {
   late final InvitationRepository invitationRepository;
   late final YouTubeRepository youtubeRepository;
   late final NotificationService notificationService;
-  late final ChallengesRepository challengesRepository;
   late final AdminRepository adminRepository;
   late final TemplatesRepository templatesRepository;
   late final GuestsRepository guestsRepository;
   late final CreationsRepository creationsRepository;
 
   // Re-enable these as WebSocketSessionHandler for repurposing
-  WebSocketSessionHandler get gameSessionHandler => _webSocketHandler!;
+  WebSocketSessionHandler get sessionHandler => _webSocketHandler!;
   WebSocketSessionHandler? get voiceSessionHandler => _webSocketHandler!;
 
   late final GreetingService greetingService;
@@ -58,11 +55,6 @@ class ServiceLocator {
   late final GuestsBloc guestsBloc;
   late final CreationsBloc creationsBloc;
   late final SessionBloc sessionBloc;
-
-  // Offline Services
-  late final LocalGameEngine localGameEngine;
-  late final LocalServerService localServerService;
-  late final DiscoveryService discoveryService;
 
   // Explicitly expose WebSocket handler for specialized calls (like updateNickname)
   WebSocketSessionHandler? _webSocketHandler;
@@ -87,7 +79,6 @@ class ServiceLocator {
     onboardingRepository = OnboardingRepository(prefs);
     sessionRepository = WebSocketSessionRepository(_webSocketHandler!);
     profileRepository = ProfileRepository(_webSocketHandler!);
-    challengesRepository = ChallengesRepository(_webSocketHandler!);
     adminRepository = AdminRepository();
     invitationRepository = InvitationRepositoryImpl();
     templatesRepository = TemplatesRepositoryImpl();
@@ -109,11 +100,6 @@ class ServiceLocator {
     guestsBloc = GuestsBloc(repository: guestsRepository);
     creationsBloc = CreationsBloc(repository: creationsRepository);
     sessionBloc = SessionBloc();
-
-    // Initialize Offline Services
-    localGameEngine = LocalGameEngine();
-    localServerService = LocalServerService(localGameEngine);
-    discoveryService = DiscoveryService();
   }
 
   void initializeSystemStatus(AuthBloc authBloc) {

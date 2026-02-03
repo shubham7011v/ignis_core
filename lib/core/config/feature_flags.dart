@@ -38,6 +38,6 @@ class FeatureFlags {
   /// Elite Deck Collection
   static bool get enableEliteDecks => _config.enableEliteDecks;
 
-  /// Game Chat & Emoji
-  static bool get enableGameChat => _config.enableGameChat;
+  /// Session Chat & Emoji
+  static bool get enableSessionChat => _config.enableGameChat;
 }

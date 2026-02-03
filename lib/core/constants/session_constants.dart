@@ -1,8 +1,8 @@
-/// Game-specific constants for animations, timeouts, and layout values.
+/// Session-specific constants for animations, timeouts, and layout values.
 ///
-/// These constants define the timing and behavior of game UI elements.
-class GameConstants {
-  GameConstants._(); // Private constructor to prevent instantiation
+/// These constants define the timing and behavior of session UI elements.
+class SessionConstants {
+  SessionConstants._(); // Private constructor to prevent instantiation
 
   // ==================== Animation Durations ====================
 
@@ -21,21 +21,15 @@ class GameConstants {
   /// Pulse animation duration for attention
   static const Duration pulseAnimationDuration = Duration(milliseconds: 1500);
 
-  /// Card flip animation
-  static const Duration cardFlipDuration = Duration(milliseconds: 400);
-
-  /// Challenge reveal animation
-  static const Duration challengeRevealDuration = Duration(milliseconds: 800);
-
   // ==================== Timeouts ====================
 
-  /// Matchmaking timeout before auto-filling with bots (seconds)
+  /// Matchmaking timeout (seconds)
   static const int matchmakingTimeoutSeconds = 45;
 
   /// Warning threshold for matchmaking timeout (seconds)
   static const int matchmakingWarningSeconds = 15;
 
-  /// Turn timeout for players (seconds)
+  /// Turn/Action timeout (seconds)
   static const int turnTimeoutSeconds = 30;
 
   /// Reconnection timeout (seconds)
@@ -43,40 +37,17 @@ class GameConstants {
 
   // ==================== Layout ====================
 
-  /// Maximum number of players in a game
-  static const int maxPlayers = 5;
+  /// Maximum number of participants in a session
+  static const int maxParticipants = 5;
 
-  /// Default grid cross-axis count for player cards
-  static const int playerGridCrossAxisCount = 3;
-
-  /// Player card aspect ratio
-  static const double playerCardAspectRatio = 0.68;
-
-  /// Card width in pixels
-  static const double cardWidth = 100.0;
-
-  /// Card height in pixels
-  static const double cardHeight = 140.0;
+  /// Default grid cross-axis count for participants
+  static const int participantGridCrossAxisCount = 3;
 
   /// Avatar size
   static const double avatarSize = 48.0;
 
   /// Large avatar size
   static const double avatarSizeLarge = 80.0;
-
-  // ==================== Game Logic ====================
-
-  /// Minimum cards that can be played in a turn
-  static const int minCardsPerPlay = 1;
-
-  /// Maximum cards that can be played in a turn
-  static const int maxCardsPerPlay = 4;
-
-  /// Default boot amount for public games
-  static const int defaultBootAmount = 100;
-
-  /// Deck size (standard 52-card deck)
-  static const int deckSize = 52;
 
   // ==================== UI Constants ====================
 

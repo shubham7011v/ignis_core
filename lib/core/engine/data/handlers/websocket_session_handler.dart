@@ -3,29 +3,24 @@ import 'package:flutter/widgets.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
-import '../../domain/handlers/game_session_handler.dart';
+import '../../domain/handlers/session_handler.dart';
 import '../../domain/handlers/voice_session_handler.dart';
 import '../../domain/models/session_state.dart';
 import '../../domain/models/session_enums.dart';
-import '../../domain/models/unit.dart';
-import '../../domain/models/game_move.dart';
 import '../../../../features/auth/domain/models/user_stats.dart';
 import '../../../../features/social/domain/models/friend_record.dart';
 import '../../domain/models/room_event.dart';
-import '../../../../features/challenges/domain/models/daily_challenge.dart';
-// import '../../../../features/voice/data/voice_audio_manager.dart';
 import '../../../../core/utils/app_logger.dart';
-import '../../../../core/di/service_locator.dart';
-import '../../../../core/constants/sound_assets.dart';
-import '../../../../core/error/failure.dart';
-import 'mixins/mixins.dart';
 
-class WebSocketSessionHandler extends GameSessionHandler
+import 'mixins/mixins.dart';
+import '../../../../core/error/failure.dart';
+
+class WebSocketSessionHandler extends SessionHandler
     with
         WidgetsBindingObserver,
         WebSocketHandlerBase,
         WebSocketSocialMixin,
-        WebSocketGameActionsMixin,
+        WebSocketSessionActionsMixin,
         WebSocketRoomMixin,
         WebSocketConnectionMixin,
         WebSocketMessageHandlerMixin
@@ -40,8 +35,6 @@ class WebSocketSessionHandler extends GameSessionHandler
   final _roomEventController = StreamController<RoomEvent>.broadcast();
   final _connectionStatusController =
       StreamController<ConnectionStatus>.broadcast();
-  final _challengesController =
-      StreamController<List<DailyChallenge>>.broadcast();
   final _challengeClaimResultController =
       StreamController<Map<String, dynamic>>.broadcast();
   final _chatController = StreamController<Map<String, dynamic>>.broadcast();
@@ -118,19 +111,19 @@ class WebSocketSessionHandler extends GameSessionHandler
 
   // Cache for interface properties
   String? _activeEventActorId;
-  UnitRank? _lastRankClaimed;
-  int _lastCountClaimed = 0;
-  final List<String> _gameLog = [];
-  String? _lastBluffWinnerId;
-  String? _lastBluffLoserId;
-  bool? _isBluffSuccessful;
-  GameMove? _lastMove;
-  bool _isRevealingBluff = false;
-  final Map<String, String> _pNames = {};
   String? _lastProcessedEventId;
   UserStats? _lastStats;
   List<FriendRecord> _friends = [];
   final Map<String, bool> _typingStatusMap = {};
+
+  // Generic Session Properties (Inherited from legacy game logic but kept for session context)
+  bool? _isBluffSuccessful;
+  final List<String> _sessionLog = [];
+  int _lastCountClaimed = 0;
+  bool _isRevealingBluff = false;
+  String? _lastBluffWinnerId;
+  String? _lastBluffLoserId;
+  final Map<String, String> _pNames = {};
 
   WebSocketSessionHandler() {
     _currentState = SessionState.initial();
@@ -214,14 +207,10 @@ class WebSocketSessionHandler extends GameSessionHandler
   @override
   StreamController<RoomEvent> get roomEventController => _roomEventController;
   @override
-  StreamController<List<DailyChallenge>> get challengesController =>
-      _challengesController;
-  @override
   StreamController<Map<String, dynamic>> get challengeClaimResultController =>
       _challengeClaimResultController;
   @override
   StreamController<Map<String, dynamic>> get chatController => _chatController;
-  @override
   @override
   StreamController<Failure> get errorController => _errorController;
 
@@ -266,7 +255,7 @@ class WebSocketSessionHandler extends GameSessionHandler
   set isBluffSuccessful(bool? value) => _isBluffSuccessful = value;
 
   @override
-  List<String> get gameLog => _gameLog;
+  List<String> get gameLog => _sessionLog;
 
   @override
   String? get activeEventActorId => _activeEventActorId;
@@ -282,16 +271,6 @@ class WebSocketSessionHandler extends GameSessionHandler
   bool get isRevealingBluff => _isRevealingBluff;
   @override
   set isRevealingBluff(bool value) => _isRevealingBluff = value;
-
-  @override
-  GameMove? get lastMove => _lastMove;
-  @override
-  set lastMove(GameMove? value) => _lastMove = value;
-
-  @override
-  UnitRank? get lastRankClaimed => _lastRankClaimed;
-  @override
-  set lastRankClaimed(UnitRank? value) => _lastRankClaimed = value;
 
   @override
   String? get lastProcessedEventId => _lastProcessedEventId;
@@ -314,7 +293,7 @@ class WebSocketSessionHandler extends GameSessionHandler
   @override
   Map<String, bool> get typingStatus => _typingStatusMap;
 
-  // --- GameSessionHandler Stream Getters ---
+  // --- SessionHandler Stream Getters ---
   @override
   Stream<SessionState> get sessionStateStream => _stateController.stream;
   @override
@@ -332,8 +311,6 @@ class WebSocketSessionHandler extends GameSessionHandler
       _leaderboardController.stream;
   Stream<List<FriendRecord>> get friendsStream => _friendsController.stream;
   Stream<RoomEvent> get roomEventStream => _roomEventController.stream;
-  Stream<List<DailyChallenge>> get challengesStream =>
-      _challengesController.stream;
   Stream<Map<String, dynamic>> get challengeClaimResultStream =>
       _challengeClaimResultController.stream;
 
@@ -408,12 +385,6 @@ class WebSocketSessionHandler extends GameSessionHandler
       }
     }
 
-    try {
-      sl.audioService.playBgm(SoundAssets.lobbyAmbience);
-    } catch (e) {
-      AppLogger.error('Failed to play lobby music', exception: e);
-    }
-
     if (_connectionCompleter != null && !_connectionCompleter!.isCompleted) {
       _connectionCompleter!.complete();
     }
@@ -431,52 +402,9 @@ class WebSocketSessionHandler extends GameSessionHandler
     }
   }
 
-  // --- Game Related Actions (Delegated if needed, but simple ones here) ---
   @override
-  Future<void> startGame({int playerCount = 5, int thinkingTimeS = 10}) async {
-    AppLogger.info('Game: Requesting START_GAME');
-    sendMessage({'type': 'START_GAME'});
-  }
-
-  @override
-  void playCards(List<String> unitIds, UnitRank declaredRank) {
-    AppLogger.info(
-      'Game: Playing cards',
-      data: {'count': unitIds.length, 'declaredRank': declaredRank.name},
-    );
-    sendMessage({
-      'type': 'PLAY_CARDS',
-      'data': {'cardIds': unitIds, 'declaredRank': declaredRank.name},
-    });
-  }
-
-  @override
-  void passTurn() {
-    AppLogger.info('Game: Passing turn');
-    sendMessage({'type': 'PASS'});
-  }
-
-  @override
-  void raiseChallenge() {
-    AppLogger.info('Game: Raising challenge');
-    sendMessage({'type': 'CHALLENGE'});
-  }
-
-  @override
-  void sortHand() {
-    final sorted = List<Unit>.from(_currentState.myHand)
-      ..sort((a, b) => a.type.index.compareTo(b.type.index));
-    _currentState = _currentState.copyWith(myHand: sorted);
-    if (!_stateController.isClosed) _stateController.add(_currentState);
-  }
-
-  @override
-  void reorderHand(int oldIndex, int newIndex) {
-    final hand = List<Unit>.from(_currentState.myHand);
-    final u = hand.removeAt(oldIndex);
-    hand.insert(newIndex, u);
-    _currentState = _currentState.copyWith(myHand: hand);
-    if (!_stateController.isClosed) _stateController.add(_currentState);
+  void leaveRoom(String roomCode) {
+    sendMessage({'type': 'LEAVE_ROOM'});
   }
 
   @override
@@ -493,9 +421,9 @@ class WebSocketSessionHandler extends GameSessionHandler
   }
 
   @override
-  void resetGameSession() {
+  void resetSession() {
     _friends = [];
-    _gameLog.clear();
+    _sessionLog.clear();
     _pNames.clear();
     _typingStatusMap.clear();
     _messageQueue.clear();

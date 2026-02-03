@@ -10,73 +10,19 @@ abstract class SessionEvent extends Equatable {
 }
 
 // -- Action Events --
-class SessionStartRequested extends SessionEvent {
-  final int playerCount;
-  final int thinkingTimeS;
-
-  const SessionStartRequested({this.playerCount = 5, this.thinkingTimeS = 10});
-
-  @override
-  List<Object?> get props => [playerCount, thinkingTimeS];
-}
-
 class SessionResetRequested extends SessionEvent {
   const SessionResetRequested();
 }
 
 class SessionHandlerSwapped extends SessionEvent {
-  final engine.GameSessionHandler newHandler;
+  final engine.SessionHandler newHandler;
   const SessionHandlerSwapped(this.newHandler);
 
   @override
   List<Object?> get props => [newHandler];
 }
 
-class UnitToggled extends SessionEvent {
-  final String unitId;
-  const UnitToggled(this.unitId);
-
-  @override
-  List<Object?> get props => [unitId];
-}
-
-class RankStaged extends SessionEvent {
-  final engine.UnitRank rank;
-  const RankStaged(this.rank);
-
-  @override
-  List<Object?> get props => [rank];
-}
-
-class RankSelectionToggleRequested extends SessionEvent {}
-
-class CardsPlayRequested extends SessionEvent {}
-
-class TurnPassRequested extends SessionEvent {}
-
-class ChallengeRaiseRequested extends SessionEvent {}
-
-class HandSortRequested extends SessionEvent {}
-
-class HandReorderRequested extends SessionEvent {
-  final int oldIndex;
-  final int newIndex;
-
-  const HandReorderRequested(this.oldIndex, this.newIndex);
-
-  @override
-  List<Object?> get props => [oldIndex, newIndex];
-}
-
 // -- Engine Update Events --
-
-class VisualCardIncrement extends SessionEvent {
-  final String playerId;
-  const VisualCardIncrement(this.playerId);
-
-  @override
-  List<Object?> get props => [playerId];
-}
 
 class EngineStateUpdated extends SessionEvent {
   final engine.SessionState state;
@@ -89,12 +35,11 @@ class EngineStateUpdated extends SessionEvent {
 class EngineEventReceived extends SessionEvent {
   final engine.SessionEventType type;
   final String? actorId;
-  final int cardCount;
 
-  const EngineEventReceived(this.type, this.actorId, {this.cardCount = 0});
+  const EngineEventReceived(this.type, this.actorId);
 
   @override
-  List<Object?> get props => [type, actorId, cardCount];
+  List<Object?> get props => [type, actorId];
 }
 
 class HandlerSyncRequested extends SessionEvent {

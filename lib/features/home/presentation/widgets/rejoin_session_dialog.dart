@@ -2,30 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/colors.dart';
 
-class RejoinGameDialog extends StatelessWidget {
+class RejoinSessionDialog extends StatelessWidget {
   final AppColorPalette palette;
   final VoidCallback onResume;
-  final VoidCallback onNewGame;
+  final VoidCallback onNewSession;
 
-  const RejoinGameDialog({
+  const RejoinSessionDialog({
     super.key,
     required this.palette,
     required this.onResume,
-    required this.onNewGame,
+    required this.onNewSession,
   });
 
   static Future<void> show({
     required BuildContext context,
     required AppColorPalette palette,
     required VoidCallback onResume,
-    required VoidCallback onNewGame,
+    required VoidCallback onNewSession,
   }) {
     return showDialog(
       context: context,
-      builder: (context) => RejoinGameDialog(
+      builder: (context) => RejoinSessionDialog(
         palette: palette,
         onResume: onResume,
-        onNewGame: onNewGame,
+        onNewSession: onNewSession,
       ),
     );
   }
@@ -35,20 +35,20 @@ class RejoinGameDialog extends StatelessWidget {
     return AlertDialog(
       backgroundColor: palette.surface,
       title: Text(
-        'Active Game Found',
+        'Active Session Found',
         style: GoogleFonts.cinzel(color: palette.textPrimary),
       ),
       content: Text(
-        'You are currently in an active game session. Do you want to rejoin it or start a new game?',
+        'You are currently in an ongoing wedding session. Do you want to rejoin it or start fresh?',
         style: GoogleFonts.inter(color: palette.textSecondary),
       ),
       actions: [
         TextButton(
           onPressed: () {
             Navigator.of(context).pop(); // Close dialog
-            onNewGame();
+            onNewSession();
           },
-          child: Text('New Game', style: TextStyle(color: palette.danger)),
+          child: Text('Start Fresh', style: TextStyle(color: palette.danger)),
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
@@ -59,7 +59,7 @@ class RejoinGameDialog extends StatelessWidget {
             Navigator.of(context).pop(); // Close dialog
             onResume();
           },
-          child: const Text('Resume Game'),
+          child: const Text('Resume Session'),
         ),
       ],
     );

@@ -12,7 +12,7 @@ import 'core/theme/bloc/theme_event.dart';
 
 import 'features/auth/auth.dart';
 import 'features/profile/profile.dart';
-import 'features/challenges/presentation/bloc/challenges_bloc.dart';
+
 import 'core/di/service_locator.dart' as di;
 import 'core/navigation/app_router.dart';
 
@@ -279,10 +279,7 @@ class IgnisApp extends StatelessWidget {
         BlocProvider(
           create: (context) => ProfileBloc(repository: di.sl.profileRepository),
         ),
-        BlocProvider(
-          create: (context) =>
-              ChallengesBloc(di.sl.challengesRepository)..add(LoadChallenges()),
-        ),
+
         BlocProvider.value(value: di.sl.sessionBloc),
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(

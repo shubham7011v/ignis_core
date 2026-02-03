@@ -30,7 +30,7 @@ class SystemStatus {
   factory SystemStatus.healthy() => const SystemStatus(
     type: SystemStatusType.healthy,
     label: 'System Healthy',
-    description: 'Multiplayer engine and cloud services are active.',
+    description: 'Session engine and cloud services are active.',
     actionLabel: 'REFRESH ALL',
     icon: Icons.check_circle_rounded,
     statusColor: Color(0xFF4CAF50),
@@ -48,7 +48,7 @@ class SystemStatus {
   factory SystemStatus.serverDown() => const SystemStatus(
     type: SystemStatusType.serverDown,
     label: 'Server Offline',
-    description: 'The game server is currently unreachable.',
+    description: 'The backend server is currently unreachable.',
     actionLabel: 'RETRY CONNECTION',
     icon: Icons.dns_rounded,
     statusColor: Color(0xFFF43F5E),
