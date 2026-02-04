@@ -64,12 +64,12 @@ dependencies:
   flutter_dotenv: ^5.1.0
   connectivity_plus: ^7.0.0
   share_plus: ^10.1.0
-  open_file_plus: ^3.4.1+1
+  open_filex_plus: ^4.7.3
   in_app_purchase: ^3.2.0
 
   # Video Rendering Dependencies
   youtube_explode_dart: ^2.3.4
-  ffmpeg_kit_flutter_min_gpl: ^6.0.3
+  ffmpeg_kit_flutter_new: ^4.1.0
   path_provider: ^2.1.5
   video_player: ^2.10.1
 
@@ -85,6 +85,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -98,7 +99,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/splash_icon.png
+    - assets/app_icon.png
     - assets/audio/music/
     - assets/audio/sfx/
     - .env
@@ -130,12 +131,18 @@ flutter:
   # see https://flutter.dev/to/font-from-package
 # flutter_native_splash configuration
 flutter_native_splash:
-  color: "#000000"
-  image: assets/splash.png
+  color: "#7E1E3F"
+  image: assets/app_icon.png
   android_gravity: center
-  ios_content_mode: scaleAspectFill
+  ios_content_mode: scaleAspectFit
   fullscreen: true
   android_12:
-    color: "#000000"
-    image: assets/splash_icon.png
+    color: "#7E1E3F"
+    image: assets/app_icon.png
   ios: true
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/app_icon.png"
+  min_sdk_android: 21 # android min sdk min:16, default:21

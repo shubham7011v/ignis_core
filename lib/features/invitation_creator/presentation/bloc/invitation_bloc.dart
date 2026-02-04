@@ -78,9 +78,7 @@ class InvitationBloc extends Bloc<InvitationEvent, InvitationState> {
         videoUrl: state.selectedStyle!.videoTemplateId,
         category: state.selectedStyle!.categories.first,
         duration: '0:30',
-        youtubeId: state.selectedStyle!.id == '1'
-            ? 'dQw4w9WgXcQ'
-            : 'dQw4w9WgXcQ',
+        youtubeId: _extractYoutubeId(state.selectedStyle!.videoTemplateId),
       );
 
       final templateFile = await _downloadService.downloadTemplateWithProgress(
@@ -136,5 +134,12 @@ class InvitationBloc extends Bloc<InvitationEvent, InvitationState> {
       categories: [event.template.category],
     );
     emit(state.copyWith(selectedStyle: style));
+  }
+
+  String _extractYoutubeId(String url) {
+    if (url.contains('v=')) {
+      return url.split('v=')[1].split('&')[0];
+    }
+    return 'dQw4w9WgXcQ'; // Fallback
   }
 }

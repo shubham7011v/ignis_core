@@ -8,7 +8,7 @@ import Foundation
 import audioplayers_darwin
 import cloud_firestore
 import connectivity_plus
-import ffmpeg_kit_flutter_min_gpl
+import ffmpeg_kit_flutter_new
 import firebase_analytics
 import firebase_app_check
 import firebase_auth
@@ -20,6 +20,7 @@ import firebase_storage
 import flutter_inappwebview_macos
 import flutter_webrtc
 import google_sign_in_ios
+import in_app_purchase_storekit
 import package_info_plus
 import share_plus
 import shared_preferences_foundation
@@ -42,6 +43,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   InAppWebViewFlutterPlugin.register(with: registry.registrar(forPlugin: "InAppWebViewFlutterPlugin"))
   FlutterWebRTCPlugin.register(with: registry.registrar(forPlugin: "FlutterWebRTCPlugin"))
   FLTGoogleSignInPlugin.register(with: registry.registrar(forPlugin: "FLTGoogleSignInPlugin"))
+  InAppPurchasePlugin.register(with: registry.registrar(forPlugin: "InAppPurchasePlugin"))
   FPPPackageInfoPlusPlugin.register(with: registry.registrar(forPlugin: "FPPPackageInfoPlusPlugin"))
   SharePlusMacosPlugin.register(with: registry.registrar(forPlugin: "SharePlusMacosPlugin"))
   SharedPreferencesPlugin.register(with: registry.registrar(forPlugin: "SharedPreferencesPlugin"))

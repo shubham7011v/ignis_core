@@ -5,7 +5,7 @@ import '../bloc/invitation_bloc.dart';
 import '../bloc/invitation_event.dart';
 import '../bloc/invitation_state.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:open_file_plus/open_file_plus.dart';
+import 'package:open_filex_plus/open_filex_plus.dart';
 
 class PreviewPage extends StatefulWidget {
   const PreviewPage({super.key});
@@ -233,7 +233,7 @@ class _PreviewPageState extends State<PreviewPage> {
                 child: OutlinedButton.icon(
                   onPressed: () async {
                     if (state.renderOutputPath != null) {
-                      final result = await OpenFile.open(
+                      final result = await OpenFilex.open(
                         state.renderOutputPath!,
                       );
                       if (result.type != ResultType.done) {

@@ -96,37 +96,37 @@ class AppColors {
         );
       case AppThemeMode.classic:
         return const AppColorPalette(
-          background: Color(0xFF121212),
-          surface: Color(0xFF1E1E1E),
-          surfaceLight: Color(0xFF2C2C2C),
-          primary: Color(0xFFE5A043),
-          primaryDim: Color(0xFF8F632A),
-          activeGlow: Color(0x66E5A043),
+          background: Color(0xFF7E1E3F), // Burgundy/Deep Magenta
+          surface: Color(0xFF4A0E26), // Darker Burgundy
+          surfaceLight: Color(0xFF5E1331), // Medium Burgundy
+          primary: Color(0xFFFFD700), // Golden
+          primaryDim: Color(0xFFB8860B), // Dark Goldenrod
+          activeGlow: Color(0x66FFD700), // Gold Glow
           warn: Color(0xFFFFC107),
           danger: Color(0xFFCF6679),
           success: Color(0xFF4CAF50),
-          textPrimary: Color(0xFFEEEEEE),
-          textSecondary: Color(0xFFAAAAAA),
-          textTertiary: Color(0xFF666666),
-          cardBack: Color(0xFF2A2A2A),
-          divider: Color(0xFF333333),
+          textPrimary: Color(0xFFFFFFFF), // White for contrast on Burgundy
+          textSecondary: Color(0xFFFFD700), // Gold for secondary text
+          textTertiary: Color(0xFFE0E0E0),
+          cardBack: Color(0xFF4A0E26),
+          divider: Color(0xFF5E1331),
         );
       case AppThemeMode.royal:
         return const AppColorPalette(
-          background: Color(0xFF1B0D0D), // Deep Maroon/Chocolate
-          surface: Color(0xFF2D0E0E), // Subtle maroon surface
-          surfaceLight: Color(0xFF3F1616), // Lighter maroon
-          primary: Color(0xFFF52D2D), // Vibrant Action Red
-          primaryDim: Color(0xFFB71C1C), // Deep Red
-          activeGlow: Color(0x66E5A043), // Gold highlight
-          warn: Color(0xFFFFD700), // Gold
+          background: Color(0xFF4A0E26), // Deepest Maroon
+          surface: Color(0xFF7E1E3F), // Burgundy
+          surfaceLight: Color(0xFF8E2247),
+          primary: Color(0xFFFFD700), // Gold
+          primaryDim: Color(0xFFD4AF37), // Metallic Gold
+          activeGlow: Color(0x66FFD700),
+          warn: Color(0xFFFFD700),
           danger: Color(0xFFD32F2F),
           success: Color(0xFF388E3C),
-          textPrimary: Color(0xFFFFFFFF), // Pure White
-          textSecondary: Color(0xFFE5A043), // Gold secondary
-          textTertiary: Color(0xFFAFAFAF), // Muted light gray
-          cardBack: Color(0xFF2D0E0E),
-          divider: Color(0xFF3F1616),
+          textPrimary: Color(0xFFFFFFFF),
+          textSecondary: Color(0xFFFFD700),
+          textTertiary: Color(0xFFAFAFAF),
+          cardBack: Color(0xFF7E1E3F),
+          divider: Color(0xFF8E2247),
         );
     }
   }
@@ -134,17 +134,17 @@ class AppColors {
   // Backward compatibility for existing static access if needed during migration
   // but we prefer using current palette from provider.
   // Legacy statics (pointing to classic)
-  static const Color background = Color(0xFF121212);
-  static const Color surface = Color(0xFF1E1E1E);
-  static const Color surfaceLight = Color(0xFF2C2C2C);
-  static const Color primary = Color(0xFFE5A043);
-  static const Color primaryDim = Color(0xFF8F632A);
-  static const Color activeGlow = Color(0x66E5A043);
+  static const Color background = Color(0xFF7E1E3F);
+  static const Color surface = Color(0xFF4A0E26);
+  static const Color surfaceLight = Color(0xFF5E1331);
+  static const Color primary = Color(0xFFFFD700);
+  static const Color primaryDim = Color(0xFFB8860B);
+  static const Color activeGlow = Color(0x66FFD700);
   static const Color danger = Color(0xFFCF6679);
   static const Color success = Color(0xFF4CAF50);
-  static const Color textPrimary = Color(0xFFEEEEEE);
-  static const Color textSecondary = Color(0xFFAAAAAA);
-  static const Color textTertiary = Color(0xFF666666);
-  static const Color cardBack = Color(0xFF2A2A2A);
-  static const Color divider = Color(0xFF333333);
+  static const Color textPrimary = Color(0xFFFFFFFF);
+  static const Color textSecondary = Color(0xFFFFD700);
+  static const Color textTertiary = Color(0xFFE0E0E0);
+  static const Color cardBack = Color(0xFF4A0E26);
+  static const Color divider = Color(0xFF5E1331);
 }

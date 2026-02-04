@@ -83,6 +83,9 @@ class ServiceLocator {
     audioService = AudioServiceImpl();
     await audioService.initialize();
 
+    // Initialize Client Render Service for video generation
+    clientRenderService = ClientRenderService();
+
     // Initialize Blocs (depend on services/repositories)
     notificationBloc = AppNotificationBloc();
     invitationBloc = InvitationBloc(

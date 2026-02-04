@@ -24,7 +24,7 @@ class AppTheme {
 
       textTheme: TextTheme(
         headlineLarge: TextStyle(
-          color: palette.textPrimary,
+          color: palette.primary,
           fontSize: 32,
           fontWeight: FontWeight.bold,
           letterSpacing: -1.0,

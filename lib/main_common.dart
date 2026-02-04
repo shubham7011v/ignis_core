@@ -290,6 +290,7 @@ class IgnisApp extends StatelessWidget {
           create: (context) => ProfileBloc(repository: di.sl.profileRepository),
         ),
         */
+        BlocProvider(create: (_) => di.sl.notificationBloc),
         BlocProvider(create: (_) => ThemeBloc()..add(ThemeLoadRequested())),
         BlocProvider(create: (_) => di.sl.billingBloc..add(BillingStarted())),
       ],
