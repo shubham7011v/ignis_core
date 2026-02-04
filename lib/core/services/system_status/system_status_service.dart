@@ -29,7 +29,6 @@ class SystemStatusService {
 
   void _init() {
     _authSub = _authBloc.stream.listen((_) => _updateStatus());
-    _authSub = _authBloc.stream.listen((_) => _updateStatus());
 
     // Start dynamic ping loop
     _scheduleNextPing();

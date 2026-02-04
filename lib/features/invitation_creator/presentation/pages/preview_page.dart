@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/colors.dart';
@@ -233,6 +234,18 @@ class _PreviewPageState extends State<PreviewPage> {
                 child: OutlinedButton.icon(
                   onPressed: () async {
                     if (state.renderOutputPath != null) {
+                      final file = File(state.renderOutputPath!);
+                      if (!await file.exists()) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Rendered file not found.'),
+                            ),
+                          );
+                        }
+                        return;
+                      }
+
                       final result = await OpenFilex.open(
                         state.renderOutputPath!,
                       );
@@ -262,9 +275,20 @@ class _PreviewPageState extends State<PreviewPage> {
                 child: ElevatedButton.icon(
                   onPressed: () async {
                     if (state.renderOutputPath != null) {
-                      final file = XFile(state.renderOutputPath!);
+                      final file = File(state.renderOutputPath!);
+                      if (!await file.exists()) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Rendered file not found.'),
+                            ),
+                          );
+                        }
+                        return;
+                      }
+
                       await Share.shareXFiles(
-                        [file],
+                        [XFile(state.renderOutputPath!)],
                         text:
                             'You are cordially invited to our wedding celebration! 💍✨',
                       );

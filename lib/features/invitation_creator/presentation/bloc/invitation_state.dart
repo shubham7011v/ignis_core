@@ -37,25 +37,31 @@ class InvitationState extends Equatable {
     errorMessage,
   ];
 
+  static const _null = Object();
+
   InvitationState copyWith({
     InvitationStatus? status,
     List<InvitationStyle>? availableStyles,
     InvitationStyle? selectedStyle,
     WeddingDetails? details,
-    String? jobId,
+    Object? jobId = _null,
     double? renderProgress,
-    String? renderOutputPath,
-    String? errorMessage,
+    Object? renderOutputPath = _null,
+    Object? errorMessage = _null,
   }) {
     return InvitationState(
       status: status ?? this.status,
       availableStyles: availableStyles ?? this.availableStyles,
       selectedStyle: selectedStyle ?? this.selectedStyle,
       details: details ?? this.details,
-      jobId: jobId ?? this.jobId,
+      jobId: jobId == _null ? this.jobId : jobId as String?,
       renderProgress: renderProgress ?? this.renderProgress,
-      renderOutputPath: renderOutputPath ?? this.renderOutputPath,
-      errorMessage: errorMessage ?? this.errorMessage,
+      renderOutputPath: renderOutputPath == _null
+          ? this.renderOutputPath
+          : renderOutputPath as String?,
+      errorMessage: errorMessage == _null
+          ? this.errorMessage
+          : errorMessage as String?,
     );
   }
 

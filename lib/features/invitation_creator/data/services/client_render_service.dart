@@ -30,29 +30,37 @@ class ClientRenderService {
   Future<RenderResult> renderInvitation({
     required File templateFile,
     required WeddingDetails details,
+    Duration? totalDuration,
     void Function(double progress)? onProgress,
   }) async {
+    // 1. Validation
+    if (!await templateFile.exists()) {
+      return RenderResult.failure(
+        'Template file not found at ${templateFile.path}',
+      );
+    }
+
     final outputDir = await getApplicationDocumentsDirectory();
+    final rendersDir = Directory('${outputDir.path}/renders');
+    if (!await rendersDir.exists()) {
+      await rendersDir.create(recursive: true);
+    }
+
     final outputPath =
-        '${outputDir.path}/renders/invitation_${DateTime.now().millisecondsSinceEpoch}.mp4';
+        '${rendersDir.path}/invitation_${DateTime.now().millisecondsSinceEpoch}.mp4';
 
-    // Ensure output directory exists
-    await Directory('${outputDir.path}/renders').create(recursive: true);
-
-    // Build FFmpeg Filter Complex
-    // Note: This is an initial simple implementation.
-    // In a production app, these coordinates would come from a template config JSON.
+    // 2. Build FFmpeg Filter Complex
     final filterComplex = _buildFilterComplex(details);
 
     final ffmpegCommand = [
       '-i',
-      templateFile.path,
+      "'${templateFile.path}'",
       '-vf',
-      filterComplex,
+      "\"$filterComplex\"",
       '-c:a',
       'copy',
       '-y',
-      outputPath,
+      "'$outputPath'",
     ].join(' ');
 
     try {
@@ -72,11 +80,14 @@ class ClientRenderService {
           // Log output
         },
         (statistics) {
-          if (onProgress != null) {
-            // Estimate progress based on duration
-            // This requires knowing the template duration beforehand
-            // For now, we'll just provide a simulation or basic stat-based progress
-            // In the real implementation, we'd use (statistics.getTime() / totalDuration)
+          if (onProgress != null && totalDuration != null) {
+            final totalMs = totalDuration.inMilliseconds;
+            if (totalMs > 0) {
+              final currentMs = statistics.getTime();
+              if (currentMs > 0) {
+                onProgress((currentMs / totalMs).clamp(0.0, 1.0));
+              }
+            }
           }
         },
       );

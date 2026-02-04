@@ -176,74 +176,107 @@ class _TemplateCardState extends State<TemplateCard> {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
             children: [
-              // Thumbnail
-              Stack(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  AspectRatio(
-                    aspectRatio: 16 / 9,
-                    child: Image.network(
-                      widget.template.thumbnailUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        color: Colors.black26,
-                        child: const Icon(
-                          Icons.video_library,
-                          color: Colors.white24,
+                  // Thumbnail
+                  Stack(
+                    children: [
+                      AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: Image.network(
+                          widget.template.thumbnailUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                                color: Colors.black26,
+                                child: const Icon(
+                                  Icons.video_library,
+                                  color: Colors.white24,
+                                ),
+                              ),
                         ),
                       ),
-                    ),
-                  ),
-                  _buildDownloadIndicator(),
-                  if (widget.template.isPremium)
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
+                      _buildDownloadIndicator(),
+                      if (widget.template.isPremium)
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: IgnisTheme.goldAccent,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'PREMIUM',
+                              style: GoogleFonts.inter(
+                                color: Colors.black,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ),
-                        decoration: BoxDecoration(
-                          color: IgnisTheme.goldAccent,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          'PREMIUM',
-                          style: GoogleFonts.inter(
-                            color: Colors.black,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                      Positioned(
+                        bottom: 8,
+                        right: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.7),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            widget.template.duration,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  Positioned(
-                    bottom: 8,
-                    right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.7),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        widget.template.duration,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
+                    ],
+                  ),
+
+                  // Details
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.template.title,
+                          style: GoogleFonts.cinzel(
+                            color: IgnisTheme.goldAccent,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
+                        const SizedBox(height: 4),
+                        Text(
+                          widget.template.category,
+                          style: GoogleFonts.inter(
+                            color: Colors.white60,
+                            fontSize: 12,
+                            letterSpacing: 1.1,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-
               // Lock Overlay
               if (widget.isLocked)
                 Positioned.fill(
@@ -272,35 +305,6 @@ class _TemplateCardState extends State<TemplateCard> {
                     ),
                   ),
                 ),
-
-              // Details
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.template.title,
-                      style: GoogleFonts.cinzel(
-                        color: IgnisTheme.goldAccent,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.template.category,
-                      style: GoogleFonts.inter(
-                        color: Colors.white60,
-                        fontSize: 12,
-                        letterSpacing: 1.1,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
         ),

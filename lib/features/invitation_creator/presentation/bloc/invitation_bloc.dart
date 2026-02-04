@@ -92,6 +92,7 @@ class InvitationBloc extends Bloc<InvitationEvent, InvitationState> {
       final renderResult = await _renderService.renderInvitation(
         templateFile: templateFile,
         details: state.details,
+        totalDuration: _parseDuration(template.duration),
         onProgress: (progress) {
           emit(state.copyWith(renderProgress: 0.3 + (progress * 0.7)));
         },
@@ -136,9 +137,23 @@ class InvitationBloc extends Bloc<InvitationEvent, InvitationState> {
     emit(state.copyWith(selectedStyle: style));
   }
 
+  Duration _parseDuration(String durationStr) {
+    try {
+      final parts = durationStr.split(':');
+      if (parts.length == 2) {
+        final minutes = int.parse(parts[0]);
+        final seconds = int.parse(parts[1]);
+        return Duration(minutes: minutes, seconds: seconds);
+      }
+    } catch (_) {}
+    return const Duration(seconds: 30); // Default
+  }
+
   String _extractYoutubeId(String url) {
     if (url.contains('v=')) {
       return url.split('v=')[1].split('&')[0];
+    } else if (url.contains('youtu.be/')) {
+      return url.split('youtu.be/')[1].split('?')[0];
     }
     return 'dQw4w9WgXcQ'; // Fallback
   }

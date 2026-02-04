@@ -9,6 +9,7 @@ class BillingRepositoryImpl implements BillingRepository {
   final _purchaseController = StreamController<bool>.broadcast();
   final String _premiumProductKey = 'premium_templates_pack';
   final String _premiumPrefKey = 'is_premium_user';
+  StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
 
   @override
   Stream<bool> get isPremiumStream => _purchaseController.stream;
@@ -25,7 +26,7 @@ class BillingRepositoryImpl implements BillingRepository {
       return;
     }
 
-    _iap.purchaseStream.listen(
+    _purchaseSubscription = _iap.purchaseStream.listen(
       _onPurchaseUpdates,
       onDone: () => _purchaseController.close(),
       onError: (e) => AppLogger.error('Billing Stream Error: $e'),
@@ -89,5 +90,10 @@ class BillingRepositoryImpl implements BillingRepository {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_premiumPrefKey, true);
     _purchaseController.add(true);
+  }
+
+  void dispose() {
+    _purchaseSubscription?.cancel();
+    _purchaseController.close();
   }
 }
