@@ -28,9 +28,13 @@ class DetailsUpdated extends InvitationEvent {
   List<Object?> get props => [details];
 }
 
-class GenerateVideoRequested extends InvitationEvent {}
+class PlaceOrderRequested extends InvitationEvent {
+  final String userId;
+  const PlaceOrderRequested(this.userId);
 
-class GenerationStatusChecked extends InvitationEvent {}
+  @override
+  List<Object?> get props => [userId];
+}
 
 class TemplateSelected extends InvitationEvent {
   final Template template;

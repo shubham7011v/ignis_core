@@ -3,9 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/ignis_theme.dart';
 import '../bloc/creations_bloc.dart';
-import '../bloc/creations_event.dart';
 import '../bloc/creations_state.dart';
-import '../widgets/creation_card.dart';
+import '../widgets/order_card.dart';
 
 class CreationsGalleryScreen extends StatelessWidget {
   const CreationsGalleryScreen({super.key});
@@ -18,7 +17,7 @@ class CreationsGalleryScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
-          'MY INVITATIONS',
+          'MY ORDERS',
           style: GoogleFonts.cinzel(
             color: IgnisTheme.goldAccent,
             fontWeight: FontWeight.bold,
@@ -34,7 +33,7 @@ class CreationsGalleryScreen extends StatelessWidget {
               child: CircularProgressIndicator(color: IgnisTheme.goldAccent),
             );
           } else if (state is CreationsLoaded) {
-            if (state.creations.isEmpty) {
+            if (state.orders.isEmpty) {
               return _buildEmptyState();
             }
             return GridView.builder(
@@ -45,21 +44,17 @@ class CreationsGalleryScreen extends StatelessWidget {
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
               ),
-              itemCount: state.creations.length,
+              itemCount: state.orders.length,
               itemBuilder: (context, index) {
-                final creation = state.creations[index];
-                return CreationCard(
-                  creation: creation,
+                final order = state.orders[index];
+                return OrderCard(
+                  order: order,
                   onTap: () {
-                    // Navigate to video preview
+                    // Navigate to details or play video if delivered
                   },
                   onDelete: () {
-                    context.read<CreationsBloc>().add(
-                      DeleteCreationEvent(creation.id),
-                    );
-                  },
-                  onRSVP: () {
-                    // Navigate to RSVP tracking for this specific invite
+                    // Optional: Allow hiding/deleting orders
+                    // context.read<CreationsBloc>().add(DeleteOrderEvent(order.id));
                   },
                 );
               },

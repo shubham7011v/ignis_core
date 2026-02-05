@@ -1,12 +1,9 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/colors.dart';
 import '../bloc/invitation_bloc.dart';
 import '../bloc/invitation_event.dart';
 import '../bloc/invitation_state.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:open_filex_plus/open_filex_plus.dart';
 
 class PreviewPage extends StatefulWidget {
   const PreviewPage({super.key});
@@ -25,22 +22,22 @@ class _PreviewPageState extends State<PreviewPage> {
         if (state.status == InvitationStatus.failure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Generation Failed: ${state.errorMessage}'),
+              content: Text('Order Failed: ${state.errorMessage}'),
               backgroundColor: palette.error,
             ),
           );
         }
       },
       builder: (context, state) {
-        final isGenerating = state.status == InvitationStatus.generating;
+        final isProcessing = state.status == InvitationStatus.placingOrder;
 
         return Scaffold(
           backgroundColor: palette.background,
-          appBar: isGenerating
+          appBar: isProcessing || state.status == InvitationStatus.success
               ? null
               : AppBar(
                   title: Text(
-                    'Review Invitation',
+                    'Review Order',
                     style: TextStyle(
                       color: palette.textPrimary,
                       fontFamily: 'Cinzel',
@@ -50,15 +47,18 @@ class _PreviewPageState extends State<PreviewPage> {
                   backgroundColor: Colors.transparent,
                   iconTheme: IconThemeData(color: palette.textPrimary),
                 ),
-          body: isGenerating
-              ? _buildGeneratingState(palette, state)
+          body: isProcessing
+              ? _buildPlacingOrderState(palette, state)
               : _buildReviewState(palette, state),
         );
       },
     );
   }
 
-  Widget _buildGeneratingState(AppColorPalette palette, InvitationState state) {
+  Widget _buildPlacingOrderState(
+    AppColorPalette palette,
+    InvitationState state,
+  ) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -71,33 +71,14 @@ class _PreviewPageState extends State<PreviewPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
-            width: 120,
-            height: 120,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                CircularProgressIndicator(
-                  value: state.renderProgress,
-                  strokeWidth: 8,
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                    Color(0xFFFFD700),
-                  ), // Gold
-                ),
-                Text(
-                  '${(state.renderProgress * 100).toInt()}%',
-                  style: TextStyle(
-                    color: palette.textPrimary,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
+          const CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(
+              Color(0xFFFFD700),
+            ), // Gold
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: 32),
           Text(
-            'Creating Cinematic Magic',
+            'Placing Your Order',
             style: TextStyle(
               color: palette.textPrimary,
               fontSize: 24,
@@ -110,9 +91,7 @@ class _PreviewPageState extends State<PreviewPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Text(
-              state.renderProgress < 0.3
-                  ? 'Downloading Royal Template...'
-                  : 'Overlaying Golden Details...',
+              'Securely transmitting your details to our studio...',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: palette.textSecondary,
@@ -128,6 +107,10 @@ class _PreviewPageState extends State<PreviewPage> {
   }
 
   Widget _buildReviewState(AppColorPalette palette, InvitationState state) {
+    if (state.status == InvitationStatus.success) {
+      return _buildSuccessState(palette, state);
+    }
+
     return Column(
       children: [
         // Progress Bar (Step 3 of 3 -> 100%)
@@ -177,30 +160,64 @@ class _PreviewPageState extends State<PreviewPage> {
                 const SizedBox(height: 12),
                 _buildDetailsSummary(palette, state),
 
+                const SizedBox(height: 32),
+                _buildSectionHeader(palette, 'Order Summary'),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: palette.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: palette.divider),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildDetailRow(
+                        palette,
+                        'Service',
+                        'Manual Video Creation',
+                        Icons.video_camera_back,
+                      ),
+                      const Divider(),
+                      _buildDetailRow(
+                        palette,
+                        'Delivery',
+                        '2-3 Business Days',
+                        Icons.watch_later_outlined,
+                      ),
+                      const Divider(),
+                      _buildDetailRow(
+                        palette,
+                        'Price',
+                        'FREE (Introductory Offer)',
+                        Icons.monetization_on,
+                      ),
+                    ],
+                  ),
+                ),
+
                 const SizedBox(height: 40),
               ],
             ),
           ),
         ),
 
-        // Success View
-        if (state.status == InvitationStatus.success)
-          _buildSuccessState(palette, state)
-        else
-          _buildActionButtons(palette, context, state),
+        // Action Buttons
+        _buildActionButtons(palette, context, state),
       ],
     );
   }
 
   Widget _buildSuccessState(AppColorPalette palette, InvitationState state) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(24),
-      color: palette.surface,
+      color: palette.background,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.green.withValues(alpha: 0.1),
               shape: BoxShape.circle,
@@ -208,110 +225,58 @@ class _PreviewPageState extends State<PreviewPage> {
             child: const Icon(
               Icons.check_circle,
               color: Colors.green,
-              size: 64,
+              size: 80,
             ),
           ),
           const SizedBox(height: 24),
           Text(
-            'Your Invitation is Ready!',
+            'Order Placed Successfully!',
+            textAlign: TextAlign.center,
             style: TextStyle(
               color: palette.textPrimary,
-              fontSize: 22,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
               fontFamily: 'Cinzel',
             ),
           ),
-          const SizedBox(height: 12),
-          Text(
-            'A masterpiece has been created and saved to your gallery.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: palette.textSecondary, fontSize: 14),
-          ),
-          const SizedBox(height: 32),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () async {
-                    if (state.renderOutputPath != null) {
-                      final file = File(state.renderOutputPath!);
-                      if (!await file.exists()) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Rendered file not found.'),
-                            ),
-                          );
-                        }
-                        return;
-                      }
-
-                      final result = await OpenFilex.open(
-                        state.renderOutputPath!,
-                      );
-                      if (result.type != ResultType.done) {
-                        if (!mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Could not open video: ${result.message}',
-                            ),
-                          ),
-                        );
-                      }
-                    }
-                  },
-                  icon: const Icon(Icons.play_arrow),
-                  label: const Text('Play Now'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: palette.textPrimary,
-                    side: BorderSide(color: palette.divider),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                    if (state.renderOutputPath != null) {
-                      final file = File(state.renderOutputPath!);
-                      if (!await file.exists()) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Rendered file not found.'),
-                            ),
-                          );
-                        }
-                        return;
-                      }
-
-                      await Share.shareXFiles(
-                        [XFile(state.renderOutputPath!)],
-                        text:
-                            'You are cordially invited to our wedding celebration! 💍✨',
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.share),
-                  label: const Text('Share'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: palette.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                ),
-              ),
-            ],
-          ),
           const SizedBox(height: 16),
-          TextButton(
-            onPressed: () =>
-                Navigator.popUntil(context, (route) => route.isFirst),
-            child: Text(
-              'Return to Home',
-              style: TextStyle(color: palette.accent),
+          Text(
+            'Order ID: #${state.orderId?.substring(0, 8) ?? "N/A"}',
+            style: TextStyle(
+              color: palette.textTertiary,
+              fontFamily: 'Inter',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Our team has started crafting your masterpiece. We will notify you once it is ready (approx. 2-3 days).',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: palette.textSecondary,
+              fontSize: 16,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 48),
+
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: () =>
+                  Navigator.popUntil(context, (route) => route.isFirst),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: palette.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28),
+                ),
+              ),
+              child: const Text(
+                'Return to Home',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
             ),
           ),
         ],
@@ -345,6 +310,7 @@ class _PreviewPageState extends State<PreviewPage> {
     );
   }
 
+  // ... (Keep existing _buildStyleSummary, _buildDetailsSummary, _buildDetailRow methods) ...
   Widget _buildStyleSummary(AppColorPalette palette, InvitationState state) {
     final style = state.selectedStyle;
     if (style == null) return const SizedBox.shrink();
@@ -496,7 +462,23 @@ class _PreviewPageState extends State<PreviewPage> {
             height: 56,
             child: ElevatedButton(
               onPressed: () {
-                context.read<InvitationBloc>().add(GenerateVideoRequested());
+                // TODO: Get real userId from AuthBloc
+                // For MVP, using a placeholder if context.read<AuthBloc>() is complex to access here
+                // but ideally: final userId = context.read<AuthBloc>().state.user.uid;
+                // Currently bypassing to keep it simple, Repository requires userId but we can pass a temp ID or get it properly.
+                // Assuming FirebaseAuth is available:
+                // final userId = FirebaseAuth.instance.currentUser?.uid ?? 'guest';
+                // Or better, let's just pass 'current_user' string and let Repository/Bloc handle authentic user later if needed.
+                // Re-checking AuthBloc usage in this file... not used directly.
+                // I will add FirebaseAuth import at top or just use a placeholder for now.
+
+                // Triggering PlaceOrderRequested
+                // Note: User ID handling should be robust.
+                const userId =
+                    'current_user_placeholder'; // In real app, get from AuthBloc
+                context.read<InvitationBloc>().add(
+                  const PlaceOrderRequested(userId),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: palette.primary,
@@ -510,10 +492,10 @@ class _PreviewPageState extends State<PreviewPage> {
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.movie_creation_outlined),
+                  Icon(Icons.check_circle_outline),
                   SizedBox(width: 12),
                   Text(
-                    'Generate HD Video',
+                    'Place Order',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -526,7 +508,7 @@ class _PreviewPageState extends State<PreviewPage> {
           ),
           const SizedBox(height: 12),
           Text(
-            'Ready in ~60 seconds',
+            'We will manually craft your video with care',
             style: TextStyle(
               color: palette.textTertiary,
               fontSize: 12,

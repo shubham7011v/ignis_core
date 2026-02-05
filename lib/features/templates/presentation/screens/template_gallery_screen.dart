@@ -31,6 +31,15 @@ class TemplateGalleryScreen extends StatelessWidget {
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history, color: IgnisTheme.goldAccent),
+            tooltip: 'My Orders',
+            onPressed: () {
+              Navigator.pushNamed(context, '/creations');
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [

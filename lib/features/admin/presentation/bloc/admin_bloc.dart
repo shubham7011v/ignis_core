@@ -1,6 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/admin_repository.dart';
+import '../../../orders/domain/entities/order.dart';
+import '../../../orders/domain/repositories/order_repository.dart';
+import '../../../orders/domain/entities/order_status.dart';
 
 // --- Events ---
 abstract class AdminEvent extends Equatable {
@@ -27,6 +30,17 @@ class BanUserEvent extends AdminEvent {
   BanUserEvent(this.userId);
 }
 
+class UpdateOrderStatusEvent extends AdminEvent {
+  final String orderId;
+  final OrderStatus status;
+  final String? videoUrl;
+
+  UpdateOrderStatusEvent(this.orderId, this.status, {this.videoUrl});
+
+  @override
+  List<Object?> get props => [orderId, status, videoUrl];
+}
+
 class AdminLogout extends AdminEvent {}
 
 // --- States ---
@@ -42,11 +56,16 @@ class AdminLoading extends AdminState {}
 class AdminAuthenticated extends AdminState {
   final Map<String, dynamic> stats;
   final List<dynamic> rooms;
+  final List<Order> orders;
 
-  AdminAuthenticated({required this.stats, required this.rooms});
+  AdminAuthenticated({
+    required this.stats,
+    required this.rooms,
+    required this.orders,
+  });
 
   @override
-  List<Object?> get props => [stats, rooms];
+  List<Object?> get props => [stats, rooms, orders];
 }
 
 class AdminError extends AdminState {
@@ -60,36 +79,36 @@ class AdminError extends AdminState {
 // --- Bloc ---
 class AdminBloc extends Bloc<AdminEvent, AdminState> {
   final AdminRepository repository;
+  final OrderRepository orderRepository;
 
-  AdminBloc(this.repository) : super(AdminInitial()) {
+  AdminBloc({required this.repository, required this.orderRepository})
+    : super(AdminInitial()) {
     on<AdminLogin>(_onLogin);
     on<LoadAdminData>(_onLoadData);
     on<CloseRoomEvent>(_onCloseRoom);
     on<BroadcastMessageEvent>(_onBroadcast);
     on<BanUserEvent>(_onBanUser);
+    on<UpdateOrderStatusEvent>(_onUpdateOrderStatus);
     on<AdminLogout>((_, emit) {
       emit(AdminInitial());
     });
   }
 
   Future<void> _onLogin(AdminLogin event, Emitter<AdminState> emit) async {
-    // The event.key is no longer needed since we use Firebase token
-    // We can just proceed to try fetching data
     emit(AdminLoading());
     try {
       final results = await Future.wait([
         repository.getStats(),
         repository.getRooms(),
+        orderRepository.getAllOrders(),
       ]);
       final stats = results[0] as Map<String, dynamic>;
       final rooms = results[1] as List<dynamic>;
-      emit(AdminAuthenticated(stats: stats, rooms: rooms));
+      final orders = results[2] as List<Order>;
+
+      emit(AdminAuthenticated(stats: stats, rooms: rooms, orders: orders));
     } catch (e) {
-      emit(
-        AdminError(
-          "Authorization Failed: Ensure your UID is an admin. Error: $e",
-        ),
-      );
+      emit(AdminError("Authorization Failed. Error: $e"));
     }
   }
 
@@ -102,12 +121,31 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
       final results = await Future.wait([
         repository.getStats(),
         repository.getRooms(),
+        orderRepository.getAllOrders(),
       ]);
       final stats = results[0] as Map<String, dynamic>;
       final rooms = results[1] as List<dynamic>;
-      emit(AdminAuthenticated(stats: stats, rooms: rooms));
+      final orders = results[2] as List<Order>;
+
+      emit(AdminAuthenticated(stats: stats, rooms: rooms, orders: orders));
     } catch (e) {
       emit(AdminError("Failed to refresh data: $e"));
+    }
+  }
+
+  Future<void> _onUpdateOrderStatus(
+    UpdateOrderStatusEvent event,
+    Emitter<AdminState> emit,
+  ) async {
+    try {
+      await orderRepository.updateOrderStatus(
+        event.orderId,
+        event.status,
+        videoUrl: event.videoUrl,
+      );
+      add(LoadAdminData()); // Refresh list
+    } catch (e) {
+      emit(AdminError("Failed to update status: $e"));
     }
   }
 

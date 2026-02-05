@@ -3,27 +3,24 @@ import '../../domain/repositories/invitation_repository.dart';
 import '../../domain/entities/invitation_style.dart';
 import 'invitation_event.dart';
 import 'invitation_state.dart';
-import '../../data/services/client_render_service.dart';
-import '../../../templates/data/services/template_download_service.dart';
-import '../../../templates/domain/models/template.dart';
+import '../../../orders/domain/repositories/order_repository.dart';
+import '../../../orders/domain/entities/order.dart';
+import '../../../orders/domain/entities/payment_info.dart';
 
 class InvitationBloc extends Bloc<InvitationEvent, InvitationState> {
   final InvitationRepository _repository;
-  final ClientRenderService _renderService;
-  final TemplateDownloadService _downloadService;
+  final OrderRepository _orderRepository;
 
   InvitationBloc({
     required InvitationRepository repository,
-    required ClientRenderService renderService,
-    required TemplateDownloadService downloadService,
+    required OrderRepository orderRepository,
   }) : _repository = repository,
-       _renderService = renderService,
-       _downloadService = downloadService,
+       _orderRepository = orderRepository,
        super(InvitationState.initial()) {
     on<InvitationStarted>(_onStarted);
     on<StyleSelected>(_onStyleSelected);
     on<DetailsUpdated>(_onDetailsUpdated);
-    on<GenerateVideoRequested>(_onGenerateVideoRequested);
+    on<PlaceOrderRequested>(_onPlaceOrderRequested);
     on<TemplateSelected>(_onTemplateSelected);
   }
 
@@ -58,61 +55,39 @@ class InvitationBloc extends Bloc<InvitationEvent, InvitationState> {
     emit(state.copyWith(details: event.details));
   }
 
-  Future<void> _onGenerateVideoRequested(
-    GenerateVideoRequested event,
+  Future<void> _onPlaceOrderRequested(
+    PlaceOrderRequested event,
     Emitter<InvitationState> emit,
   ) async {
     if (state.selectedStyle == null) return;
 
-    emit(
-      state.copyWith(status: InvitationStatus.generating, renderProgress: 0.0),
-    );
+    emit(state.copyWith(status: InvitationStatus.placingOrder));
 
     try {
-      // 1. Get/Download Template
-      final template = Template(
-        id: state.selectedStyle!.id,
-        title: state.selectedStyle!.name,
-        description: '',
-        thumbnailUrl: state.selectedStyle!.thumbnailUrl,
-        videoUrl: state.selectedStyle!.videoTemplateId,
-        category: state.selectedStyle!.categories.first,
-        duration: '0:30',
-        youtubeId: _extractYoutubeId(state.selectedStyle!.videoTemplateId),
-      );
-
-      final templateFile = await _downloadService.downloadTemplateWithProgress(
-        template,
-        (progress) {
-          emit(state.copyWith(renderProgress: progress * 0.3));
-        },
-      );
-
-      // 2. Render locally
-      final renderResult = await _renderService.renderInvitation(
-        templateFile: templateFile,
+      final order = Order(
+        id: '', // Repository will generate ID
+        userId: event.userId,
+        styleId: state.selectedStyle!.id,
         details: state.details,
-        totalDuration: _parseDuration(template.duration),
-        onProgress: (progress) {
-          emit(state.copyWith(renderProgress: 0.3 + (progress * 0.7)));
-        },
+        createdAt: DateTime.now(),
+        // Payment info would ideally come from valid transaction
+        paymentInfo: PaymentInfo(
+          transactionId: 'manual_pending', // Placeholder until payment flow
+          amount: 0.0,
+          currency: 'INR',
+          paidAt: DateTime.now(),
+          status: 'pending',
+        ),
       );
 
-      if (renderResult.status == RenderStatus.success) {
-        emit(
-          state.copyWith(
-            status: InvitationStatus.success,
-            renderOutputPath: renderResult.outputPath,
-          ),
-        );
-      } else {
-        emit(
-          state.copyWith(
-            status: InvitationStatus.failure,
-            errorMessage: renderResult.errorMessage,
-          ),
-        );
-      }
+      final createdOrder = await _orderRepository.createOrder(order);
+
+      emit(
+        state.copyWith(
+          status: InvitationStatus.success,
+          orderId: createdOrder.id,
+        ),
+      );
     } catch (e) {
       emit(
         state.copyWith(
@@ -135,26 +110,5 @@ class InvitationBloc extends Bloc<InvitationEvent, InvitationState> {
       categories: [event.template.category],
     );
     emit(state.copyWith(selectedStyle: style));
-  }
-
-  Duration _parseDuration(String durationStr) {
-    try {
-      final parts = durationStr.split(':');
-      if (parts.length == 2) {
-        final minutes = int.parse(parts[0]);
-        final seconds = int.parse(parts[1]);
-        return Duration(minutes: minutes, seconds: seconds);
-      }
-    } catch (_) {}
-    return const Duration(seconds: 30); // Default
-  }
-
-  String _extractYoutubeId(String url) {
-    if (url.contains('v=')) {
-      return url.split('v=')[1].split('&')[0];
-    } else if (url.contains('youtu.be/')) {
-      return url.split('youtu.be/')[1].split('?')[0];
-    }
-    return 'dQw4w9WgXcQ'; // Fallback
   }
 }

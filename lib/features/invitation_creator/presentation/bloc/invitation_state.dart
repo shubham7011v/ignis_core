@@ -2,16 +2,14 @@ import 'package:equatable/equatable.dart';
 import '../../domain/entities/invitation_style.dart';
 import '../../domain/entities/wedding_details.dart';
 
-enum InvitationStatus { initial, loading, generating, success, failure }
+enum InvitationStatus { initial, loading, placingOrder, success, failure }
 
 class InvitationState extends Equatable {
   final InvitationStatus status;
   final List<InvitationStyle> availableStyles;
   final InvitationStyle? selectedStyle;
   final WeddingDetails details;
-  final String? jobId;
-  final double renderProgress;
-  final String? renderOutputPath;
+  final String? orderId;
   final String? errorMessage;
 
   const InvitationState({
@@ -19,9 +17,7 @@ class InvitationState extends Equatable {
     this.availableStyles = const [],
     this.selectedStyle,
     required this.details,
-    this.jobId,
-    this.renderProgress = 0.0,
-    this.renderOutputPath,
+    this.orderId,
     this.errorMessage,
   });
 
@@ -31,9 +27,7 @@ class InvitationState extends Equatable {
     availableStyles,
     selectedStyle,
     details,
-    jobId,
-    renderProgress,
-    renderOutputPath,
+    orderId,
     errorMessage,
   ];
 
@@ -44,9 +38,7 @@ class InvitationState extends Equatable {
     List<InvitationStyle>? availableStyles,
     InvitationStyle? selectedStyle,
     WeddingDetails? details,
-    Object? jobId = _null,
-    double? renderProgress,
-    Object? renderOutputPath = _null,
+    Object? orderId = _null,
     Object? errorMessage = _null,
   }) {
     return InvitationState(
@@ -54,11 +46,7 @@ class InvitationState extends Equatable {
       availableStyles: availableStyles ?? this.availableStyles,
       selectedStyle: selectedStyle ?? this.selectedStyle,
       details: details ?? this.details,
-      jobId: jobId == _null ? this.jobId : jobId as String?,
-      renderProgress: renderProgress ?? this.renderProgress,
-      renderOutputPath: renderOutputPath == _null
-          ? this.renderOutputPath
-          : renderOutputPath as String?,
+      orderId: orderId == _null ? this.orderId : orderId as String?,
       errorMessage: errorMessage == _null
           ? this.errorMessage
           : errorMessage as String?,

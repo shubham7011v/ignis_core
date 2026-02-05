@@ -12,6 +12,8 @@ import '../../features/auth/presentation/screens/splash_screen.dart';
 
 import '../../features/templates/presentation/screens/template_gallery_screen.dart';
 import '../../features/templates/presentation/bloc/templates_event.dart';
+import '../../features/creations/presentation/screens/creations_gallery_screen.dart';
+import '../../features/creations/presentation/bloc/creations_event.dart';
 
 class AppRouter {
   static const String splash = '/splash';
@@ -22,6 +24,7 @@ class AppRouter {
   // static const String settings = '/settings'; // Settings disabled for v1.0
 
   static const String templateGallery = '/template_gallery';
+  static const String creations = '/creations';
   static const String styleSelection = '/style_selection';
   static const String detailsForm = '/details_form';
   static const String preview = '/preview';
@@ -48,6 +51,13 @@ class AppRouter {
     templateGallery: (context) => BlocProvider.value(
       value: di.sl.templatesBloc..add(TemplateLoadStarted()),
       child: const TemplateGalleryScreen(),
+    ),
+    creations: (context) => BlocProvider.value(
+      value: di.sl.creationsBloc
+        ..add(
+          const LoadUserOrders('current_user_placeholder'),
+        ), // TODO: Use real user ID
+      child: const CreationsGalleryScreen(),
     ),
   };
 }

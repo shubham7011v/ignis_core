@@ -8,7 +8,7 @@ import '../../features/profile/profile.dart';
 import '../../features/invitation_creator/domain/repositories/invitation_repository.dart';
 import '../../features/invitation_creator/data/repositories/invitation_repository_impl.dart';
 import '../../features/invitation_creator/presentation/bloc/invitation_bloc.dart';
-import '../../features/invitation_creator/data/services/client_render_service.dart';
+import '../../features/creations/presentation/bloc/creations_bloc.dart';
 import '../../features/admin/data/admin_repository.dart';
 import '../../features/templates/presentation/bloc/templates_bloc.dart';
 import '../../features/templates/domain/repositories/templates_repository.dart';
@@ -18,6 +18,9 @@ import '../../features/templates/data/services/template_download_service.dart';
 import '../../features/billing/domain/repositories/billing_repository.dart';
 import '../../features/billing/data/repositories/billing_repository_impl.dart';
 import '../../features/billing/presentation/bloc/billing_bloc.dart';
+// Orders
+import '../../features/orders/domain/repositories/order_repository.dart';
+import '../../features/orders/data/repositories/firestore_order_repository.dart';
 
 class ServiceLocator {
   static final ServiceLocator _instance = ServiceLocator._internal();
@@ -38,16 +41,15 @@ class ServiceLocator {
   late final TemplatesRepository templatesRepository;
   late final TemplateDownloadService templateDownloadService;
   late final BillingRepository billingRepository;
-
-  // Session Handling (Removed WebSocket Engine)
+  late final OrderRepository orderRepository;
 
   late final GreetingService greetingService;
   late final SystemStatusService systemStatusService;
   late final AudioService audioService;
   late final AppNotificationBloc notificationBloc;
   late final InvitationBloc invitationBloc;
+  late final CreationsBloc creationsBloc;
   late final TemplatesBloc templatesBloc;
-  late final ClientRenderService clientRenderService;
   late final BillingBloc billingBloc;
 
   // WebSocket handler removed
@@ -73,7 +75,9 @@ class ServiceLocator {
     templatesRepository = TemplatesRepositoryImpl();
     templateDownloadService = TemplateDownloadService();
     // Billing
-    billingRepository = BillingRepositoryImpl();
+    billingRepository = BillingRepositoryImpl(); // Fixed import path if needed
+    // Orders
+    orderRepository = FirestoreOrderRepository();
 
     // YouTube & Notifications
     youtubeRepository = YouTubeServiceImpl();
@@ -83,18 +87,17 @@ class ServiceLocator {
     audioService = AudioServiceImpl();
     await audioService.initialize();
 
-    // Initialize Client Render Service for video generation
-    clientRenderService = ClientRenderService();
-
     // Initialize Blocs (depend on services/repositories)
     notificationBloc = AppNotificationBloc();
     invitationBloc = InvitationBloc(
       repository: invitationRepository,
-      renderService: clientRenderService,
-      downloadService: templateDownloadService,
+      orderRepository: orderRepository,
     );
+    creationsBloc = CreationsBloc(orderRepository: orderRepository);
     templatesBloc = TemplatesBloc(repository: templatesRepository);
     billingBloc = BillingBloc(billingRepository: billingRepository);
+    // Admin
+    // AdminBloc dependency injection updated
   }
 
   void initializeSystemStatus(AuthBloc authBloc) {

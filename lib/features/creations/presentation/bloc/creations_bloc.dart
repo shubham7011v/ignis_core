@@ -1,40 +1,66 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/repositories/creations_repository.dart';
+import '../../../orders/domain/repositories/order_repository.dart';
+import '../../../orders/domain/entities/order.dart';
 import 'creations_event.dart';
 import 'creations_state.dart';
 
 class CreationsBloc extends Bloc<CreationsEvent, CreationsState> {
-  final CreationsRepository _repository;
+  final OrderRepository _orderRepository;
+  StreamSubscription? _ordersSubscription;
 
-  CreationsBloc({required CreationsRepository repository})
-    : _repository = repository,
+  CreationsBloc({required OrderRepository orderRepository})
+    : _orderRepository = orderRepository,
       super(CreationsInitial()) {
-    on<LoadCreations>(_onLoadCreations);
-    on<DeleteCreationEvent>(_onDeleteCreation);
+    on<LoadUserOrders>(_onLoadUserOrders);
+    on<_OrdersUpdated>(_onOrdersUpdated);
+    on<_OrdersError>(_onOrdersError);
   }
 
-  Future<void> _onLoadCreations(
-    LoadCreations event,
+  Future<void> _onLoadUserOrders(
+    LoadUserOrders event,
     Emitter<CreationsState> emit,
   ) async {
     emit(CreationsLoading());
-    try {
-      final creations = await _repository.getCreations();
-      emit(CreationsLoaded(creations: creations));
-    } catch (e) {
-      emit(CreationsError(e.toString()));
-    }
+    await _ordersSubscription?.cancel();
+
+    _ordersSubscription = _orderRepository
+        .watchUserOrders(event.userId)
+        .listen(
+          (orders) {
+            add(_OrdersUpdated(orders));
+          },
+          onError: (error) {
+            add(_OrdersError(error.toString()));
+          },
+        );
   }
 
-  Future<void> _onDeleteCreation(
-    DeleteCreationEvent event,
-    Emitter<CreationsState> emit,
-  ) async {
-    try {
-      await _repository.deleteCreation(event.id);
-      add(LoadCreations());
-    } catch (e) {
-      emit(CreationsError(e.toString()));
-    }
+  void _onOrdersUpdated(_OrdersUpdated event, Emitter<CreationsState> emit) {
+    // Cast dynamic list back to List<Order>
+    final orders = event.orders.cast<Order>();
+    emit(CreationsLoaded(orders: orders));
   }
+
+  void _onOrdersError(_OrdersError event, Emitter<CreationsState> emit) {
+    emit(CreationsError(event.message));
+  }
+
+  @override
+  Future<void> close() {
+    _ordersSubscription?.cancel();
+    return super.close();
+  }
+}
+
+// Internal events for stream updates
+class _OrdersUpdated extends CreationsEvent {
+  final List<dynamic>
+  orders; // dynamic to avoid import loop in event file if possible, or just cast
+  const _OrdersUpdated(this.orders);
+}
+
+class _OrdersError extends CreationsEvent {
+  final String message;
+  const _OrdersError(this.message);
 }

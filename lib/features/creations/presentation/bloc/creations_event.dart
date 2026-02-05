@@ -4,15 +4,21 @@ abstract class CreationsEvent extends Equatable {
   const CreationsEvent();
 
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
-class LoadCreations extends CreationsEvent {}
-
-class DeleteCreationEvent extends CreationsEvent {
-  final String id;
-  const DeleteCreationEvent(this.id);
+class LoadUserOrders extends CreationsEvent {
+  final String userId;
+  const LoadUserOrders(this.userId);
 
   @override
-  List<Object?> get props => [id];
+  List<Object> get props => [userId];
+}
+
+class DeleteOrderEvent extends CreationsEvent {
+  final String orderId;
+  const DeleteOrderEvent(this.orderId);
+
+  @override
+  List<Object> get props => [orderId];
 }
