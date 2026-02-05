@@ -10,6 +10,7 @@ import '../widgets/home_dashboard.dart';
 import '../widgets/home_bottom_nav_bar.dart';
 import '../bloc/home_bloc.dart';
 import '../../../../features/templates/presentation/screens/search_screen.dart';
+import '../../../../features/templates/presentation/screens/shorts_screen.dart';
 import '../../../../features/templates/presentation/bloc/templates_event.dart';
 import '../../../../features/creations/presentation/screens/creations_gallery_screen.dart';
 import '../../../../features/creations/presentation/bloc/creations_event.dart';
@@ -84,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       // Safety: clamp index if isAdmin status changed mid-session
                       final adjustedIndex = isAdmin
                           ? selectedIndex
-                          : selectedIndex.clamp(0, 3);
+                          : selectedIndex.clamp(0, 4);
 
                       return PopScope(
                         canPop: adjustedIndex == 0,
@@ -118,6 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     homeState: homeState,
                                   ),
                                   const SearchScreen(),
+                                  const ShortsScreen(),
                                   const CreationsGalleryScreen(),
                                   SettingsScreen(
                                     onBack: () => _goHome(context),

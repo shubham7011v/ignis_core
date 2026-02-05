@@ -16,9 +16,10 @@ The app uses a strict 5-tab structure managed by `IndexedStack`.
 | :--- | :--- | :--- | :--- |
 | **0** | **Home** | `HomeDashboard` | Featured carousel, categories rails, cinematic browsing. |
 | **1** | **Search** | `SearchScreen` | Text search ("Royal", "Sangeet") + category chips. |
-| **2** | **Creations** | `CreationsGalleryScreen` | User's order history (In Progress, Completed) & drafts. |
-| **3** | **Account** | `SettingsScreen` | User profile, policies, sign out. |
-| **4** | **Admin** | `AdminScreen` | **Conditional**: Visible only to `AppConfig.adminUids`. Data entry & fulfillment. |
+| **2** | **Shorts** | `ShortsScreen` | Vertical full-screen video feed (YouTube Shorts style). |
+| **3** | **Creations** | `CreationsGalleryScreen` | User's order history (In Progress, Completed) & drafts. |
+| **4** | **Account** | `SettingsScreen` | User profile, policies, sign out. |
+| **5** | **Admin** | `AdminScreen` | **Conditional**: Visible only to `AppConfig.adminUids`. Data entry & fulfillment. |
 
 ## 3. Data Flow (Order Fulfillment)
 ```mermaid
