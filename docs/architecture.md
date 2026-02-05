@@ -1,151 +1,80 @@
 # Vivaah Master Architecture & Technical Specification
 
 ## 1. Executive Summary
-Vivaah is a **client-first** wedding invitation video platform designed for rapid market validation. Version 1.0 focuses exclusively on on-device video rendering with zero backend dependencies, using YouTube CDN for template delivery and Google Play Billing for monetization.
+Vivaah is a wedding invitation video platform. Version 1.0 includes **User Accounts (Google Sign-In only)** and **Manual Fulfillment** where admins create videos manually and deliver them via unlisted YouTube links.
 
-**Future versions** will introduce cloud features (user accounts, server rendering) based on user demand and device performance metrics.
+The architecture follows a **Hybrid Backend** approach using Go (VPS) and Firebase to minimize production costs while providing a secure, account-based experience.
 
 ---
 
-## 2. Version 1.0 Architecture (MVP)
+## 2. Version 1.0 Architecture (Production)
 
-### 2.1 Technology Stack (v1.0)
+### 2.1 Technology Stack
 | Layer | Technology | Role |
 | :--- | :--- | :--- |
-| **Frontend** | Flutter (Android) | Cross-platform mobile experience (Material 3 / Royal Theme) |
-| **Backend** | None | Zero server dependencies for v1.0 |
-| **Database** | Local SQLite | Template metadata cache only |
-| **Content Delivery** | YouTube CDN | Global, infinite bandwidth template hosting |
-| **Render Engine** | FFmpegKit | On-device video composition (Text-on-Video, Overlays) |
-| **Payment** | Google Play Billing | In-app purchases for premium templates |
-| **Analytics** | None (v1.0) | Optional local crash logging only |
+| **Frontend** | Flutter (Android) | Cross-platform mobile experience |
+| **Database** | Firebase Firestore | Real-time order sync and metadata |
+| **Backend** | Go (VPS) | Admin Panel and high-volume API requests |
+| **Auth** | Firebase Auth | Secure user management (Free Tier) |
+| **Delivery** | YouTube | **Free** video hosting and streaming |
+| **Video Creation** | Manual | Created by staff via professional software |
 
-### 2.2 v1.0 Data Flow
-```mermaid
-graph LR
-    User([User's Phone]) --> Templates[Hardcoded Template List]
-    Templates --> YT[YouTube CDN]
-    YT -->|Download MP4| Cache[Local Cache]
-    Cache --> FFmpeg[FFmpegKit]
-    User -->|Enter Details| FFmpeg
-    FFmpeg -->|Render| Gallery[Device Gallery]
-    User -->|Share| Social[WhatsApp/Instagram]
-    
-    User -.->|Purchase Premium| PlayBilling[Google Play]
-    PlayBilling -.->|Unlock| Templates
-```
-
-### 2.3 Key Design Decisions (v1.0)
-
-#### ✅ What's Included
-1. **Hardcoded Template Catalog**: 5-10 templates with YouTube IDs embedded in JSON
-2. **Offline-First**: Videos can be generated without internet (after template download)
-3. **No Login Required**: Zero friction user experience
-4. **Local Storage**: All user creations saved to device gallery
-5. **Google Play Billing**: One-time purchase for "Premium Templates Pack"
-
-#### ❌ What's Deferred (v2.0+)
-1. Firebase Authentication
-2. Cloud storage for user videos
-3. Server-side rendering
-4. Cross-device sync
-5. Analytics and crash reporting
-
----
-
-## 3. Current Implementation Status
-
-### ✅ Completed (v1.0 Ready)
-- [x] **YouTube CDN Integration**: Fetching direct video streams via `youtube_explode_dart`
-- [x] **Local Render Engine**: `ClientRenderService` with FFmpeg wrappers
-- [x] **Cinematic UI**: Royal theme, progress indicators, success states
-- [x] **On-Device Sharing**: Play Now and social sharing (WhatsApp/Instagram)
-
-### 🔄 In Progress (v1.0 MVP Blockers)
-- [ ] **Strip Firebase**: Remove all Firebase dependencies from `pubspec.yaml` and `main_common.dart`
-- [ ] **Remove Auth/Profile**: Delete login, profile, and session management screens
-- [ ] **Google Play Billing**: Integrate `in_app_purchase` package
-- [ ] **Hardcode Templates**: Create local JSON config for YouTube template mappings
-- [ ] **Navigation Simplification**: Direct users from splash → templates → creator
-
----
-
-## 4. Future Architecture (v2.0+)
-
-### Phase 4: User Accounts & Cloud Sync (v2.0)
-**Deploy only if v1.0 gains >1000 active users**
-
+### 2.2 Production Data Flow (Manual Fulfillment)
 ```mermaid
 graph TD
-    User([User]) --> Firebase[Firebase Auth]
-    Firebase --> Firestore[Cloud Firestore]
-    User --> Storage[Firebase Storage]
-    Storage --> Videos[User Video Library]
+    User([User]) --> Form[Enter Wedding Details]
+    Form --> Order[Place Order]
+    Order --> Firebase[Firestore: Order Pending]
+    Admin[Admin/Staff] --> Dash[Admin Dashboard on Go VPS]
+    Dash --> Firebase
+    Admin --> Edit[Manual Video Creation - Local]
+    Edit --> YT[Upload to YouTube as Unlisted]
+    Admin --> Dash[Update order with YT link]
+    Dash --> Firebase[Firestore: Update status to Completed]
+    Firebase --> User[App Notify: Video Ready]
 ```
 
-**Features**:
-- Google/Email sign-in
-- Cloud storage for created videos
-- Cross-device history sync
-- Analytics (Firebase Analytics, Crashlytics)
+---
 
-### Phase 5: Server-Side Rendering (v3.0)
-**Deploy if client rendering fails on >20% of devices**
+## 3. Hybrid Backend Cost Optimization (Zero-Variable-Cost)
 
-```mermaid
-graph TD
-    User([Low-End Device]) --> API[Go REST API]
-    API --> Queue[Render Queue]
-    Queue --> Worker[FFmpeg Worker Pool]
-    Worker --> S3[Cloud Storage]
-    S3 --> User
-```
+To maintain a $0 variable cost profile, we use the **Go VPS** for all data-heavy operations.
 
-**Features**:
-- Go server with FFmpeg workers
-- Render job queue (concurrency control)
-- Premium HD/4K rendering tier
-- Automatic fallback for low-end devices
+1. **YouTube ($0)**: Primary video hosting.
+2. **Go VPS Database (Primary)**: The VPS hosts a local SQL database (PostgreSQL/SQLite) that stores all order details, logs, and billing history.
+3. **Firebase Firestore (Sync-Only)**: Used ONLY to relay order status changes (e.g., "Pending" -> "Completed") to the app in real-time. This keeps us safely within the free tier.
+4. **OpenClaw (Moltbot)**: Handles background tasks on the VPS for free.
+5. **Firebase Auth**: Used for Google Sign-In only (Free).
 
 ---
 
-## 5. Monetization Strategy
+## 4. Current Implementation Status
 
-### v1.0: In-App Purchase
-- **Free Tier**: 3 basic templates, unlimited renders
-- **Premium Pack**: $4.99 one-time purchase for 10+ premium templates
-- **No Subscription**: Avoid recurring costs to maximize conversions
+### ✅ Completed
+- [x] YouTube template gallery and download service
+- [x] Invitation creator wizard (style → details → preview)
+- [x] Order repository for tracking
+- [x] Admin dashboard foundation
+- [x] Royal theme branding
 
-### v2.0+: Subscription Model
-- **Basic**: $2.99/month (cloud sync, basic templates)
-- **Premium**: $7.99/month (HD server rendering, all templates)
-
----
-
-## 6. Cost Analysis
-
-### v1.0 (Client-Only)
-| Component | Cost |
-| :--- | :--- |
-| Bandwidth | $0 (YouTube CDN) |
-| Rendering | $0 (on-device) |
-| Server | $0 (no backend) |
-| **Total per user** | **$0.00** |
-
-### v2.0+ (Cloud Features)
-| Component | Cost |
-| :--- | :--- |
-| Firebase (Auth, Firestore, Storage) | ~$0.10/user/month |
-| Server (VPS) | $20/month (fixed) |
-| **Estimated marginal cost** | **$0.10/user** |
+### 🔄 In Progress
+- [ ] Refinement of manual fulfillment UI
+- [ ] Go + Firebase production integration
+- [ ] Google Play Billing integration
 
 ---
 
-## 7. Risk Mitigation
+## 5. Futuristic Architecture (Phase 5+)
 
-| Risk | Impact | Mitigation |
-| :--- | :--- | :--- |
-| FFmpeg fails on low-end devices | High | Phase 2: Add server fallback |
-| YouTube blocks video downloads | Critical | Maintain fallback CDN (S3/Cloudflare R2) |
-| Template copyright claims | High | Use only royalty-free templates or original content |
-| Poor conversion rate | Medium | A/B test pricing ($2.99 vs $4.99 vs $7.99) |
+### On-Device Rendering (FFmpeg)
+**Goal**: Fully automated instant rendering on the user's device.
+- Re-integrate **FFmpegKit** for local composition.
+- Automatic text-on-video overlays.
+- Reduced dependency on admin fulfillment.
+
+---
+
+## 6. Risk Mitigation
+- **YouTube Controls**: If unlisted links are restricted, we will use a self-hosted CDN on the VPS.
+- **Order Volume**: If manual fulfillment slows down, we will implement the auto-rendering (Phase 5) earlier.
+

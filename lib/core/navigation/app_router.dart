@@ -7,7 +7,7 @@ import '../../features/invitation_creator/presentation/pages/preview_page.dart';
 import '../../features/invitation_creator/presentation/bloc/invitation_event.dart';
 // import '../../features/settings/settings.dart';
 
-// import '../../features/auth/auth.dart';
+import '../../features/auth/auth.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 
 import '../../features/templates/presentation/screens/template_gallery_screen.dart';
@@ -18,8 +18,8 @@ import '../../features/admin/presentation/screens/admin_screen.dart';
 
 class AppRouter {
   static const String splash = '/splash';
-  // static const String intro = '/intro';
-  // static const String celebration = '/celebration';
+  static const String intro = '/intro';
+  static const String celebration = '/celebration';
   // static const String home = '/home'; // Main Home (with BottomNav) disabled for v1.0
 
   // static const String settings = '/settings'; // Settings disabled for v1.0
@@ -34,8 +34,8 @@ class AppRouter {
   static Map<String, WidgetBuilder> get routes => {
     splash: (context) => const SplashScreen(),
     admin: (context) => const AdminScreen(),
-    // intro: (context) => const IntroScreen(initialPage: 0),
-    // celebration: (context) => const CelebrationEntryScreen(),
+    intro: (context) => const IntroScreen(initialPage: 0),
+    celebration: (context) => const CelebrationEntryScreen(),
     // home: (context) => const HomeScreen(),
     styleSelection: (context) => BlocProvider.value(
       value: di.sl.invitationBloc..add(InvitationStarted()),

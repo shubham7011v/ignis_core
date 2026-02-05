@@ -1,7 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/navigation/app_router.dart';
 import '../../../../core/theme/ignis_theme.dart';
+import '../../../../core/di/service_locator.dart' as di;
+import '../../../../core/utils/app_logger.dart';
+import '../bloc/auth_bloc.dart';
+import '../bloc/auth_state.dart';
+import '../bloc/auth_event.dart';
+import 'intro_screen.dart';
+
+class FadeRoute<T> extends PageRouteBuilder<T> {
+  final Widget page;
+  FadeRoute({required this.page})
+    : super(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+            FadeTransition(opacity: animation, child: child),
+      );
+}
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -23,7 +40,6 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (!mounted) return;
 
-    /*
     final authBloc = context.read<AuthBloc>();
     final onboardingRepo = di.sl.onboardingRepository;
 
@@ -46,14 +62,12 @@ class _SplashScreenState extends State<SplashScreen> {
         AppLogger.error('Silent sign-in timed out or failed', exception: e);
       }
     }
-    */
 
     if (!mounted) return;
 
     // Remove native splash just before transitioning
     FlutterNativeSplash.remove();
 
-    /*
     final state = authBloc.state;
     AppLogger.info('🔍 [SplashScreen] Final State Decision: $state');
 
@@ -72,10 +86,6 @@ class _SplashScreenState extends State<SplashScreen> {
         ).pushReplacement(FadeRoute(page: const IntroScreen(initialPage: 2)));
       }
     }
-    */
-
-    // v1.0 MVP: Direct to Template Gallery
-    Navigator.of(context).pushReplacementNamed(AppRouter.templateGallery);
   }
 
   @override

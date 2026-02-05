@@ -2,6 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/data.dart';
 import '../services/services.dart';
 import '../repositories/session_repository.dart';
+import '../repositories/session_repository_impl.dart';
 import '../notifications/bloc/app_notification_bloc.dart';
 import '../../features/auth/auth.dart';
 import '../../features/profile/profile.dart';
@@ -61,7 +62,6 @@ class ServiceLocator {
     storageService = StorageService(prefs);
     greetingService = GreetingService();
 
-    /*
     // Initialize Repositories
     authRepository = AuthRepository();
     userRepository = UserRepository();
@@ -69,7 +69,6 @@ class ServiceLocator {
     sessionRepository = SessionRepositoryImpl();
     profileRepository = ProfileRepository();
     adminRepository = AdminRepository();
-    */
     // v1.0 MVP: Only local repositories
     invitationRepository = InvitationRepositoryImpl();
     templatesRepository = TemplatesRepositoryImpl();

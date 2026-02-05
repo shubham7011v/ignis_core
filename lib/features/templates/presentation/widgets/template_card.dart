@@ -214,7 +214,7 @@ class _TemplateCardState extends State<TemplateCard> {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              'PREMIUM',
+                              '₹${widget.template.cost.toStringAsFixed(0)}',
                               style: GoogleFonts.inter(
                                 color: Colors.black,
                                 fontSize: 10,

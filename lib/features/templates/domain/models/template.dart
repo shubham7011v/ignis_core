@@ -9,6 +9,7 @@ class Template extends Equatable {
   final String category;
   final String duration;
   final bool isPremium;
+  final double cost;
   final String? youtubeId; // YouTube video ID for downloading
 
   const Template({
@@ -20,6 +21,7 @@ class Template extends Equatable {
     required this.category,
     required this.duration,
     this.isPremium = false,
+    this.cost = 0.0,
     this.youtubeId,
   });
 
@@ -33,6 +35,7 @@ class Template extends Equatable {
     category,
     duration,
     isPremium,
+    cost,
     youtubeId,
   ];
 
@@ -46,6 +49,7 @@ class Template extends Equatable {
       category: json['category'] as String,
       duration: json['duration'] as String,
       isPremium: (json['isPremium'] as bool?) ?? false,
+      cost: (json['cost'] as num?)?.toDouble() ?? 0.0,
       youtubeId: json['youtubeId'] as String?,
     );
   }
@@ -60,6 +64,7 @@ class Template extends Equatable {
       'category': category,
       'duration': duration,
       'isPremium': isPremium,
+      'cost': cost,
       'youtubeId': youtubeId,
     };
   }

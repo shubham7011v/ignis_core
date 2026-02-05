@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/theme/ignis_theme.dart';
+import '../../../../core/navigation/app_router.dart';
 import '../widgets/display_name_dialog.dart';
 
 class CelebrationEntryScreen extends StatefulWidget {
@@ -55,7 +56,7 @@ class _CelebrationEntryScreenState extends State<CelebrationEntryScreen>
 
               // Close dialog and navigate
               navigator.pop();
-              rootNavigator.pushReplacementNamed('/home');
+              rootNavigator.pushReplacementNamed(AppRouter.templateGallery);
             },
           ),
         );
@@ -64,7 +65,7 @@ class _CelebrationEntryScreenState extends State<CelebrationEntryScreen>
       // Auto-advance after a short delay
       await Future.delayed(const Duration(milliseconds: 400));
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/home');
+        Navigator.of(context).pushReplacementNamed(AppRouter.templateGallery);
       }
     }
   }
