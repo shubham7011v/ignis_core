@@ -16,3 +16,11 @@ class TemplateCategoryChanged extends TemplatesEvent {
   @override
   List<Object?> get props => [category];
 }
+
+class SearchTemplates extends TemplatesEvent {
+  final String query;
+  const SearchTemplates(this.query);
+
+  @override
+  List<Object?> get props => [query];
+}

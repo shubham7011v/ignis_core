@@ -9,7 +9,7 @@ import '../../../settings/settings.dart';
 import '../widgets/home_dashboard.dart';
 import '../widgets/home_bottom_nav_bar.dart';
 import '../bloc/home_bloc.dart';
-import '../../../../features/templates/presentation/screens/template_gallery_screen.dart';
+import '../../../../features/templates/presentation/screens/search_screen.dart';
 import '../../../../features/templates/presentation/bloc/templates_event.dart';
 import '../../../../features/creations/presentation/screens/creations_gallery_screen.dart';
 import '../../../../features/creations/presentation/bloc/creations_event.dart';
@@ -117,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     palette: palette,
                                     homeState: homeState,
                                   ),
-                                  const TemplateGalleryScreen(),
+                                  const SearchScreen(),
                                   const CreationsGalleryScreen(),
                                   SettingsScreen(
                                     onBack: () => _goHome(context),

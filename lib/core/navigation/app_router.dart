@@ -9,12 +9,12 @@ import '../../features/settings/settings.dart';
 
 import '../../features/auth/auth.dart';
 
-import '../../features/templates/presentation/screens/template_gallery_screen.dart';
 import '../../features/templates/presentation/bloc/templates_event.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/creations/presentation/screens/creations_gallery_screen.dart';
 import '../../features/creations/presentation/bloc/creations_event.dart';
 import '../../features/admin/presentation/screens/admin_screen.dart';
+import '../../features/templates/presentation/screens/search_screen.dart';
 
 class AppRouter {
   static const String splash = '/splash';
@@ -24,7 +24,7 @@ class AppRouter {
 
   static const String settings = '/settings';
 
-  static const String templateGallery = '/template_gallery';
+  static const String search = '/search';
   static const String creations = '/creations';
   static const String styleSelection = '/style_selection';
   static const String detailsForm = '/details_form';
@@ -51,9 +51,9 @@ class AppRouter {
     ),
 
     settings: (context) => const SettingsScreen(),
-    templateGallery: (context) => BlocProvider.value(
+    search: (context) => BlocProvider.value(
       value: di.sl.templatesBloc..add(TemplateLoadStarted()),
-      child: const TemplateGalleryScreen(),
+      child: const SearchScreen(),
     ),
     creations: (context) => BlocProvider.value(
       value: di.sl.creationsBloc

@@ -11,6 +11,7 @@ class TemplatesBloc extends Bloc<TemplatesEvent, TemplatesState> {
       super(TemplatesInitial()) {
     on<TemplateLoadStarted>(_onLoadStarted);
     on<TemplateCategoryChanged>(_onCategoryChanged);
+    on<SearchTemplates>(_onSearchTemplates);
   }
 
   Future<void> _onLoadStarted(
@@ -47,6 +48,30 @@ class TemplatesBloc extends Bloc<TemplatesEvent, TemplatesState> {
           ),
         );
       }
+    } catch (e) {
+      emit(TemplatesError(e.toString()));
+    }
+  }
+
+  Future<void> _onSearchTemplates(
+    SearchTemplates event,
+    Emitter<TemplatesState> emit,
+  ) async {
+    emit(TemplatesLoading());
+    try {
+      final allTemplates = await _repository.getTemplates();
+      if (event.query.isEmpty) {
+        emit(TemplatesLoaded(templates: allTemplates));
+        return;
+      }
+
+      final filtered = allTemplates.where((t) {
+        final query = event.query.toLowerCase();
+        return t.title.toLowerCase().contains(query) ||
+            t.category.toLowerCase().contains(query);
+      }).toList();
+
+      emit(TemplatesLoaded(templates: filtered));
     } catch (e) {
       emit(TemplatesError(e.toString()));
     }

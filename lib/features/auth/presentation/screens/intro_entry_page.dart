@@ -78,7 +78,7 @@ class _IntroEntryPageState extends State<IntroEntryPage>
                       // Bypass to celebration for testing
                       Navigator.of(
                         context,
-                      ).pushReplacementNamed(AppRouter.templateGallery);
+                      ).pushReplacementNamed(AppRouter.search);
                     },
                     child: Text(
                       'Create Memories.',

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/ignis_theme.dart';
 import '../../../orders/domain/entities/order.dart';
 import '../../../orders/domain/entities/order_status.dart';
 import 'package:intl/intl.dart';
@@ -20,141 +19,158 @@ class OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Determine status color and label
-    Color statusColor;
-    String statusLabel = order.status.displayName;
-    IconData statusIcon;
-
-    switch (order.status) {
-      case OrderStatus.pending:
-        statusColor = Colors.orangeAccent;
-        statusIcon = Icons.hourglass_empty;
-        break;
-      case OrderStatus.inProgress:
-        statusColor = Colors.blueAccent;
-        statusIcon = Icons.brush;
-        break;
-      case OrderStatus.delivered:
-        statusColor = Colors.greenAccent;
-        statusIcon = Icons.check_circle_outline;
-        break;
-      case OrderStatus.cancelled:
-        statusColor = Colors.redAccent;
-        statusIcon = Icons.cancel_outlined;
-        break;
-    }
+    final statusColor = _getStatusColor(order.status);
+    final statusLabel = order.status.displayName.toUpperCase();
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF251616),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white10),
+          color: const Color(0xFF1A1A1A),
+          borderRadius: BorderRadius.circular(12),
+          // Cinematic Glow
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
-              blurRadius: 10,
+              color: Colors.black.withValues(alpha: 0.5),
+              blurRadius: 8,
               offset: const Offset(0, 4),
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Status Header (Top Bar)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 6,
-                  horizontal: 12,
-                ),
-                color: statusColor.withValues(alpha: 0.2),
-                child: Row(
-                  children: [
-                    Icon(statusIcon, size: 14, color: statusColor),
-                    const SizedBox(width: 8),
-                    Text(
-                      statusLabel,
-                      style: GoogleFonts.inter(
-                        color: statusColor,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // 1. Thumbnail Background
+            if (order.thumbnailUrl != null)
+              Image.network(
+                order.thumbnailUrl!,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    _buildPlaceholder(),
+              )
+            else
+              _buildPlaceholder(),
+
+            // 2. Gradient Overlay (Bottom Up)
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black54,
+                    Colors.black87,
+                    Colors.black,
                   ],
+                  stops: [0.0, 0.5, 0.7, 1.0],
                 ),
               ),
+            ),
 
-              // Placeholder Thumbnail or Icon
-              Expanded(
-                child: Container(
-                  width: double.infinity,
-                  color: Colors.black26,
-                  child: Center(
-                    child: Icon(
-                      Icons.movie_creation_outlined,
-                      color: Colors.white10,
-                      size: 48,
-                    ),
+            // 3. Status Badge (Top Right)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.black87,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: statusColor, width: 1),
+                ),
+                child: Text(
+                  statusLabel,
+                  style: GoogleFonts.inter(
+                    color: statusColor,
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
                   ),
                 ),
               ),
+            ),
 
-              // Info
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Order #${order.id.substring(0, 8)}',
-                      style: GoogleFonts.cinzel(
-                        color: IgnisTheme.goldAccent,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+            // 4. Content (Bottom)
+            Positioned(
+              left: 10,
+              right: 10,
+              bottom: 10,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${order.details.brideName} & ${order.details.groomName}',
+                    style: GoogleFonts.cinzel(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      DateFormat('MMM dd, yyyy').format(order.createdAt),
-                      style: GoogleFonts.inter(
-                        color: Colors.white54,
-                        fontSize: 10,
-                      ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    DateFormat('MMM dd, yyyy').format(order.createdAt),
+                    style: GoogleFonts.inter(
+                      color: Colors.white70,
+                      fontSize: 10,
                     ),
-                    const SizedBox(height: 8),
-                    if (order.status == OrderStatus.delivered &&
-                        order.videoUrl != null)
-                      SizedBox(
+                  ),
+                  if (order.status == OrderStatus.delivered &&
+                      order.videoUrl != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: SizedBox(
+                        height: 28,
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           onPressed: () => _launchURL(order.videoUrl!),
-                          icon: const Icon(Icons.play_circle_fill, size: 16),
-                          label: const Text('WATCH VIDEO'),
+                          icon: const Icon(Icons.play_arrow, size: 14),
+                          label: const Text('WATCH'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.redAccent,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 0),
-                            textStyle: GoogleFonts.inter(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                            padding: EdgeInsets.zero,
                           ),
                         ),
                       ),
-                  ],
-                ),
+                    ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  Widget _buildPlaceholder() {
+    return Container(
+      color: const Color(0xFF2C2C2C),
+      child: Center(
+        child: Icon(
+          Icons.movie_filter_outlined,
+          color: Colors.white24,
+          size: 48,
+        ),
+      ),
+    );
+  }
+
+  Color _getStatusColor(OrderStatus status) {
+    switch (status) {
+      case OrderStatus.pending:
+        return Colors.orangeAccent;
+      case OrderStatus.inProgress:
+        return Colors.blueAccent;
+      case OrderStatus.delivered:
+        return const Color(0xFF4CAF50); // Green
+      case OrderStatus.cancelled:
+        return Colors.redAccent;
+    }
   }
 
   Future<void> _launchURL(String url) async {
