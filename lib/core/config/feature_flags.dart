@@ -39,5 +39,5 @@ class FeatureFlags {
   static bool get enableEliteDecks => _config.enableEliteDecks;
 
   /// Session Chat & Emoji
-  static bool get enableSessionChat => _config.enableGameChat;
+  static bool get enableSessionChat => _config.enableSessionChat;
 }

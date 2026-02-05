@@ -67,7 +67,7 @@ class AppConfig {
   late final int maxReconnectAttempts;
   late final int reconnectBaseDelayMs;
 
-  // Game Settings
+  // Session Settings
   late final int defaultThinkingTimeS;
   late final int defaultPlayerCount;
   late final int maxPlayers;
@@ -95,7 +95,7 @@ class AppConfig {
   late final String termsUrl;
   late final String dataUsageUrl;
   late final String supportEmail;
-  late final String gameRulesUrl;
+  late final String helpCenterUrl;
 
   // Feature Flags (From Remote Config / Server Override)
   late bool enableVoiceChat;
@@ -109,7 +109,7 @@ class AppConfig {
   late bool enableInnerCircle;
   late bool enableGlobalRankings;
   late bool enableEliteDecks;
-  late bool enableGameChat;
+  late bool enableSessionChat;
 
   /// Update configuration from server-side /api/config response
   void updateFromServer(Map<String, dynamic> serverConfig) {
@@ -133,9 +133,9 @@ class AppConfig {
         !isOverridden('ENABLE_ADMIN_DASHBOARD')) {
       enableAdminDashboard = serverConfig['enableAdminDashboard'];
     }
-    if (serverConfig['enableGameChat'] is bool &&
-        !isOverridden('ENABLE_GAME_CHAT')) {
-      enableGameChat = serverConfig['enableGameChat'];
+    if (serverConfig['enableSessionChat'] is bool &&
+        !isOverridden('ENABLE_SESSION_CHAT')) {
+      enableSessionChat = serverConfig['enableSessionChat'];
     }
   }
 
@@ -255,8 +255,8 @@ class AppConfig {
       2000,
     );
 
-    // Game Settings
-    bootStep = '4c. Loading Game Settings';
+    // Session Settings
+    bootStep = '4c. Loading Session Settings';
     defaultThinkingTimeS = _getIntConfig(
       'default_thinking_time_s',
       'DEFAULT_THINKING_TIME_S',
@@ -341,10 +341,10 @@ class AppConfig {
       'SUPPORT_EMAIL',
       'support@example.com',
     );
-    gameRulesUrl = _getStringConfig(
-      'game_rules_url',
-      'GAME_RULES_URL',
-      'https://example.com/rules',
+    helpCenterUrl = _getStringConfig(
+      'help_center_url',
+      'HELP_CENTER_URL',
+      'https://example.com/help',
     );
 
     // Feature Flags
@@ -401,9 +401,9 @@ class AppConfig {
       'ENABLE_ELITE_DECKS',
       false,
     );
-    enableGameChat = _getBoolConfig(
-      'enable_game_chat',
-      'ENABLE_GAME_CHAT',
+    enableSessionChat = _getBoolConfig(
+      'enable_session_chat',
+      'ENABLE_SESSION_CHAT',
       false,
     );
 

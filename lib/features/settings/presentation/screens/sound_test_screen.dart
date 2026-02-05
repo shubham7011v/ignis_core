@@ -13,8 +13,8 @@ class SoundTestScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           _buildSectionHeader('Music / Ambience'),
-          _buildMusicTile('Lobby Ambience', SoundAssets.lobbyAmbience),
-          _buildMusicTile('Game BGM', SoundAssets.gameBgm),
+          _buildMusicTile('Main Ambience', SoundAssets.mainAmbience),
+          _buildMusicTile('App BGM', SoundAssets.appBgm),
 
           const SizedBox(height: 20),
           _buildSectionHeader('Core SFX'),
@@ -44,7 +44,7 @@ class SoundTestScreen extends StatelessWidget {
           ),
 
           const SizedBox(height: 20),
-          _buildSectionHeader('Game Events'),
+          _buildSectionHeader('Notifications'),
           Wrap(
             spacing: 8,
             runSpacing: 8,

@@ -306,19 +306,13 @@ class IgnisApp extends StatelessWidget {
                 child: ErrorBoundary(child: child!),
               );
             },
-            routes: {
-              ...AppRouter.routes,
-              // LobbyScreen is now self-sufficient via Bloc
-              // AppRouter.lobby is already handled in AppRouter.routes
-            },
+            routes: {...AppRouter.routes},
           );
         },
       ),
     );
   }
 }
-
-// Wrapper removed as LobbyScreen now handles its own state connection
 
 /// Extracts a meaningful error message from any error object
 String _getErrorMessage(Object error) {

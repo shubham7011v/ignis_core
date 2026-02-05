@@ -20,9 +20,9 @@ class SettingsSupportSection extends StatelessWidget {
       children: [
         SettingsActionTile(
           icon: Icons.help_outline_rounded,
-          title: 'Game Rules',
+          title: 'Help & FAQ',
           palette: palette,
-          onTap: () => onLaunchURL(AppConfig.instance.gameRulesUrl),
+          onTap: () => onLaunchURL(AppConfig.instance.helpCenterUrl),
         ),
         SettingsDivider(palette: palette),
         SettingsActionTile(

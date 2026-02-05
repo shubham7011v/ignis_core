@@ -25,7 +25,7 @@ class SettingsAboutSection extends StatelessWidget {
     return Column(
       children: [
         Text(
-          'BLUFF MULTIPLAYER',
+          'VIVAAH',
           style: TextStyle(
             color: palette.textPrimary.withValues(alpha: 0.5),
             fontSize: 12,

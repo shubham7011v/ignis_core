@@ -25,8 +25,7 @@ class HomeTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String rawName =
-        user?.displayName ?? stats?.name ?? 'Mysterious Player';
+    final String rawName = user?.displayName ?? stats?.name ?? 'Guest';
     final String displayName = rawName.split(' ').first;
     final String photoUrl = user?.photoURL ?? '';
     // Legacy stats removed for Vivaah

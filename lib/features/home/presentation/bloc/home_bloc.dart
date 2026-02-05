@@ -52,9 +52,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     // Update greeting just in case it's stale
     emit(state.copyWith(greeting: _greetingService.getTimeBasedGreeting()));
 
-    // Start Lobby Music
+    // Start Background Music
     if (_audioService.isInitialized) {
-      _audioService.playBgm(SoundAssets.lobbyAmbience);
+      _audioService.playBgm(SoundAssets.mainAmbience);
     } else {
       AppLogger.warning(
         'AudioService not initialized yet. Skipping auto-play.',

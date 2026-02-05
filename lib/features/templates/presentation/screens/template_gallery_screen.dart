@@ -22,12 +22,17 @@ class TemplateGalleryScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text(
-          'WEDDING TEMPLATES',
-          style: GoogleFonts.cinzel(
-            color: IgnisTheme.goldAccent,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2,
+        title: GestureDetector(
+          onLongPress: () {
+            Navigator.pushNamed(context, '/admin');
+          },
+          child: Text(
+            'WEDDING TEMPLATES',
+            style: GoogleFonts.cinzel(
+              color: IgnisTheme.goldAccent,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
+            ),
           ),
         ),
         centerTitle: true,

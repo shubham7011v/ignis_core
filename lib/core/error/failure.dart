@@ -45,7 +45,7 @@ class UnknownFailure extends Failure {
   ]);
 }
 
-/// Session/Game specific failure.
+/// Session/Order specific failure.
 class SessionFailure extends Failure {
   const SessionFailure(super.message, [super.originalError]);
 }
