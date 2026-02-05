@@ -6,11 +6,13 @@ import '../bloc/home_bloc.dart';
 class HomeBottomNavBar extends StatelessWidget {
   final int selectedIndex;
   final AppColorPalette palette;
+  final bool showAdmin;
 
   const HomeBottomNavBar({
     super.key,
     required this.selectedIndex,
     required this.palette,
+    this.showAdmin = false,
   });
 
   @override
@@ -25,22 +27,33 @@ class HomeBottomNavBar extends StatelessWidget {
       unselectedItemColor: palette.textTertiary,
       showSelectedLabels: false,
       showUnselectedLabels: false,
-      items: const [
-        BottomNavigationBarItem(
+      items: [
+        const BottomNavigationBarItem(
           icon: Icon(Icons.home_outlined),
           activeIcon: Icon(Icons.home),
           label: 'Home',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.movie_creation_outlined),
-          activeIcon: Icon(Icons.movie_creation),
-          label: 'Designs',
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.search_rounded),
+          activeIcon: Icon(Icons.search_rounded),
+          label: 'Search',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.settings_outlined),
-          activeIcon: Icon(Icons.settings),
-          label: 'Settings',
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.video_library_outlined),
+          activeIcon: Icon(Icons.video_library),
+          label: 'Creations',
         ),
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.person_outline_rounded),
+          activeIcon: Icon(Icons.person_rounded),
+          label: 'Account',
+        ),
+        if (showAdmin)
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.admin_panel_settings_outlined),
+            activeIcon: Icon(Icons.admin_panel_settings),
+            label: 'Admin',
+          ),
       ],
     );
   }

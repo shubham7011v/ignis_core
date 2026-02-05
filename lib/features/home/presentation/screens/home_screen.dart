@@ -11,6 +11,11 @@ import '../widgets/home_bottom_nav_bar.dart';
 import '../bloc/home_bloc.dart';
 import '../../../../features/templates/presentation/screens/template_gallery_screen.dart';
 import '../../../../features/templates/presentation/bloc/templates_event.dart';
+import '../../../../features/creations/presentation/screens/creations_gallery_screen.dart';
+import '../../../../features/creations/presentation/bloc/creations_event.dart';
+import '../../../../features/admin/presentation/screens/admin_screen.dart';
+import '../../../../core/config/app_config.dart';
+import '../../../auth/auth.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -65,36 +70,66 @@ class _HomeScreenState extends State<HomeScreen> {
                 builder: (context, homeState) {
                   final selectedIndex = homeState.tabIndex;
 
-                  return PopScope(
-                    canPop: selectedIndex == 0,
-                    onPopInvokedWithResult: (didPop, result) {
-                      if (didPop) return;
-                      _goHome(context);
-                    },
-                    child: Scaffold(
-                      backgroundColor: palette.background,
-                      body: SafeArea(
-                        child: IndexedStack(
-                          index: selectedIndex,
-                          children: [
-                            HomeDashboard(
-                              palette: palette,
-                              homeState: homeState,
+                  return BlocBuilder<AuthBloc, AuthState>(
+                    builder: (context, authState) {
+                      final user = (authState is Authenticated)
+                          ? authState.user
+                          : null;
+                      final config = AppConfig.instance;
+                      final bool isAdmin =
+                          user != null &&
+                          (config.isAdmin ||
+                              config.adminUids.contains(user.uid));
+
+                      return PopScope(
+                        canPop: selectedIndex == 0,
+                        onPopInvokedWithResult: (didPop, result) {
+                          if (didPop) return;
+                          _goHome(context);
+                        },
+                        child: Scaffold(
+                          backgroundColor: palette.background,
+                          body: SafeArea(
+                            child: MultiBlocProvider(
+                              providers: [
+                                BlocProvider.value(
+                                  value: sl.templatesBloc
+                                    ..add(TemplateLoadStarted()),
+                                ),
+                                BlocProvider.value(
+                                  value: sl.creationsBloc
+                                    ..add(
+                                      const LoadUserOrders(
+                                        'current_user_placeholder',
+                                      ),
+                                    ),
+                                ),
+                              ],
+                              child: IndexedStack(
+                                index: selectedIndex,
+                                children: [
+                                  HomeDashboard(
+                                    palette: palette,
+                                    homeState: homeState,
+                                  ),
+                                  const TemplateGalleryScreen(),
+                                  const CreationsGalleryScreen(),
+                                  SettingsScreen(
+                                    onBack: () => _goHome(context),
+                                  ),
+                                  if (isAdmin) const AdminScreen(),
+                                ],
+                              ),
                             ),
-                            BlocProvider.value(
-                              value: sl.templatesBloc
-                                ..add(TemplateLoadStarted()),
-                              child: const TemplateGalleryScreen(),
-                            ),
-                            SettingsScreen(onBack: () => _goHome(context)),
-                          ],
+                          ),
+                          bottomNavigationBar: HomeBottomNavBar(
+                            selectedIndex: selectedIndex,
+                            palette: palette,
+                            showAdmin: isAdmin,
+                          ),
                         ),
-                      ),
-                      bottomNavigationBar: HomeBottomNavBar(
-                        selectedIndex: selectedIndex,
-                        palette: palette,
-                      ),
-                    ),
+                      );
+                    },
                   );
                 },
               ),

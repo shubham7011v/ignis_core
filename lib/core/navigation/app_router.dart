@@ -5,10 +5,9 @@ import '../../features/invitation_creator/presentation/pages/style_selection_pag
 import '../../features/invitation_creator/presentation/pages/details_form_page.dart';
 import '../../features/invitation_creator/presentation/pages/preview_page.dart';
 import '../../features/invitation_creator/presentation/bloc/invitation_event.dart';
-// import '../../features/settings/settings.dart';
+import '../../features/settings/settings.dart';
 
 import '../../features/auth/auth.dart';
-import '../../features/auth/presentation/screens/splash_screen.dart';
 
 import '../../features/templates/presentation/screens/template_gallery_screen.dart';
 import '../../features/templates/presentation/bloc/templates_event.dart';
@@ -23,7 +22,7 @@ class AppRouter {
   static const String celebration = '/celebration';
   static const String home = '/home';
 
-  // static const String settings = '/settings'; // Settings disabled for v1.0
+  static const String settings = '/settings';
 
   static const String templateGallery = '/template_gallery';
   static const String creations = '/creations';
@@ -51,7 +50,7 @@ class AppRouter {
       child: const PreviewPage(),
     ),
 
-    // settings: (context) => const SettingsScreen(),
+    settings: (context) => const SettingsScreen(),
     templateGallery: (context) => BlocProvider.value(
       value: di.sl.templatesBloc..add(TemplateLoadStarted()),
       child: const TemplateGalleryScreen(),
