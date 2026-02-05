@@ -10,10 +10,11 @@ import '../widgets/home_dashboard.dart';
 import '../widgets/home_bottom_nav_bar.dart';
 import '../bloc/home_bloc.dart';
 import '../../../../features/templates/presentation/screens/search_screen.dart';
-import '../../../../features/templates/presentation/screens/shorts_screen.dart';
+import '../../../../features/shorts/presentation/screens/shorts_screen.dart';
 import '../../../../features/templates/presentation/bloc/templates_event.dart';
 import '../../../../features/creations/presentation/screens/creations_gallery_screen.dart';
 import '../../../../features/creations/presentation/bloc/creations_event.dart';
+import '../../../../features/shorts/presentation/bloc/shorts_event.dart';
 import '../../../../features/admin/presentation/screens/admin_screen.dart';
 import '../../../../core/config/app_config.dart';
 import '../../../auth/auth.dart';
@@ -109,6 +110,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                         'current_user_placeholder',
                                       ),
                                     ),
+                                ),
+                                BlocProvider.value(
+                                  value: sl.shortsBloc..add(const LoadShorts()),
                                 ),
                               ],
                               child: IndexedStack(

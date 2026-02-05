@@ -22,6 +22,10 @@ import '../../features/billing/presentation/bloc/billing_bloc.dart';
 // Orders
 import '../../features/orders/domain/repositories/order_repository.dart';
 import '../../features/orders/data/repositories/firestore_order_repository.dart';
+// Shorts
+import '../../features/shorts/domain/repositories/shorts_repository.dart';
+import '../../features/shorts/data/repositories/mock_shorts_repository.dart';
+import '../../features/shorts/presentation/bloc/shorts_bloc.dart';
 
 class ServiceLocator {
   static final ServiceLocator _instance = ServiceLocator._internal();
@@ -43,6 +47,7 @@ class ServiceLocator {
   late final TemplateDownloadService templateDownloadService;
   late final BillingRepository billingRepository;
   late final OrderRepository orderRepository;
+  late final ShortsRepository shortsRepository;
 
   late final GreetingService greetingService;
   late final SystemStatusService systemStatusService;
@@ -52,6 +57,7 @@ class ServiceLocator {
   late final CreationsBloc creationsBloc;
   late final TemplatesBloc templatesBloc;
   late final BillingBloc billingBloc;
+  late final ShortsBloc shortsBloc;
 
   // WebSocket handler removed
 
@@ -77,6 +83,8 @@ class ServiceLocator {
     billingRepository = BillingRepositoryImpl(); // Fixed import path if needed
     // Orders
     orderRepository = FirestoreOrderRepository();
+    // Shorts
+    shortsRepository = MockShortsRepository();
 
     // YouTube & Notifications
     youtubeRepository = YouTubeServiceImpl();
@@ -95,6 +103,7 @@ class ServiceLocator {
     creationsBloc = CreationsBloc(orderRepository: orderRepository);
     templatesBloc = TemplatesBloc(repository: templatesRepository);
     billingBloc = BillingBloc(billingRepository: billingRepository);
+    shortsBloc = ShortsBloc(repository: shortsRepository);
     // Admin
     // AdminBloc dependency injection updated
   }

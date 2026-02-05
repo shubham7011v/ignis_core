@@ -236,6 +236,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: 'ACCOUNT & SECURITY',
                   palette: palette,
                 ),
+                SettingsActionTile(
+                  icon: Icons.favorite_border_rounded,
+                  title: 'Only Saved Templates',
+                  palette: palette,
+                  onTap: () {
+                    // TODO: Navigate to SavedTemplatesScreen
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Saved Templates coming soon!'),
+                      ),
+                    );
+                  },
+                ),
                 SettingsAccountSection(
                   palette: palette,
                   onSignOut: _showSignOutConfirm,
