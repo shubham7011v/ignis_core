@@ -81,8 +81,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           (config.isAdmin ||
                               config.adminUids.contains(user.uid));
 
+                      // Safety: clamp index if isAdmin status changed mid-session
+                      final adjustedIndex = isAdmin
+                          ? selectedIndex
+                          : selectedIndex.clamp(0, 3);
+
                       return PopScope(
-                        canPop: selectedIndex == 0,
+                        canPop: adjustedIndex == 0,
                         onPopInvokedWithResult: (didPop, result) {
                           if (didPop) return;
                           _goHome(context);
@@ -106,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ],
                               child: IndexedStack(
-                                index: selectedIndex,
+                                index: adjustedIndex,
                                 children: [
                                   HomeDashboard(
                                     palette: palette,
@@ -123,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           bottomNavigationBar: HomeBottomNavBar(
-                            selectedIndex: selectedIndex,
+                            selectedIndex: adjustedIndex,
                             palette: palette,
                             showAdmin: isAdmin,
                           ),
