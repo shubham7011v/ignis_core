@@ -55,12 +55,12 @@ class AppRouter {
       value: di.sl.templatesBloc..add(TemplateLoadStarted()),
       child: const SearchScreen(),
     ),
-    creations: (context) => BlocProvider.value(
-      value: di.sl.creationsBloc
-        ..add(
-          const LoadUserOrders('current_user_placeholder'),
-        ), // TODO: Use real user ID
-      child: const CreationsGalleryScreen(),
-    ),
+    creations: (context) {
+      final userId = di.sl.authRepository.currentUser?.uid ?? '';
+      return BlocProvider.value(
+        value: di.sl.creationsBloc..add(LoadUserOrders(userId)),
+        child: const CreationsGalleryScreen(),
+      );
+    },
   };
 }

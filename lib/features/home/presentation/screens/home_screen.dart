@@ -105,11 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 BlocProvider.value(
                                   value: sl.creationsBloc
-                                    ..add(
-                                      const LoadUserOrders(
-                                        'current_user_placeholder',
-                                      ),
-                                    ),
+                                    ..add(LoadUserOrders(user?.uid ?? '')),
                                 ),
                                 BlocProvider.value(
                                   value: sl.shortsBloc..add(const LoadShorts()),

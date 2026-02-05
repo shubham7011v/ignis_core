@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/ignis_network_image.dart';
 import '../bloc/invitation_bloc.dart';
@@ -463,23 +464,17 @@ class _PreviewPageState extends State<PreviewPage> {
             height: 56,
             child: ElevatedButton(
               onPressed: () {
-                // TODO: Get real userId from AuthBloc
-                // For MVP, using a placeholder if context.read<AuthBloc>() is complex to access here
-                // but ideally: final userId = context.read<AuthBloc>().state.user.uid;
-                // Currently bypassing to keep it simple, Repository requires userId but we can pass a temp ID or get it properly.
-                // Assuming FirebaseAuth is available:
-                // final userId = FirebaseAuth.instance.currentUser?.uid ?? 'guest';
-                // Or better, let's just pass 'current_user' string and let Repository/Bloc handle authentic user later if needed.
-                // Re-checking AuthBloc usage in this file... not used directly.
-                // I will add FirebaseAuth import at top or just use a placeholder for now.
+                final userId = FirebaseAuth.instance.currentUser?.uid;
+                if (userId == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please sign in to place an order'),
+                    ),
+                  );
+                  return;
+                }
 
-                // Triggering PlaceOrderRequested
-                // Note: User ID handling should be robust.
-                const userId =
-                    'current_user_placeholder'; // In real app, get from AuthBloc
-                context.read<InvitationBloc>().add(
-                  const PlaceOrderRequested(userId),
-                );
+                context.read<InvitationBloc>().add(PlaceOrderRequested(userId));
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: palette.primary,

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -80,6 +81,29 @@ Future<void> mainCommon({required String env, required String appName}) async {
             '🚀 [STARTUP] 2. Firebase already initialized, skipping',
           );
         }
+
+        // ✅ NEW: Enable Crashlytics error reporting
+        FlutterError.onError = (errorDetails) {
+          FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+          AppLogger.error(
+            'Flutter Framework Error',
+            exception: errorDetails.exception,
+            stackTrace: errorDetails.stack,
+          );
+        };
+
+        // ✅ NEW: Catch errors outside Flutter framework
+        PlatformDispatcher.instance.onError = (error, stack) {
+          FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+          AppLogger.error(
+            'Platform Error',
+            exception: error,
+            stackTrace: stack,
+          );
+          return true;
+        };
+
+        AppLogger.info('🚀 [STARTUP] Crashlytics error handler enabled');
       } on FirebaseException catch (e) {
         // Handle duplicate app error gracefully
         if (e.code == 'duplicate-app') {
