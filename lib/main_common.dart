@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -96,7 +98,6 @@ Future<void> mainCommon({required String env, required String appName}) async {
       config.load();
       AppLogger.info('🚀 [STARTUP] 4. Config loaded');
 
-      /*
       // Connectivity Doctor & Server Config Sync
       _bootStep = '5. Syncing Server Config';
       AppLogger.info('🚀 [STARTUP] $_bootStep...');
@@ -123,7 +124,6 @@ Future<void> mainCommon({required String env, required String appName}) async {
           '🚀 [STARTUP] 5. Server Config Sync Failed (continuing): $e',
         );
       }
-      */
 
       _bootStep = '6. Activating App Check';
       AppLogger.info('🚀 [STARTUP] $_bootStep...');

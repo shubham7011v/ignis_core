@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/ignis_theme.dart';
+import '../../../../core/widgets/ignis_network_image.dart';
 import '../../../auth/auth.dart';
 import '../bloc/home_state.dart';
 import 'home_top_bar.dart';
@@ -169,9 +170,15 @@ class HomeDashboard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildFeatureItem(Icons.flash_on, 'Instant', 'Ready in 5m'),
-        _buildFeatureItem(Icons.diamond, 'Premium', '4K Quality'),
-        _buildFeatureItem(Icons.share, 'Easy Share', 'WhatsApp'),
+        Flexible(
+          child: _buildFeatureItem(Icons.flash_on, 'Instant', 'Ready in 5m'),
+        ),
+        Flexible(
+          child: _buildFeatureItem(Icons.diamond, 'Premium', '4K Quality'),
+        ),
+        Flexible(
+          child: _buildFeatureItem(Icons.share, 'Easy Share', 'WhatsApp'),
+        ),
       ],
     );
   }
@@ -209,12 +216,16 @@ class HomeDashboard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: GoogleFonts.cinzel(
-            color: IgnisTheme.goldAccent,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+        Expanded(
+          child: Text(
+            title,
+            style: GoogleFonts.cinzel(
+              color: IgnisTheme.goldAccent,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
         TextButton(
@@ -351,10 +362,10 @@ class HomeDashboard extends StatelessWidget {
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(20),
               ),
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
+              child: IgnisNetworkImage(
+                imageUrl: imageUrl,
                 width: double.infinity,
+                fit: BoxFit.cover,
               ),
             ),
           ),

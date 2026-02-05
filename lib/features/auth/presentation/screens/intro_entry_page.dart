@@ -48,8 +48,8 @@ class _IntroEntryPageState extends State<IntroEntryPage>
         if (state is Authenticated) {
           di.sl.onboardingRepository.markIntroAsSeen();
           di.sl.onboardingRepository.markIntroAsSeen();
-          // v1.0 MVP: Direct to Template Gallery
-          Navigator.of(context).pushReplacementNamed(AppRouter.templateGallery);
+          // v1.0 MVP: Direct to Home Dashboard
+          Navigator.of(context).pushReplacementNamed(AppRouter.home);
         } else if (state is AuthFailure) {
           context.read<AppNotificationBloc>().add(
             ShowErrorNotification(state.failure.message),

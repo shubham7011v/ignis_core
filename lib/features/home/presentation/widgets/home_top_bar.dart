@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/theme/colors.dart';
-import '../../../../core/utils/app_logger.dart';
 import '../../../auth/domain/models/user_stats.dart';
 import '../../../../core/models/system_status.dart';
 import 'system_status_capsule.dart';
+import '../../../../core/widgets/ignis_network_image.dart';
 
 class HomeTopBar extends StatelessWidget {
   final User? user;
@@ -39,15 +39,19 @@ class HomeTopBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                'VIVAAH',
-                style: GoogleFonts.cinzel(
-                  color: palette.warn, // Using gold color
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 3,
+              Flexible(
+                child: Text(
+                  'VIVAAH',
+                  style: GoogleFonts.cinzel(
+                    color: palette.warn, // Using gold color
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 3,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              const SizedBox(width: 8),
               SystemStatusCapsule(systemStatus: systemStatus, palette: palette),
             ],
           ),
@@ -83,22 +87,36 @@ class HomeTopBar extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              CircleAvatar(
-                radius: 30,
-                backgroundColor: palette.primary.withValues(alpha: 0.1),
-                backgroundImage: photoUrl.isNotEmpty
-                    ? NetworkImage(photoUrl)
-                    : null,
-                onBackgroundImageError: (exception, stackTrace) {
-                  // Silently handle the error
-                  AppLogger.warning(
-                    'Failed to load profile image',
-                    exception: exception,
-                  );
-                },
-                child: photoUrl.isEmpty
-                    ? Icon(Icons.person, size: 20, color: palette.primary)
-                    : null,
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: palette.primary.withValues(alpha: 0.1),
+                ),
+                child: ClipOval(
+                  child: photoUrl.isNotEmpty
+                      ? IgnisNetworkImage(
+                          imageUrl: photoUrl,
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                          errorWidget: Center(
+                            child: Icon(
+                              Icons.person,
+                              size: 24,
+                              color: palette.primary,
+                            ),
+                          ),
+                        )
+                      : Center(
+                          child: Icon(
+                            Icons.person,
+                            size: 24,
+                            color: palette.primary,
+                          ),
+                        ),
+                ),
               ),
             ],
           ),

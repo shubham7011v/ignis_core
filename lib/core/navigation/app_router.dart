@@ -12,6 +12,7 @@ import '../../features/auth/presentation/screens/splash_screen.dart';
 
 import '../../features/templates/presentation/screens/template_gallery_screen.dart';
 import '../../features/templates/presentation/bloc/templates_event.dart';
+import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/creations/presentation/screens/creations_gallery_screen.dart';
 import '../../features/creations/presentation/bloc/creations_event.dart';
 import '../../features/admin/presentation/screens/admin_screen.dart';
@@ -20,7 +21,7 @@ class AppRouter {
   static const String splash = '/splash';
   static const String intro = '/intro';
   static const String celebration = '/celebration';
-  // static const String home = '/home'; // Main Home (with BottomNav) disabled for v1.0
+  static const String home = '/home';
 
   // static const String settings = '/settings'; // Settings disabled for v1.0
 
@@ -36,7 +37,7 @@ class AppRouter {
     admin: (context) => const AdminScreen(),
     intro: (context) => const IntroScreen(initialPage: 0),
     celebration: (context) => const CelebrationEntryScreen(),
-    // home: (context) => const HomeScreen(),
+    home: (context) => const HomeScreen(),
     styleSelection: (context) => BlocProvider.value(
       value: di.sl.invitationBloc..add(InvitationStarted()),
       child: const StyleSelectionPage(),

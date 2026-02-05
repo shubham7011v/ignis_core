@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/ignis_network_image.dart';
 import '../bloc/invitation_bloc.dart';
 import '../bloc/invitation_event.dart';
 import '../bloc/invitation_state.dart';
@@ -326,8 +327,8 @@ class _PreviewPageState extends State<PreviewPage> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              style.thumbnailUrl,
+            child: IgnisNetworkImage(
+              imageUrl: style.thumbnailUrl,
               width: 80,
               height: 80,
               fit: BoxFit.cover,

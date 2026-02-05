@@ -56,7 +56,7 @@ class _CelebrationEntryScreenState extends State<CelebrationEntryScreen>
 
               // Close dialog and navigate
               navigator.pop();
-              rootNavigator.pushReplacementNamed(AppRouter.templateGallery);
+              rootNavigator.pushReplacementNamed(AppRouter.home);
             },
           ),
         );
@@ -65,7 +65,7 @@ class _CelebrationEntryScreenState extends State<CelebrationEntryScreen>
       // Auto-advance after a short delay
       await Future.delayed(const Duration(milliseconds: 400));
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed(AppRouter.templateGallery);
+        Navigator.of(context).pushReplacementNamed(AppRouter.home);
       }
     }
   }

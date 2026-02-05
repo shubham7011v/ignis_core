@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/ignis_theme.dart';
 import '../bloc/profile_bloc.dart';
 import '../bloc/profile_event.dart';
 import '../bloc/profile_state.dart';
@@ -8,6 +9,7 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/bloc/theme_bloc.dart';
 import '../../../../core/theme/bloc/theme_state.dart';
 import '../../../../shared/components/app_error_widget.dart';
+import '../../../../core/widgets/ignis_network_image.dart';
 import '../../../../core/di/service_locator.dart' as di;
 
 class ProfileViewScreen extends StatelessWidget {
@@ -79,18 +81,40 @@ class ProfileViewScreen extends StatelessWidget {
       child: Column(
         children: [
           // Avatar and Name
-          CircleAvatar(
-            radius: 60,
-            backgroundColor: palette.primary.withValues(alpha: 0.1),
-            backgroundImage: profile.photoUrl != null
-                ? NetworkImage(profile.photoUrl!)
-                : null,
-            onBackgroundImageError: (exception, stackTrace) {
-              // Silently handle error
-            },
-            child: profile.photoUrl == null
-                ? Icon(Icons.person, size: 60, color: palette.primary)
-                : null,
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: palette.primary.withValues(alpha: 0.1),
+              border: Border.all(
+                color: IgnisTheme.goldAccent, // Using gold for profile accent
+                width: 2,
+              ),
+            ),
+            child: ClipOval(
+              child: profile.photoUrl != null
+                  ? IgnisNetworkImage(
+                      imageUrl: profile.photoUrl!,
+                      width: 120,
+                      height: 120,
+                      fit: BoxFit.cover,
+                      errorWidget: Center(
+                        child: Icon(
+                          Icons.person,
+                          size: 60,
+                          color: palette.primary,
+                        ),
+                      ),
+                    )
+                  : Center(
+                      child: Icon(
+                        Icons.person,
+                        size: 60,
+                        color: palette.primary,
+                      ),
+                    ),
+            ),
           ),
           const SizedBox(height: 16),
           Text(

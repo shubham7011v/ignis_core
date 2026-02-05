@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/ignis_network_image.dart';
 import 'settings_components.dart';
 
 class SettingsAccountSection extends StatelessWidget {
@@ -22,11 +23,16 @@ class SettingsAccountSection extends StatelessWidget {
       palette: palette,
       children: [
         ListTile(
-          leading: CircleAvatar(
-            backgroundImage: user?.photoURL != null
-                ? NetworkImage(user!.photoURL!)
-                : null,
-            child: user?.photoURL == null ? const Icon(Icons.person) : null,
+          leading: ClipOval(
+            child: user?.photoURL != null
+                ? IgnisNetworkImage(
+                    imageUrl: user!.photoURL!,
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.cover,
+                    errorWidget: const Icon(Icons.person),
+                  )
+                : const Icon(Icons.person, size: 24),
           ),
           title: Text(
             user?.displayName ?? 'Guest',

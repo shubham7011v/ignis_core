@@ -32,16 +32,6 @@ class HomeBottomNavBar extends StatelessWidget {
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.people_outline),
-          activeIcon: Icon(Icons.people),
-          label: 'Guests',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.favorite_outline),
-          activeIcon: Icon(Icons.favorite),
-          label: 'RSVP',
-        ),
-        BottomNavigationBarItem(
           icon: Icon(Icons.movie_creation_outlined),
           activeIcon: Icon(Icons.movie_creation),
           label: 'Designs',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/ignis_network_image.dart';
 import '../bloc/invitation_bloc.dart';
 import '../bloc/invitation_event.dart';
 import '../bloc/invitation_state.dart';
@@ -214,12 +215,12 @@ class StyleCard extends StatelessWidget {
             // Thumbnail
             ClipRRect(
               borderRadius: BorderRadius.circular(13),
-              child: Image.network(
-                style.thumbnailUrl,
+              child: IgnisNetworkImage(
+                imageUrl: style.thumbnailUrl,
                 fit: BoxFit.cover,
-                height: double.infinity,
                 width: double.infinity,
-                errorBuilder: (context, error, stackTrace) => Container(
+                height: double.infinity,
+                errorWidget: Container(
                   color: palette.surfaceLight,
                   child: Icon(Icons.broken_image, color: palette.textTertiary),
                 ),

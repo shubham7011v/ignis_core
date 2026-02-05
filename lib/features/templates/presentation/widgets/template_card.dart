@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/ignis_theme.dart';
+import '../../../../core/widgets/ignis_network_image.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../domain/models/template.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -186,17 +187,16 @@ class _TemplateCardState extends State<TemplateCard> {
                     children: [
                       AspectRatio(
                         aspectRatio: 16 / 9,
-                        child: Image.network(
-                          widget.template.thumbnailUrl,
+                        child: IgnisNetworkImage(
+                          imageUrl: widget.template.thumbnailUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                color: Colors.black26,
-                                child: const Icon(
-                                  Icons.video_library,
-                                  color: Colors.white24,
-                                ),
-                              ),
+                          errorWidget: Container(
+                            color: Colors.black26,
+                            child: const Icon(
+                              Icons.video_library,
+                              color: Colors.white24,
+                            ),
+                          ),
                         ),
                       ),
                       _buildDownloadIndicator(),
