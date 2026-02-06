@@ -1,47 +1,38 @@
-# Build stage
-FROM golang:1.25-alpine AS builder
+# Build Stage
+FROM golang:1.21-alpine AS builder
 
-# Install build dependencies for cgo (required for modernc.org/sqlite or database/sql with sqlite)
-RUN apk add --no-cache git gcc musl-dev
+# Install git for fetching dependencies
+RUN apk add --no-cache git
 
 WORKDIR /app
 
-# Copy go mod files first for better caching
+# Copy go mod and sum files
 COPY go.mod go.sum ./
+
+# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
 RUN go mod download
 
-# Copy source code
+# Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 
-# Accept version as build argument
-ARG VERSION=dev
+# Build the Go app
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o vivaah-server ./cmd/server
 
-# Build the binary with CGO enabled for SQLite and embed version
-RUN CGO_ENABLED=1 GOOS=linux go build -ldflags "-X ignis_server/version.Version=${VERSION}" -o ignis-server ./cmd/server
+# Run Stage
+FROM alpine:latest  
 
-# Runtime stage
-FROM alpine:latest
-
-# Install runtime dependencies
-RUN apk add --no-cache ca-certificates sqlite
+RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 
-# Copy binary from builder
-COPY --from=builder /app/ignis-server .
+# Copy the Pre-built binary from the builder stage
+COPY --from=builder /app/vivaah-server .
 
-# Create data directory for SQLite persistence
-RUN mkdir -p /root/data
+# Copy migrations
+COPY --from=builder /app/db ./db
 
-# Set environment variables
-ENV PORT=8080
-ENV ENABLE_VOICE=false
-
-# Expose port
+# Expose port 8080 to the outside world
 EXPOSE 8080
 
-# Define volume for database persistence
-VOLUME ["/root/data"]
-
-# Run
-CMD ["./ignis-server"]
+# Command to run the executable
+CMD ["./vivaah-server"]

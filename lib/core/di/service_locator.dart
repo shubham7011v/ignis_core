@@ -69,10 +69,6 @@ class ServiceLocator {
     storageService = StorageService(prefs);
     greetingService = GreetingService();
 
-    navigationService = NavigationService();
-    storageService = StorageService(prefs);
-    greetingService = GreetingService();
-
     // Services
     shortsVideoService = ShortsVideoService();
 

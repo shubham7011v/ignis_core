@@ -63,6 +63,11 @@ veil-prod-*.json
 firebase-service-account-dev.json
 firebase-service-account-prod.json
 
+# Generated Firebase Options (contain API keys)
+lib/config/firebase_options_dev.dart
+lib/config/firebase_options_prod.dart
+lib/config/firebase_options_*.dart
+
 # Local Environment
 .env
 .env.local

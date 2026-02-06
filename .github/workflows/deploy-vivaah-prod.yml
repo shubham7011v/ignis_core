@@ -1,0 +1,97 @@
+name: Deploy Vivaah Prod
+
+on:
+    push:
+        tags:
+            - "vivaah_prod_v*"
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        environment: prod
+        steps:
+            - name: Deploy to Server via SSH
+              uses: appleboy/ssh-action@v1.0.3
+              env:
+                  # Secrets needed
+                  FIREBASE_JSON: ${{ secrets.SERVER_FIREBASE_CREDENTIALS }}
+                  DB_PASSWORD: ${{ secrets.SERVER_DB_PASSWORD }}
+                  SERVER_IP: ${{ secrets.SERVER_IP }}
+                  SSH_KEY: ${{ secrets.SSH_KEY }}
+              with:
+                  host: ${{ secrets.SERVER_IP }}
+                  username: root
+                  key: ${{ secrets.SSH_KEY }}
+                  envs: FIREBASE_JSON,DB_PASSWORD
+                  script: |
+                      # Configuration
+                      APP_DIR="/opt/vivaah"
+                      REPO_URL="https://github.com/shubham7011v/ignis_core.git" # Assuming this is the repo
+                      VERSION="${{ github.ref_name }}"
+
+                      echo "🚀 Deploying Vivaah $VERSION to $APP_DIR..."
+
+                      # 1. Prepare Directory
+                      mkdir -p $APP_DIR
+                      cd $APP_DIR
+
+                      # 2. Update Code
+                      if [ -d "ignis_core" ]; then
+                          echo "🔄 Updating repo..."
+                          cd ignis_core
+                          git fetch --all --tags
+                          git checkout ${{ github.ref_name }}
+                          git pull origin main # Ensure we have latest if tag is on main
+                          cd ..
+                      else
+                          echo "📥 Cloning repo..."
+                          git clone $REPO_URL ignis_core
+                          cd ignis_core
+                          git checkout ${{ github.ref_name }}
+                          cd ..
+                      fi
+
+                      # 3. Setup Secrets & Env
+                      echo "🔑 Configuring secrets..."
+
+                      # Create server/.env
+                      cat <<EOF > ignis_core/server/.env
+                      PORT=8080
+                      GIN_MODE=release
+                      DB_HOST=db
+                      DB_PORT=5432
+                      DB_USER=vivaah_user
+                      DB_PASSWORD=$DB_PASSWORD
+                      DB_NAME=vivaah_db
+                      FIREBASE_CREDENTIALS_PATH=/root/firebase-adminsdk.json
+                      ALLOWED_ORIGINS=https://iamsorry.in,https://api.iamsorry.in
+                      EOF
+
+                      # Create Firebase JSON
+                      echo "$FIREBASE_JSON" | base64 -d > ignis_core/server/firebase-adminsdk.json
+
+                      # 4. Copy Docker files to deployment root for clean context
+                      cp ignis_core/docker-compose.yml .
+
+                      # 5. Build & Deploy
+                      echo "🐳 Building and starting containers..."
+
+                      # Build specific service to ensure fresh image
+                      docker-compose build server
+
+                      # Start up (recreate if changed)
+                      docker-compose up -d --remove-orphans
+
+                      # 6. Cleanup
+                      docker system prune -f
+
+                      # 7. Verification
+                      echo "Health check..."
+                      sleep 10
+                      if curl -s http://localhost:8082/health | grep "ok"; then
+                          echo "✅ Vivaah Deployment Successful!"
+                      else
+                          echo "⚠️ Health check failed or timed out. Check logs."
+                          docker-compose logs --tail=50
+                          exit 1
+                      fi
