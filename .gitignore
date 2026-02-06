@@ -93,3 +93,4 @@ Thumbs.db
 
 *.agent
 logs/
+server/firebase-adminsdk.json
