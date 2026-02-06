@@ -6,25 +6,12 @@
 server
 veil-server
 
-# Environment & Secrets
-.env
-.env.local
-.env.*.local
-*.pem
-*.key
-firebase-adminsdk*.json
-service-account*.json
-
 # Database
 *.db
 *.db-shm
 *.db-wal
 *.sqlite
 *.sqlite3
-
-# Seed/Init scripts with real credentials
-init_db.ps1
-seed_data.sql
 
 # Logs
 *.log
@@ -36,3 +23,4 @@ vendor/
 # IDEs
 .idea/
 .vscode/
+
