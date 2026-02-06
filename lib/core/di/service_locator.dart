@@ -26,6 +26,7 @@ import '../../features/orders/data/repositories/firestore_order_repository.dart'
 import '../../features/shorts/domain/repositories/shorts_repository.dart';
 import '../../features/shorts/data/repositories/mock_shorts_repository.dart';
 import '../../features/shorts/presentation/bloc/shorts_bloc.dart';
+import '../../features/shorts/data/services/shorts_video_service.dart';
 
 class ServiceLocator {
   static final ServiceLocator _instance = ServiceLocator._internal();
@@ -48,7 +49,7 @@ class ServiceLocator {
   late final BillingRepository billingRepository;
   late final OrderRepository orderRepository;
   late final ShortsRepository shortsRepository;
-
+  late final ShortsVideoService shortsVideoService;
   late final GreetingService greetingService;
   late final SystemStatusService systemStatusService;
   late final AudioService audioService;
@@ -67,6 +68,13 @@ class ServiceLocator {
     navigationService = NavigationService();
     storageService = StorageService(prefs);
     greetingService = GreetingService();
+
+    navigationService = NavigationService();
+    storageService = StorageService(prefs);
+    greetingService = GreetingService();
+
+    // Services
+    shortsVideoService = ShortsVideoService();
 
     // Initialize Repositories
     authRepository = AuthRepository();

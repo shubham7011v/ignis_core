@@ -8,8 +8,6 @@ import '../../../invitation_creator/presentation/bloc/invitation_bloc.dart';
 import '../../../invitation_creator/presentation/bloc/invitation_event.dart';
 import '../../../templates/domain/models/template.dart';
 import '../bloc/home_bloc.dart';
-import '../bloc/home_event.dart';
-import '../bloc/home_state.dart';
 import 'home_top_bar.dart';
 import 'hero_template_carousel.dart';
 import 'template_rail.dart';

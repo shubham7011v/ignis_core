@@ -7,6 +7,9 @@ import '../bloc/shorts_event.dart';
 import '../bloc/shorts_state.dart';
 import '../widgets/shorts_action_bar.dart';
 import '../widgets/shorts_info_sheet.dart';
+import '../managers/video_controller_manager.dart';
+import '../widgets/shorts_player_widget.dart';
+import '../../../../core/di/service_locator.dart';
 
 class ShortsScreen extends StatefulWidget {
   const ShortsScreen({super.key});
@@ -17,12 +20,42 @@ class ShortsScreen extends StatefulWidget {
 
 class _ShortsScreenState extends State<ShortsScreen> {
   final PageController _pageController = PageController();
+  late final VideoControllerManager _videoManager;
 
   @override
   void initState() {
     super.initState();
-    // Load shorts when screen is created
+    _videoManager = VideoControllerManager(sl.shortsVideoService);
     context.read<ShortsBloc>().add(const LoadShorts());
+  }
+
+  void _onPageChanged(int index, List<Short> shorts) {
+    // 1. Play current
+    _videoManager.play(index);
+
+    // 2. Pause previous/next (to save resources)
+    if (index > 0) _videoManager.pause(index - 1);
+
+    // 3. Preload next 2 videos
+    if (index + 1 < shorts.length) {
+      _preload(index + 1, shorts[index + 1]);
+    }
+    if (index + 2 < shorts.length) {
+      _preload(index + 2, shorts[index + 2]);
+    }
+
+    // 4. Dispose metrics (sliding window)
+    _videoManager.disposeMetrics(index);
+
+    setState(() {}); // Rebuild to show updated players
+  }
+
+  void _preload(int index, Short short) {
+    if (short.videoUrl != null) {
+      _videoManager.preload(index, short.videoUrl!).then((_) {
+        if (mounted) setState(() {});
+      });
+    }
   }
 
   void _showTemplateInfo(BuildContext context, Short short) {
@@ -37,7 +70,23 @@ class _ShortsScreenState extends State<ShortsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: BlocBuilder<ShortsBloc, ShortsState>(
+      body: BlocConsumer<ShortsBloc, ShortsState>(
+        listener: (context, state) {
+          if (state is ShortsLoaded && state.shortsWithFavorites.isNotEmpty) {
+            // Preload first video immediately
+            final firstShort = state.shortsWithFavorites[0];
+            if (firstShort.videoUrl != null) {
+              _videoManager.preload(0, firstShort.videoUrl!).then((_) {
+                _videoManager.play(0);
+                if (mounted) setState(() {});
+              });
+            }
+            // Preload second video, but don't play it
+            if (state.shortsWithFavorites.length > 1) {
+              _preload(1, state.shortsWithFavorites[1]);
+            }
+          }
+        },
         builder: (context, state) {
           if (state is ShortsLoading || state is ShortsInitial) {
             return const Center(
@@ -99,9 +148,10 @@ class _ShortsScreenState extends State<ShortsScreen> {
               scrollDirection: Axis.vertical,
               controller: _pageController,
               itemCount: shorts.length,
+              onPageChanged: (index) => _onPageChanged(index, shorts),
               itemBuilder: (context, index) {
                 final short = shorts[index];
-                return _buildShortCard(context, short);
+                return _buildShortCard(context, index, short);
               },
             );
           }
@@ -112,23 +162,28 @@ class _ShortsScreenState extends State<ShortsScreen> {
     );
   }
 
-  Widget _buildShortCard(BuildContext context, Short short) {
+  Widget _buildShortCard(BuildContext context, int index, Short short) {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // 1. Background / Video Placeholder
-        Container(
-          color: Color(short.placeholderColor),
-          child: Center(
+        // 1. Video Player or Placeholder
+        ShortsPlayerWidget(
+          short: short,
+          controller: _videoManager.getController(index),
+          isInitialized: _videoManager.isInitialized(index),
+        ),
+
+        // 2. Play Icon (if not playing/initialized)
+        if (!_videoManager.isInitialized(index))
+          Center(
             child: Icon(
               Icons.play_circle_outline,
               size: 80,
               color: Colors.white.withValues(alpha: 0.5),
             ),
           ),
-        ),
 
-        // 2. Gradient Overlay for Text Visibility
+        // 3. Gradient Overlay for Text Visibility
         Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -140,7 +195,7 @@ class _ShortsScreenState extends State<ShortsScreen> {
           ),
         ),
 
-        // 3. Right Side Actions (Discovery-Focused)
+        // 4. Right Side Actions (Discovery-Focused)
         Positioned(
           right: 12,
           bottom: 120,
@@ -159,7 +214,7 @@ class _ShortsScreenState extends State<ShortsScreen> {
           ),
         ),
 
-        // 4. Bottom Template Info
+        // 5. Bottom Template Info
         Positioned(
           left: 16,
           bottom: 24,
@@ -207,6 +262,7 @@ class _ShortsScreenState extends State<ShortsScreen> {
   @override
   void dispose() {
     _pageController.dispose();
+    _videoManager.disposeAll();
     super.dispose();
   }
 }
