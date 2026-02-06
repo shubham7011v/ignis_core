@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  server:
+    container_name: vivaah-prod
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8080"
+    env_file:
+      - ./server/.env
+    environment:
+      - GIN_MODE=release
+      - DB_HOST=db
+      - DB_PORT=5432
+      - FIREBASE_CREDENTIALS_PATH=/root/firebase-adminsdk.json
+    depends_on:
+      - db
+    volumes:
+      - ./server/firebase-adminsdk.json:/root/firebase-adminsdk.json
+    networks:
+      - vivaah-prod-network
+    restart: unless-stopped
+
+  db:
+    image: postgres:18-alpine
+    container_name: vivaah-prod-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-vivaah_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-local_pass}
+      POSTGRES_DB: ${DB_NAME:-vivaah_db}
+    volumes:
+      - vivaah_prod_pg_data:/var/lib/postgresql/data
+    networks:
+      - vivaah-prod-network
+    restart: unless-stopped
+
+volumes:
+  vivaah_prod_pg_data:
+
+networks:
+  vivaah-prod-network:
+    driver: bridge
