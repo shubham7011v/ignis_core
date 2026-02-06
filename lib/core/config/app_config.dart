@@ -200,14 +200,14 @@ class AppConfig {
           _safeGetEnv('SERVER_URL') ??
           const String.fromEnvironment(
             'SERVER_URL',
-            defaultValue: 'wss://vivaah.duckdns.org/ws',
+            defaultValue: 'wss://api.vivaah.iamsorry.in/ws',
           );
       apiBaseUrl =
           _customApiUrl ??
           _safeGetEnv('API_URL') ??
           const String.fromEnvironment(
             'API_URL',
-            defaultValue: 'https://vivaah.duckdns.org/api',
+            defaultValue: 'https://api.vivaah.iamsorry.in/api',
           );
     } else {
       var defaultServerUrl =
@@ -215,18 +215,19 @@ class AppConfig {
           _safeGetEnv('SERVER_URL') ??
           const String.fromEnvironment(
             'SERVER_URL',
-            defaultValue: 'ws://72.62.197.76:8080/ws',
+            defaultValue: 'ws://dev-api.vivaah.iamsorry.in/ws',
           );
       var defaultApiUrl =
           _customApiUrl ??
           _safeGetEnv('API_URL') ??
           const String.fromEnvironment(
             'API_URL',
-            defaultValue: 'http://72.62.197.76:8080/api',
+            defaultValue: 'https://dev-api.vivaah.iamsorry.in/api',
           );
 
       // Handle Android Emulator localhost (10.0.2.2)
       if (!kIsWeb && Platform.isAndroid) {
+        // Only remap if explicitly pointing to localhost, not the VPS
         if (defaultServerUrl.contains('localhost')) {
           defaultServerUrl = defaultServerUrl.replaceFirst(
             'localhost',

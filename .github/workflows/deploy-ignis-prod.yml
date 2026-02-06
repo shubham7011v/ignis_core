@@ -1,9 +1,9 @@
-name: Deploy Vivaah Prod
+name: Deploy Ignis Prod
 
 on:
     push:
         tags:
-            - "vivaah_prod_v*"
+            - "ignis_prod_v*"
 
 jobs:
     deploy:
@@ -13,8 +13,8 @@ jobs:
             - name: Deploy to Server via SSH
               uses: appleboy/ssh-action@v1.0.3
               env:
-                  FIREBASE_JSON: ${{ secrets.SERVER_FIREBASE_CREDENTIALS_PROD }}
-                  DB_PASSWORD: ${{ secrets.SERVER_DB_PASSWORD_PROD }}
+                  FIREBASE_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+                  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
                   SERVER_IP: ${{ secrets.SERVER_IP }}
                   SSH_KEY: ${{ secrets.SSH_KEY }}
               with:
@@ -23,8 +23,10 @@ jobs:
                   key: ${{ secrets.SSH_KEY }}
                   envs: FIREBASE_JSON,DB_PASSWORD
                   script: |
-                      APP_DIR="/opt/vivaah/prod"
+                      APP_DIR="/opt/ignis/prod"
                       REPO_URL="https://github.com/shubham7011v/ignis_core.git"
+
+                      echo "🚀 Deploying Ignis Prod (Vivaah) to $APP_DIR..."
 
                       mkdir -p $APP_DIR
                       cd $APP_DIR
@@ -47,15 +49,16 @@ jobs:
                       GIN_MODE=release
                       DB_HOST=db
                       DB_PORT=5432
-                      DB_USER=vivaah_user
+                      DB_USER=ignis_user
                       DB_PASSWORD=$DB_PASSWORD
-                      DB_NAME=vivaah_db
+                      DB_NAME=ignis_db
                       FIREBASE_CREDENTIALS_PATH=/root/firebase-adminsdk.json
-                      ALLOWED_ORIGINS=https://iamsorry.in,https://api.iamsorry.in
+                      ALLOWED_ORIGINS=https://iamsorry.in,https://api.vivaah.iamsorry.in
+                      DOMAINS=api.vivaah.iamsorry.in
                       EOF
 
                       echo "$FIREBASE_JSON" | base64 -d > ignis_core/server/firebase-adminsdk.json
-                      cp ignis_core/docker-compose-prod.yml ./docker-compose.yml
+                      cp ignis_core/docker-compose-ignis-prod.yml ./docker-compose.yml
 
                       docker compose build server
                       docker compose up -d --remove-orphans
@@ -63,7 +66,7 @@ jobs:
 
                       sleep 10
                       if curl -s http://localhost:8083/health | grep "ok"; then
-                          echo "✅ Vivaah Prod Deployment Successful!"
+                          echo "✅ Ignis Prod Deployment Successful!"
                       else
                           echo "❌ Health check failed!"
                           docker compose logs --tail=50

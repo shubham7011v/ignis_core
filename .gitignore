@@ -62,6 +62,7 @@ veil-dev-shubham-*.json
 veil-prod-*.json
 firebase-service-account-dev.json
 firebase-service-account-prod.json
+server/firebase-adminsdk.json
 
 # Generated Firebase Options (contain API keys)
 lib/config/firebase_options_dev.dart

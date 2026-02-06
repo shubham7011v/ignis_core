@@ -1,9 +1,9 @@
-name: Deploy Vivaah Dev
+name: Deploy Ignis Dev
 
 on:
     push:
         tags:
-            - "vivaah_dev_v*"
+            - "ignis_dev_v*"
 
 jobs:
     deploy:
@@ -13,8 +13,8 @@ jobs:
             - name: Deploy to Server via SSH
               uses: appleboy/ssh-action@v1.0.3
               env:
-                  FIREBASE_JSON: ${{ secrets.SERVER_FIREBASE_CREDENTIALS_DEV }}
-                  DB_PASSWORD: ${{ secrets.SERVER_DB_PASSWORD_DEV }}
+                  FIREBASE_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+                  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
                   SERVER_IP: ${{ secrets.SERVER_IP }}
                   SSH_KEY: ${{ secrets.SSH_KEY }}
               with:
@@ -23,8 +23,10 @@ jobs:
                   key: ${{ secrets.SSH_KEY }}
                   envs: FIREBASE_JSON,DB_PASSWORD
                   script: |
-                      APP_DIR="/opt/vivaah/dev"
+                      APP_DIR="/opt/ignis/dev"
                       REPO_URL="https://github.com/shubham7011v/ignis_core.git"
+
+                      echo "🚀 Deploying Ignis Dev (Vivaah) to $APP_DIR..."
 
                       mkdir -p $APP_DIR
                       cd $APP_DIR
@@ -47,15 +49,16 @@ jobs:
                       GIN_MODE=debug
                       DB_HOST=db
                       DB_PORT=5432
-                      DB_USER=vivaah_user
+                      DB_USER=ignis_user
                       DB_PASSWORD=$DB_PASSWORD
-                      DB_NAME=vivaah_db
+                      DB_NAME=ignis_db
                       FIREBASE_CREDENTIALS_PATH=/root/firebase-adminsdk.json
                       ALLOWED_ORIGINS=*
+                      DOMAINS=dev-api.vivaah.iamsorry.in
                       EOF
 
                       echo "$FIREBASE_JSON" | base64 -d > ignis_core/server/firebase-adminsdk.json
-                      cp ignis_core/docker-compose-dev.yml ./docker-compose.yml
+                      cp ignis_core/docker-compose-ignis-dev.yml ./docker-compose.yml
 
                       docker compose build server
                       docker compose up -d --remove-orphans
@@ -63,7 +66,7 @@ jobs:
 
                       sleep 10
                       if curl -s http://localhost:8082/health | grep "ok"; then
-                          echo "✅ Vivaah Dev Deployment Successful!"
+                          echo "✅ Ignis Dev Deployment Successful!"
                       else
                           echo "❌ Health check failed!"
                           docker compose logs --tail=50

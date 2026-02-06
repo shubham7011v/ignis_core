@@ -2,12 +2,12 @@ version: '3.8'
 
 services:
   server:
-    container_name: vivaah-dev
+    container_name: ignis-dev
     build:
       context: ./server
       dockerfile: Dockerfile
     ports:
-      - "8082:8080"
+      - "8082:8080" # Ignis Dev
     env_file:
       - ./server/.env
     environment:
@@ -20,25 +20,25 @@ services:
     volumes:
       - ./server/firebase-adminsdk.json:/root/firebase-adminsdk.json
     networks:
-      - vivaah-dev-network
+      - ignis-dev-network
     restart: unless-stopped
 
   db:
     image: postgres:18-alpine
-    container_name: vivaah-dev-db
+    container_name: ignis-dev-db
     environment:
-      POSTGRES_USER: ${DB_USER:-vivaah_user}
+      POSTGRES_USER: ${DB_USER:-ignis_user}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-local_pass}
-      POSTGRES_DB: ${DB_NAME:-vivaah_db}
+      POSTGRES_DB: ${DB_NAME:-ignis_db}
     volumes:
-      - vivaah_dev_pg_data:/var/lib/postgresql/data
+      - ignis_dev_pg_data:/var/lib/postgresql/data
     networks:
-      - vivaah-dev-network
+      - ignis-dev-network
     restart: unless-stopped
 
 volumes:
-  vivaah_dev_pg_data:
+  ignis_dev_pg_data:
 
 networks:
-  vivaah-dev-network:
+  ignis-dev-network:
     driver: bridge
