@@ -10,6 +10,9 @@ import '../widgets/shorts_info_sheet.dart';
 import '../managers/video_controller_manager.dart';
 import '../widgets/shorts_player_widget.dart';
 import '../../../../core/di/service_locator.dart';
+import '../../../invitation_creator/presentation/bloc/invitation_bloc.dart';
+import '../../../invitation_creator/presentation/bloc/invitation_event.dart';
+import '../../../templates/domain/models/template.dart';
 
 class ShortsScreen extends StatefulWidget {
   const ShortsScreen({super.key});
@@ -209,7 +212,24 @@ class _ShortsScreenState extends State<ShortsScreen> {
             },
             onInfoTap: () => _showTemplateInfo(context, short),
             onCtaTap: () {
-              // TODO: Navigate to Order Flow
+              // Map Short to Template for consistency (since they share ID)
+              // Ideally we'd map fields, but for now ID and Title are enough to fetch full details
+              context.read<InvitationBloc>().add(
+                TemplateSelected(
+                  Template(
+                    id: short.id,
+                    title: short.title,
+                    thumbnailUrl: short.thumbnailUrl ?? '',
+                    cost: 499.0, // Default cost
+                    category: short.category,
+                    videoUrl: short.videoUrl ?? '',
+                    duration: '0:30', // Default duration
+                    youtubeId: '',
+                    description: 'Wedding Invitation',
+                  ),
+                ),
+              );
+              Navigator.pushNamed(context, '/details_form');
             },
           ),
         ),

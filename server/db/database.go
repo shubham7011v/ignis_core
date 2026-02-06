@@ -5,33 +5,20 @@ import (
 	"embed"
 	"fmt"
 	"log"
-	"os"
-	"path/filepath"
 
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/sqlite"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 
-	_ "modernc.org/sqlite"
+	_ "github.com/lib/pq"
 )
 
 //go:embed migrations/*.sql
 var migrationsFS embed.FS
 
-// InitDB initializes the SQLite database and runs migrations
-func InitDB(dbPath string) (*sql.DB, error) {
-	// Ensure directory exists
-	dir := filepath.Dir(dbPath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return nil, err
-	}
-
-	var err error
-	actualPath := dbPath
-	if dbPath == ":memory:" {
-		actualPath = "file::memory:?cache=shared"
-	}
-	dbConn, err := sql.Open("sqlite", actualPath)
+// InitDB initializes the PostgreSQL database and runs migrations
+func InitDB(connStr string) (*sql.DB, error) {
+	dbConn, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, err
 	}
@@ -40,16 +27,7 @@ func InitDB(dbPath string) (*sql.DB, error) {
 		return nil, err
 	}
 
-	log.Println("Database connected at", dbPath)
-
-	// Enable Write-Ahead Logging (WAL) for concurrency
-	if _, err := dbConn.Exec("PRAGMA journal_mode=WAL;"); err != nil {
-		return nil, fmt.Errorf("failed to enable WAL mode: %v", err)
-	}
-	// Set busy timeout to prevent "database is locked" errors
-	if _, err := dbConn.Exec("PRAGMA busy_timeout=5000;"); err != nil {
-		return nil, fmt.Errorf("failed to set busy timeout: %v", err)
-	}
+	log.Println("Database connected to PostgreSQL")
 
 	// Run migrations
 	if err := runMigrations(dbConn); err != nil {
@@ -60,7 +38,7 @@ func InitDB(dbPath string) (*sql.DB, error) {
 }
 
 func runMigrations(dbConn *sql.DB) error {
-	driver, err := sqlite.WithInstance(dbConn, &sqlite.Config{})
+	driver, err := postgres.WithInstance(dbConn, &postgres.Config{})
 	if err != nil {
 		return fmt.Errorf("could not setup migration driver: %v", err)
 	}
@@ -70,7 +48,7 @@ func runMigrations(dbConn *sql.DB) error {
 		return fmt.Errorf("could not setup migration source: %v", err)
 	}
 
-	m, err := migrate.NewWithInstance("iofs", source, "sqlite", driver)
+	m, err := migrate.NewWithInstance("iofs", source, "postgres", driver)
 	if err != nil {
 		return fmt.Errorf("could not create migration instance: %v", err)
 	}

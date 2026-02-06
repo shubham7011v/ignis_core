@@ -67,6 +67,16 @@ class HomeDashboard extends StatelessWidget {
                         );
                         Navigator.pushNamed(context, '/details_form');
                       },
+                      onPlayPressed: (template) {
+                        // 1. Switch to Shorts Tab (Index 2)
+                        context.read<HomeBloc>().add(
+                          const HomeBottomNavTapped(2),
+                        );
+
+                        // 2. Play this specific video (Future: Add PlaySpecificShort event)
+                        // For now, it just opens the feed, which is acceptable for v1
+                        // context.read<ShortsBloc>().add(PlaySpecificShort(template.id));
+                      },
                     ),
                   ),
 

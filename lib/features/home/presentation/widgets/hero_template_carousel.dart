@@ -8,11 +8,13 @@ import '../../../templates/domain/models/template.dart';
 class HeroTemplateCarousel extends StatefulWidget {
   final List<Template> featuredTemplates;
   final Function(Template) onCreatePressed;
+  final Function(Template) onPlayPressed;
 
   const HeroTemplateCarousel({
     super.key,
     required this.featuredTemplates,
     required this.onCreatePressed,
+    required this.onPlayPressed,
   });
 
   @override
@@ -73,6 +75,7 @@ class _HeroTemplateCarouselState extends State<HeroTemplateCarousel> {
               return _HeroSlide(
                 template: template,
                 onCreatePressed: () => widget.onCreatePressed(template),
+                onPlayPressed: () => widget.onPlayPressed(template),
               );
             },
           ),
@@ -109,8 +112,13 @@ class _HeroTemplateCarouselState extends State<HeroTemplateCarousel> {
 class _HeroSlide extends StatelessWidget {
   final Template template;
   final VoidCallback onCreatePressed;
+  final VoidCallback onPlayPressed;
 
-  const _HeroSlide({required this.template, required this.onCreatePressed});
+  const _HeroSlide({
+    required this.template,
+    required this.onCreatePressed,
+    required this.onPlayPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -233,9 +241,7 @@ class _HeroSlide extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   OutlinedButton(
-                    onPressed: () {
-                      // Logic for preview could go here
-                    },
+                    onPressed: onPlayPressed,
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Colors.white70),
                       foregroundColor: Colors.white,
