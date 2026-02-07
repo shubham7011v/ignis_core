@@ -16,7 +16,7 @@ func NewSharingService(baseURL string) *SharingService {
 }
 
 // GetShortMetadata returns metadata for social previews for a Short
-func (s *SharingService) GetShortMetadata(short *models.Short) map[string]string {
+func (s *SharingService) GetShortMetadata(short *models.Template) map[string]string {
 	return map[string]string{
 		"og:title":       fmt.Sprintf("Check out this %s", short.Title),
 		"og:description": fmt.Sprintf("A beautiful wedding invitation in the %s category.", short.Category),

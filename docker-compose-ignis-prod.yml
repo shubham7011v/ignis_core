@@ -8,13 +8,17 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8083:8080" # Ignis Prod
-    env_file:
-      - ./server/.env
     environment:
       - GIN_MODE=release
+      - PORT=${PORT:-8080}
       - DB_HOST=db
       - DB_PORT=5432
+      - DB_USER=${DB_USER:-vivaah_user}
+      - DB_PASSWORD=${DB_PASSWORD:-ignis_prod_secure_pass_2026}
+      - DB_NAME=${DB_NAME:-vivaah_db}
       - FIREBASE_CREDENTIALS_PATH=/root/firebase-adminsdk.json
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://vivaah.iamsorry.in}
+      - DOMAINS=${DOMAINS:-api.vivaah.iamsorry.in}
     depends_on:
       - db
     volumes:
@@ -27,9 +31,9 @@ services:
     image: postgres:18-alpine
     container_name: ignis-prod-db
     environment:
-      POSTGRES_USER: ${DB_USER:-ignis_user}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-local_pass}
-      POSTGRES_DB: ${DB_NAME:-ignis_db}
+      POSTGRES_USER: ${DB_USER:-vivaah_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-ignis_prod_secure_pass_2026}
+      POSTGRES_DB: ${DB_NAME:-vivaah_db}
     volumes:
       - ignis_prod_pg_data:/var/lib/postgresql/data
     networks:

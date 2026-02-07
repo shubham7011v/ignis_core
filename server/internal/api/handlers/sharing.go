@@ -31,8 +31,8 @@ func NewSharingHandler(
 
 // HandleShortLink handles GET /s/:id
 func (h *SharingHandler) HandleShortLink(c *gin.Context) {
-	id := c.Param("id")
-	short, err := h.shortsRepo.GetRandomShorts("", 1) // Using GetByID would be better, but we only have GetRandomShorts in repo currently. Let's assume we add GetByID later.
+	_ = c.Param("id")
+	_, err := h.shortsRepo.GetRandomShorts("", 1) // Using GetByID would be better, but we only have GetRandomShorts in repo currently. Let's assume we add GetByID later.
 	// For now, let's mock the lookup or assume the repository has it.
 	// Actually, let's update repository first or just use a placeholder here.
 
