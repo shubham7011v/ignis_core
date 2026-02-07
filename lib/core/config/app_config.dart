@@ -173,7 +173,7 @@ class AppConfig {
     appName =
         injectedAppName ??
         _safeGetEnv('APP_NAME') ??
-        const String.fromEnvironment('APP_NAME', defaultValue: 'Vivaah');
+        const String.fromEnvironment('APP_NAME', defaultValue: 'Vites');
 
     isProduction = environment == 'production' || environment == 'prod';
     isDevelopment = !isProduction;

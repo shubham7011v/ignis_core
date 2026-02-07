@@ -25,9 +25,9 @@ func Load() *Config {
 		Port:                    getEnv("PORT", "8080"),
 		DBHost:                  getEnv("DB_HOST", "localhost"),
 		DBPort:                  getEnv("DB_PORT", "5432"),
-		DBUser:                  getEnv("DB_USER", "vivaah_user"),
-		DBPassword:              getEnv("DB_PASSWORD", ""),
-		DBName:                  getEnv("DB_NAME", "vivaah_db"),
+		DBUser:                  getEnv("DB_USER", "vites_user"),
+		DBPassword:              getEnv("DB_PASSWORD", "vites_secure_pass_2026"),
+		DBName:                  getEnv("DB_NAME", "vites_db"),
 		FirebaseCredentialsPath: getEnv("FIREBASE_CREDENTIALS_PATH", ""),
 		AllowedOrigins:          getEnv("ALLOWED_ORIGINS", "*"),
 	}

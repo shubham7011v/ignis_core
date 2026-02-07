@@ -26,7 +26,7 @@ jobs:
                       APP_DIR="/opt/ignis/dev"
                       REPO_URL="https://github.com/shubham7011v/ignis_core.git"
 
-                      echo "🚀 Deploying Ignis Dev (Vivaah) to $APP_DIR..."
+                      echo "🚀 Deploying Ignis Dev (Vites) to $APP_DIR..."
 
                       mkdir -p $APP_DIR
                       cd $APP_DIR
@@ -49,12 +49,12 @@ jobs:
                       GIN_MODE=debug
                       DB_HOST=db
                       DB_PORT=5432
-                      DB_USER=ignis_user
+                      DB_USER=vites_user
                       DB_PASSWORD=$DB_PASSWORD
-                      DB_NAME=ignis_db
+                      DB_NAME=vites_db
                       FIREBASE_CREDENTIALS_PATH=/root/firebase-adminsdk.json
                       ALLOWED_ORIGINS=*
-                      DOMAINS=dev-api.vivaah.iamsorry.in
+                      DOMAINS=dev.vites.iamsorry.in
                       EOF
 
                       echo "$FIREBASE_JSON" | base64 -d > ignis_core/server/firebase-adminsdk.json

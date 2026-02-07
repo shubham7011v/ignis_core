@@ -16,7 +16,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o vivaah-server ./cmd/server
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o vites-server ./cmd/server
 
 # Run Stage
 FROM alpine:latest  
@@ -26,7 +26,7 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
 # Copy the Pre-built binary from the builder stage
-COPY --from=builder /app/vivaah-server .
+COPY --from=builder /app/vites-server .
 
 # Copy migrations
 COPY --from=builder /app/db ./db
@@ -35,4 +35,4 @@ COPY --from=builder /app/db ./db
 EXPOSE 8080
 
 # Command to run the executable
-CMD ["./vivaah-server"]
+CMD ["./vites-server"]

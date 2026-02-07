@@ -165,7 +165,7 @@ docker compose restart server
 
 ### Database Backup
 ```bash
-docker exec ignis-prod-db pg_dump -U vivaah_user vivaah_db > backup_$(date +%Y%m%d).sql
+docker exec ignis-prod-db pg_dump -U vites_user vites_db > backup_$(date +%Y%m%d).sql
 ```
 
 ### Update Environment Variables

@@ -74,7 +74,7 @@ class ShortsBloc extends Bloc<ShortsEvent, ShortsState> {
     try {
       await Share.share(
         'Check out this amazing wedding invitation template: ${short.title}',
-        subject: 'Vivaah - ${short.title}',
+        subject: 'Vites - ${short.title}',
       );
     } catch (e) {
       // Share errors are non-critical, just log
