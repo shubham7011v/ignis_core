@@ -1,13 +1,13 @@
-name: Flutter CI/CD
+name: Vites CI/CD
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 env:
-  FLUTTER_VERSION: '3.24.0'
+  FLUTTER_VERSION: "3.24.0"
 
 jobs:
   # Test Job
@@ -15,18 +15,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          
+
       - name: Install dependencies
         run: flutter pub get
-        
+
       - name: Run tests
         run: flutter test
-        
+
       - name: Analyze code
         run: flutter analyze
 
@@ -37,27 +37,27 @@ jobs:
     if: github.ref == 'refs/heads/develop'
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          
+
       - name: Install dependencies
         run: flutter pub get
-        
+
       - name: Decode Firebase Config (Dev)
         env:
           FIREBASE_CONFIG_BASE64: ${{ secrets.FIREBASE_CONFIG_DEV_BASE64 }}
         run: echo "$FIREBASE_CONFIG_BASE64" | base64 -d > lib/config/firebase_options_dev.dart
-        
+
       - name: Build APK (Dev)
         run: |
           flutter build apk \
             --dart-define=API_BASE_URL=${{ secrets.DEV_API_BASE_URL }} \
             --dart-define=APP_ENV=development \
             --release
-            
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
@@ -71,32 +71,32 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
-          java-version: '17'
-          
+          distribution: "zulu"
+          java-version: "17"
+
       - name: Install dependencies
         run: flutter pub get
-        
+
       - name: Decode Firebase Config (Prod)
         env:
           FIREBASE_CONFIG_BASE64: ${{ secrets.FIREBASE_CONFIG_PROD_BASE64 }}
         run: echo "$FIREBASE_CONFIG_BASE64" | base64 -d > lib/config/firebase_options_prod.dart
-        
+
       - name: Decode Keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
           echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
-          
+
       - name: Create key.properties
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -109,27 +109,27 @@ jobs:
           keyAlias=$KEY_ALIAS
           storeFile=release.keystore
           EOF
-          
+
       - name: Build APK (Prod)
         run: |
           flutter build apk \
             --dart-define=API_BASE_URL=${{ secrets.PROD_API_BASE_URL }} \
             --dart-define=APP_ENV=production \
             --release
-            
+
       - name: Build App Bundle (Prod)
         run: |
           flutter build appbundle \
             --dart-define=API_BASE_URL=${{ secrets.PROD_API_BASE_URL }} \
             --dart-define=APP_ENV=production \
             --release
-            
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-prod-release.apk
           path: build/app/outputs/flutter-apk/app-release.apk
-          
+
       - name: Upload App Bundle
         uses: actions/upload-artifact@v4
         with:
@@ -153,19 +153,19 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-          
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
-          
+          go-version: "1.21"
+
       - name: Install dependencies
         working-directory: ./server
         run: go mod download
-        
+
       - name: Run tests
         working-directory: ./server
         env:
@@ -175,7 +175,7 @@ jobs:
           DB_PASSWORD: test_password
           DB_NAME: vivaah_test
         run: go test ./... -v
-        
+
       - name: Build server
         working-directory: ./server
-        run: go build -o vivaah-server ./cmd/server
+        run: go build -o vites-server ./cmd/server

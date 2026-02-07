@@ -11,6 +11,9 @@ jobs:
         steps:
             - name: Deploy to Server via SSH
               uses: appleboy/ssh-action@v1.0.3
+              env:
+                  FIREBASE_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+                  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
               with:
                   host: ${{ secrets.SERVER_IP }}
                   username: root
@@ -40,7 +43,7 @@ jobs:
                           cd ..
                       fi
 
-                      # Setup Env
+                      # Setup Env (File-less for secrets)
                       cat <<EOF > ignis_core/server/.env
                       PORT=8080
                       GIN_MODE=release
@@ -49,14 +52,17 @@ jobs:
                       DB_USER=vites_user
                       DB_PASSWORD=$DB_PASSWORD
                       DB_NAME=vites_db
-                      FIREBASE_CREDENTIALS_PATH=/root/firebase-adminsdk.json
+                      # FIREBASE_CREDENTIALS_PATH=/root/firebase-adminsdk.json # Not used
                       ALLOWED_ORIGINS=https://vites.iamsorry.in
                       DOMAINS=vites.iamsorry.in
                       EOF
 
-                      echo "$FIREBASE_JSON" | base64 -d > ignis_core/server/firebase-adminsdk.json
+                      # Copy docker-compose
                       cp ignis_core/docker-compose-ignis-prod.yml ./docker-compose.yml
 
+                      # Run with inline secret
+                      echo "🚀 Starting containers..."
+                      export FIREBASE_CREDENTIALS_JSON="$FIREBASE_JSON"
                       docker compose build server
                       docker compose up -d --remove-orphans
                       docker system prune -f

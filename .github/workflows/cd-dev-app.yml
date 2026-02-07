@@ -1,4 +1,4 @@
-name: Veil App CD (Development)
+name: Vites App CD (Development)
 
 on:
   push:
@@ -116,7 +116,7 @@ jobs:
           files: |
             artifacts/app-dev-release.apk
           tag_name: ${{ github.ref_name }}
-          name: Dev Release ${{ needs.vars.outputs.version_name }}
+          name: Vites Dev Release ${{ needs.vars.outputs.version_name }}
           draft: false
           prerelease: true
           generate_release_notes: true

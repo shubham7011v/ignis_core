@@ -19,10 +19,9 @@ services:
       - FIREBASE_CREDENTIALS_PATH=/root/firebase-adminsdk.json
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://vivaah.iamsorry.in}
       - DOMAINS=${DOMAINS:-api.vivaah.iamsorry.in}
+      - FIREBASE_CREDENTIALS_JSON=${FIREBASE_CREDENTIALS_JSON}
     depends_on:
       - db
-    volumes:
-      - ./server/firebase-adminsdk.json:/root/firebase-adminsdk.json
     networks:
       - ignis-prod-network
     restart: unless-stopped

@@ -19,10 +19,9 @@ services:
       - FIREBASE_CREDENTIALS_PATH=/root/firebase-adminsdk.json
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-*}
       - DOMAINS=${DOMAINS:-dev.vites.iamsorry.in}
+      - FIREBASE_CREDENTIALS_JSON=${FIREBASE_CREDENTIALS_JSON}
     depends_on:
       - db
-    volumes:
-      - ./server/firebase-adminsdk.json:/root/firebase-adminsdk.json
     networks:
       - ignis-dev-network
     restart: unless-stopped
