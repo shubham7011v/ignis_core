@@ -69,8 +69,19 @@ jobs:
                       docker rmi ignis-server:dev || true
                       docker build --network=host --build-arg VERSION=$VERSION -t ignis-server:dev .
 
+                      # Return to parent directory for docker-compose operations
+                      cd ..
+
                       # Ensure docker-compose.yml is up to date
-                      cp ignis_core/docker-compose-ignis-dev.yml ./docker-compose.yml
+                      # We are now in /opt/ignis/dev. The repo is in ./ignis_core.
+                      # The file should be at ./ignis_core/docker-compose-ignis-dev.yml
+                      if [ -f "ignis_core/docker-compose-ignis-dev.yml" ]; then
+                          cp ignis_core/docker-compose-ignis-dev.yml ./docker-compose.yml
+                      else
+                          echo "❌ Error: Could not find docker-compose file at ignis_core/docker-compose-ignis-dev.yml"
+                          ls -R ignis_core
+                          exit 1
+                      fi
 
                       # Run with inline secret
                       echo "🚀 Starting containers..."
