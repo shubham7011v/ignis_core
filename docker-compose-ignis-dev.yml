@@ -29,7 +29,7 @@ services:
     container_name: vites-dev-db
     environment:
       POSTGRES_USER: vites_user
-      POSTGRES_PASSWORD: vites_secure_pass_2026
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-vites_secure_pass_2026}
       POSTGRES_DB: vites_db
     volumes:
       - ignis_dev_pg_data:/var/lib/postgresql/data

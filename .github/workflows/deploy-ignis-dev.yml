@@ -50,7 +50,8 @@ jobs:
                       fi
 
                       # Setup Env (File-less for secrets)
-                      cat <<EOF > ignis_core/server/.env
+                      # We place .env in APP_DIR so docker-compose picks it up
+                      cat <<EOF > .env
                       PORT=8080
                       GIN_MODE=debug
                       DB_HOST=db
@@ -63,8 +64,11 @@ jobs:
                       DOMAINS=dev.vites.iamsorry.in
                       EOF
 
+                      # Export for docker compose
+                      export DB_PASSWORD="$DB_PASSWORD"
+
                       # Build image with version
-                      cd server
+                      cd ignis_core/server
                       # Explicitly remove old image to force fresh build/tag usage
                       docker rmi ignis-server:dev || true
                       docker build --network=host --build-arg VERSION=$VERSION -t ignis-server:dev .
