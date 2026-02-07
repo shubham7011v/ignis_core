@@ -20,6 +20,9 @@ jobs:
                   username: root
                   key: ${{ secrets.SSH_KEY }}
                   port: 22
+                  debug: true
+                  command_timeout: 30m
+                  script_stop: true
                   envs: FIREBASE_JSON,DB_PASSWORD
                   script: |
                       export FIREBASE_JSON="${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
