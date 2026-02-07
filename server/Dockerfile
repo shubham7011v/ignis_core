@@ -15,8 +15,11 @@ RUN go mod download
 # Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 
+# Build args
+ARG VERSION=dev
+
 # Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o vites-server ./cmd/server
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags "-X main.Version=${VERSION}" -o vites-server ./cmd/server
 
 # Run Stage
 FROM alpine:latest  

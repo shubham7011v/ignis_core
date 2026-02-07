@@ -22,10 +22,13 @@ jobs:
                   port: 22
                   envs: FIREBASE_JSON,DB_PASSWORD
                   script: |
+                      # Extract version from tag
+                      VERSION="${{ github.ref_name }}"
+                      echo "Deploying version: $VERSION"
+
                       # Use env vars passed via 'envs', do NOT interpolate secrets directly
                       # export FIREBASE_JSON="$FIREBASE_JSON" # Already exported by action
                       # export DB_PASSWORD="$DB_PASSWORD" # Already exported by action
-
                       APP_DIR="/opt/ignis/dev"
                       REPO_URL="https://github.com/shubham7011v/ignis_core.git"
 
@@ -60,14 +63,31 @@ jobs:
                       DOMAINS=dev.vites.iamsorry.in
                       EOF
 
-                      # Copy docker-compose
-                      cp ignis_core/docker-compose-ignis-dev.yml ./docker-compose.yml
+                      # Build image with version
+                      cd server
+                      docker build --network=host --build-arg VERSION=$VERSION -t ignis-server:dev .
+
+                      # Ensure docker-compose.yml is up to date
+                      cp ~/ignis_core/ignis_core/docker-compose-ignis-dev.yml ./docker-compose.yml
 
                       # Run with inline secret
                       echo "🚀 Starting containers..."
                       export FIREBASE_CREDENTIALS_JSON="$FIREBASE_JSON"
-                      docker compose build server
-                      docker compose up -d --remove-orphans
+                      # Note: We build again here with compose, but since we built the image properly above with tags,
+                      # we can force compose to use that or just let compose build it if properly configured.
+                      # Ideally, docker-compose should use the image we just built or build context needs args.
+                      # Simplified: We just let compose build it but we need to pass args to compose or rely on the image tag.
+                      # BETTER APPROACH (matching veil_core): Explicit build with docker then compose up.
+
+                      # Since we did explicit build above, we should ensure compose uses that or builds correctly.
+                      # To pass args to compose build:
+                      # docker compose build --build-arg VERSION=$VERSION server # Redundant since we built explicitly above, but good for cache
+
+                      # Stop existing containers to avoid name conflicts
+                      docker compose down --remove-orphans
+
+                      # Start new containers
+                      docker compose up -d --force-recreate
                       docker system prune -f
 
                       sleep 10
@@ -78,3 +98,17 @@ jobs:
                           docker compose logs --tail=50
                           exit 1
                       fi
+
+                      # Verify version
+                      echo "Verifying deployed version..."
+                      # Port 8082 for dev
+                      DEPLOYED_VERSION=$(curl -s http://localhost:8082/api/version | grep -o '"version":"[^"]*"' | cut -d'"' -f4)
+                      echo "Expected: $VERSION"
+                      echo "Deployed: $DEPLOYED_VERSION"
+
+                      if [ "$DEPLOYED_VERSION" != "$VERSION" ]; then
+                        echo "❌ Version mismatch! Expected $VERSION but got $DEPLOYED_VERSION"
+                        exit 1
+                      fi
+
+                      echo "✅ Dev deployment verified! Version $VERSION matches."
