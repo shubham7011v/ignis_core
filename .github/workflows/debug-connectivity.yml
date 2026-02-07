@@ -21,6 +21,25 @@ jobs:
                   nc -zv $HOST 22 || echo "Port 22 unreachable"
                   # traceroute $HOST || echo "Traceroute failed" (noisy and often blocked)
 
+            - name: Verify Secrets Integrity
+              env:
+                  HOST: ${{ secrets.SERVER_IP }}
+                  SSH_KEY: ${{ secrets.SSH_KEY }}
+              run: |
+                  echo "Verifying Secrets..."
+                  if [ "$HOST" == "72.62.197.76" ]; then
+                    echo "✅ HOST matches expected IP 72.62.197.76"
+                  else
+                    echo "❌ HOST does NOT match 72.62.197.76"
+                    echo "First 3 chars: ${HOST:0:3}"
+                  fi
+
+                  if [ -z "$SSH_KEY" ]; then
+                     echo "❌ SSH_KEY is empty!"
+                  else
+                     echo "✅ SSH_KEY is present (Length: ${#SSH_KEY})"
+                  fi
+
             - name: Test SSH Handshake
               env:
                   SSH_KEY: ${{ secrets.SSH_KEY }}
@@ -30,4 +49,4 @@ jobs:
                   echo "$SSH_KEY" > ~/.ssh/id_rsa
                   chmod 600 ~/.ssh/id_rsa
                   # Try connecting with verbose output to see where it hangs/fails
-                  ssh -v -o StrictHostKeyChecking=no -o ConnectTimeout=10 root@$HOST "echo 'SSH Connection Successful'"
+                  ssh -v -o StrictHostKeyChecking=no -o ConnectTimeout=10 root@$HOST "uptime"
