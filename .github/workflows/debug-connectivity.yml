@@ -1,0 +1,22 @@
+name: Debug Network Connectivity
+
+on:
+    push:
+        branches:
+            - "**"
+    workflow_dispatch:
+
+jobs:
+    debug-connection:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Test Connectivity
+              env:
+                  HOST: ${{ secrets.SERVER_IP }}
+              run: |
+                  sudo apt-get install -y traceroute
+                  echo "Testing connectivity to $HOST..."
+                  ping -c 4 $HOST || echo "Ping failed"
+                  nc -zv $HOST 22 || echo "Port 22 unreachable"
+                  # traceroute to check path (might be blocked by firewalls but worth a try)
+                  traceroute $HOST || echo "Traceroute failed"
