@@ -1,55 +1,55 @@
 name: Promote Admin (PROD)
 
 on:
-    workflow_dispatch:
-        inputs:
-            email:
-                description: "User Email"
-                required: true
-            confirmation:
-                description: "Type 'CONFIRM' to proceed"
-                required: true
+  workflow_dispatch:
+    inputs:
+      email:
+        description: "User Email"
+        required: true
+      confirmation:
+        description: "Type 'CONFIRM' to proceed"
+        required: true
 
 jobs:
-    promote-prod:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Verify Confirmation
-              run: |
-                  if [ "${{ github.event.inputs.confirmation }}" != "CONFIRM" ]; then
-                    echo "❌ Deployment aborted: Confirmation code mismatch."
-                    exit 1
-                  fi
+  promote-prod:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirmation }}" != "CONFIRM" ]; then
+            echo "❌ Deployment aborted: Confirmation code mismatch."
+            exit 1
+          fi
 
-            - name: Execute Promotion in PROD
-              uses: appleboy/ssh-action@v1.0.3
-              with:
-                  host: ${{ secrets.SERVER_IP }}
-                  username: root
-                  key: ${{ secrets.SSH_KEY }}
-                  port: 22
-                  script: |
-                      EMAIL="${{ github.event.inputs.email }}"
-                      CONTAINER="ignis-prod-db" # Assuming prod container name
-                      USER="vivaah_user" # Assuming prod db user
-                      DB="vivaah_db" # Assuming prod db name
+      - name: Execute Promotion in PROD
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: root
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            EMAIL="${{ github.event.inputs.email }}"
+            CONTAINER="ignis-prod-db" # Assuming prod container name
+            USER="vivaah_user" # Assuming prod db user
+            DB="vivaah_db" # Assuming prod db name
 
-                      echo "🚀 Promoting $EMAIL to Admin in PROD..."
+            echo "🚀 Promoting $EMAIL to Admin in PROD..."
 
-                      # Check if container exists first to avoid confusing errors
-                      if ! docker ps | grep -q "$CONTAINER"; then
-                         echo "⚠️ Prod database container ($CONTAINER) not found. Is Prod deployed?"
-                         exit 1
-                      fi
+            # Check if container exists first to avoid confusing errors
+            if ! docker ps | grep -q "$CONTAINER"; then
+               echo "⚠️ Prod database container ($CONTAINER) not found. Is Prod deployed?"
+               exit 1
+            fi
 
-                      # Update
-                      docker exec $CONTAINER psql -U $USER -d $DB -c "UPDATE users SET is_admin = true WHERE email = '$EMAIL';"
+            # Update
+            docker exec $CONTAINER psql -U $USER -d $DB -c "UPDATE users SET is_admin = true WHERE email = '$EMAIL';"
 
-                      # Verify
-                      RESULT=$(docker exec $CONTAINER psql -U $USER -d $DB -t -c "SELECT COUNT(*) FROM users WHERE email = '$EMAIL' AND is_admin = true;")
-                      if [ $(echo "$RESULT" | tr -d '[:space:]') -gt 0 ]; then
-                        echo "✅ Success: $EMAIL is now an Admin in PROD."
-                      else
-                        echo "❌ Error: Failed to promote $EMAIL."
-                        exit 1
-                      fi
+            # Verify
+            RESULT=$(docker exec $CONTAINER psql -U $USER -d $DB -t -c "SELECT COUNT(*) FROM users WHERE email = '$EMAIL' AND is_admin = true;")
+            if [ $(echo "$RESULT" | tr -d '[:space:]') -gt 0 ]; then
+              echo "✅ Success: $EMAIL is now an Admin in PROD."
+            else
+              echo "❌ Error: Failed to promote $EMAIL."
+              exit 1
+            fi
