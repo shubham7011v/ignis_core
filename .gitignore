@@ -98,4 +98,6 @@ Thumbs.db
 
 
 *.agent
-logs/
+
+# Build Artifacts
+ignis_deploy_v*.zip
