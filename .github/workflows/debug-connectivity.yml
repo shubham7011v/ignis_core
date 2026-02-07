@@ -9,6 +9,7 @@ on:
 jobs:
     debug-connection:
         runs-on: ubuntu-latest
+        environment: dev
         steps:
             - name: Test Connectivity
               env:
