@@ -65,6 +65,8 @@ jobs:
 
                       # Build image with version
                       cd server
+                      # Explicitly remove old image to force fresh build/tag usage
+                      docker rmi ignis-server:dev || true
                       docker build --network=host --build-arg VERSION=$VERSION -t ignis-server:dev .
 
                       # Ensure docker-compose.yml is up to date
