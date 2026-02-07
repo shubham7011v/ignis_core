@@ -201,6 +201,26 @@ class _ShortsScreenState extends State<ShortsScreen> {
         // 4. Right Side Actions (Discovery-Focused)
         Positioned(
           right: 12,
+          top: MediaQuery.of(context).padding.top + 12,
+          child: IconButton(
+            onPressed: () => Navigator.pushNamed(context, '/search'),
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.4),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.search_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+          ),
+        ),
+
+        Positioned(
+          right: 12,
           bottom: 120,
           child: ShortsActionBar(
             short: short,

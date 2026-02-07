@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/navigation/app_router.dart';
 import '../../../../core/theme/ignis_theme.dart';
 import '../../../../core/di/service_locator.dart' as di;

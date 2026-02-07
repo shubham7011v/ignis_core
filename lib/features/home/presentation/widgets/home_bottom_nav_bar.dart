@@ -33,11 +33,7 @@ class HomeBottomNavBar extends StatelessWidget {
           activeIcon: Icon(Icons.home),
           label: 'Home',
         ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.search_rounded),
-          activeIcon: Icon(Icons.search_rounded),
-          label: 'Search',
-        ),
+
         const BottomNavigationBarItem(
           icon: Icon(Icons.amp_stories_outlined),
           activeIcon: Icon(Icons.amp_stories_rounded),

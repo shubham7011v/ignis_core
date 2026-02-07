@@ -1,1 +1,35 @@
-{"firestore":{"rules":"firestore.rules","indexes":"firestore.indexes.json"},"storage":{"rules":"storage.rules"},"flutter":{"platforms":{"android":{"default":{"projectId":"vites-dev","appId":"1:930731577575:android:777cfb626eda9272681242","fileOutput":"android/app/google-services.json"}},"dart":{"lib/config/firebase_options_dev.dart":{"projectId":"vites-dev","configurations":{"android":"1:930731577575:android:777cfb626eda9272681242"}},"lib/config/firebase_options_prod.dart":{"projectId":"vites-prod","configurations":{"android":"1:493415880904:android:4bf30b52b2bfd48b24adfd","ios":"1:493415880904:ios:73c041cf93a7c26824adfd"}}}}}}
+{
+    "firestore": {
+        "rules": "firestore.rules",
+        "indexes": "firestore.indexes.json"
+    },
+    "storage": {
+        "rules": "storage.rules"
+    },
+    "flutter": {
+        "platforms": {
+            "android": {
+                "default": {
+                    "projectId": "vites-dev",
+                    "appId": "1:930731577575:android:133bc71ac3a3be6e681242",
+                    "fileOutput": "android/app/google-services.json"
+                }
+            },
+            "dart": {
+                "lib/config/firebase_options_dev.dart": {
+                    "projectId": "vites-dev",
+                    "configurations": {
+                        "android": "1:930731577575:android:133bc71ac3a3be6e681242"
+                    }
+                },
+                "lib/config/firebase_options_prod.dart": {
+                    "projectId": "vites-prod",
+                    "configurations": {
+                        "android": "1:493415880904:android:4bf30b52b2bfd48b24adfd",
+                        "ios": "1:493415880904:ios:73c041cf93a7c26824adfd"
+                    }
+                }
+            }
+        }
+    }
+}

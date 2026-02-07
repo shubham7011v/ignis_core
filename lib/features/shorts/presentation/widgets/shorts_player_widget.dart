@@ -75,7 +75,7 @@ class _ShortsPlayerWidgetState extends State<ShortsPlayerWidget> {
                         ? Icons.pause_circle_filled
                         : Icons.play_circle_filled,
                     size: 72,
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                   ),
                 ),
               ),
