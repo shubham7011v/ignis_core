@@ -128,7 +128,7 @@ class _CelebrationEntryScreenState extends State<CelebrationEntryScreen>
                   ),
                   const SizedBox(height: 60),
                   Text(
-                    'WELCOME TO VIVAAH',
+                    'WELCOME TO VITES',
                     style: GoogleFonts.cinzel(
                       color: IgnisTheme.goldAccent.withValues(alpha: 0.9),
                       fontSize: 22,

@@ -182,7 +182,7 @@ class AppConfig {
     _customApiUrl = customApiUrl;
   }
 
-  /// Safely get value from dotenv, returning null if not initialized
+  /// Safely get value from dotenv, returning null
   static String? _safeGetEnv(String key) {
     try {
       return dotenv.maybeGet(key);
@@ -200,14 +200,14 @@ class AppConfig {
           _safeGetEnv('SERVER_URL') ??
           const String.fromEnvironment(
             'SERVER_URL',
-            defaultValue: 'wss://api.vivaah.iamsorry.in/ws',
+            defaultValue: 'wss://vites.iamsorry.in/ws',
           );
       apiBaseUrl =
           _customApiUrl ??
           _safeGetEnv('API_URL') ??
           const String.fromEnvironment(
             'API_URL',
-            defaultValue: 'https://api.vivaah.iamsorry.in/api',
+            defaultValue: 'https://vites.iamsorry.in/api',
           );
     } else {
       var defaultServerUrl =
@@ -215,14 +215,14 @@ class AppConfig {
           _safeGetEnv('SERVER_URL') ??
           const String.fromEnvironment(
             'SERVER_URL',
-            defaultValue: 'ws://dev-api.vivaah.iamsorry.in/ws',
+            defaultValue: 'wss://dev.vites.iamsorry.in/ws',
           );
       var defaultApiUrl =
           _customApiUrl ??
           _safeGetEnv('API_URL') ??
           const String.fromEnvironment(
             'API_URL',
-            defaultValue: 'https://dev-api.vivaah.iamsorry.in/api',
+            defaultValue: 'https://dev.vites.iamsorry.in/api',
           );
 
       // Handle Android Emulator localhost (10.0.2.2)

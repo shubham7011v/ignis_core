@@ -309,7 +309,7 @@ class IgnisApp extends StatelessWidget {
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, themeState) {
           return MaterialApp(
-            title: 'Vivaah',
+            title: 'Vites',
             debugShowCheckedModeBanner: AppConfig.instance.isDevelopment,
             theme: AppTheme.getTheme(themeState.mode),
             initialRoute: AppRouter.splash,

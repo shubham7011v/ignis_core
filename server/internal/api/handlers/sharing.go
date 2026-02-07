@@ -69,7 +69,7 @@ func (h *SharingHandler) renderPreviewPage(c *gin.Context, title, image, descrip
     <title>%s</title>
 </head>
 <body>
-    <p>Redirecting to Vivaah app...</p>
+    <p>Redirecting to Vites app...</p>
 </body>
 </html>`, title, description, image, title)
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(html))
@@ -88,7 +88,7 @@ func (h *SharingHandler) HandleAppleAppSiteAssociation(c *gin.Context) {
 			"apps": []string{},
 			"details": []gin.H{
 				{
-					"appID": "YOUR_TEAM_ID.com.vivaah.app",
+					"appID": "YOUR_TEAM_ID.com.iamsorry.vites",
 					"paths": []string{"/s/*", "/v/*"},
 				},
 			},
@@ -103,7 +103,7 @@ func (h *SharingHandler) HandleAssetLinks(c *gin.Context) {
 			"relation": []string{"delegate_permission/common.handle_all_urls"},
 			"target": gin.H{
 				"namespace":                "android_app",
-				"package_name":             "com.vivaah.app",
+				"package_name":             "com.iamsorry.vites",
 				"sha256_cert_fingerprints": []string{"YOUR_SHA256_FINGERPRINT"},
 			},
 		},

@@ -1,4 +1,4 @@
-package com.ignis.vivaah
+package com.iamsorry.vites
 
 import io.flutter.embedding.android.FlutterActivity
 

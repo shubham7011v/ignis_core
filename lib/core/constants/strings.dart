@@ -1,5 +1,5 @@
-class AppStrings {
-  static const String appName = 'Vivaah';
+class Strings {
+  static const String appName = 'Vites';
   static const String roomPrefix = 'Room #';
   static const String declaredPrefix = 'Declared: ';
   static const String unitsSuffix = ' Units';

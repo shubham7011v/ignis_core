@@ -1,5 +1,5 @@
 import 'main_common.dart';
 
 void main() {
-  mainCommon(env: 'prod', appName: 'Vivaah');
+  mainCommon(env: 'prod', appName: 'Vites');
 }

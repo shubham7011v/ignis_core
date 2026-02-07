@@ -17,7 +17,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.ignis.vivaah"
+    namespace = "com.iamsorry.vites"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -41,7 +41,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.ignis.vivaah"
+        applicationId = "com.iamsorry.vites"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 24
@@ -64,11 +64,11 @@ android {
             dimension = "env"
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
-            resValue("string", "app_name", "Vivaah Dev")
+            resValue("string", "app_name", "Vites Dev")
         }
         create("prod") {
             dimension = "env"
-            resValue("string", "app_name", "Vivaah")
+            resValue("string", "app_name", "Vites")
         }
     }
 

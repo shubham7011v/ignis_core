@@ -41,7 +41,7 @@ class HomeTopBar extends StatelessWidget {
             children: [
               Flexible(
                 child: Text(
-                  'VIVAAH',
+                  'VITES',
                   style: GoogleFonts.cinzel(
                     color: palette.warn, // Using gold color
                     fontSize: 28,

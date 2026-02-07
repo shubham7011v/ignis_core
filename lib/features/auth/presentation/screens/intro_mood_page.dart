@@ -70,7 +70,7 @@ class _IntroMoodPageState extends State<IntroMoodPage>
                   opacity: _showTitle ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 800),
                   child: Text(
-                    'VIVAAH',
+                    'VITES',
                     style: GoogleFonts.cinzel(
                       color: IgnisTheme.goldAccent,
                       fontSize: 56,
