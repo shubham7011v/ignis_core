@@ -11,4 +11,5 @@ type User struct {
 	IsAdmin     bool      `json:"isAdmin" db:"is_admin"`
 	CreatedAt   time.Time `json:"createdAt" db:"created_at"`
 	LastLogin   time.Time `json:"lastLogin" db:"last_login"`
+	FCMToken    string    `json:"fcmToken" db:"fcm_token"`
 }

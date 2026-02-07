@@ -19,7 +19,7 @@ func (r *UserRepository) GetOrCreateUser(firebaseUID, email, displayName, photoU
 	var user models.User
 
 	// Try to get existing user
-	query := `SELECT id, firebase_uid, email, display_name, photo_url, is_admin, created_at, last_login
+	query := `SELECT id, firebase_uid, email, display_name, photo_url, is_admin, created_at, last_login, COALESCE(fcm_token, '')
 	          FROM users WHERE firebase_uid = $1`
 
 	err := r.db.QueryRow(query, firebaseUID).Scan(
@@ -31,13 +31,14 @@ func (r *UserRepository) GetOrCreateUser(firebaseUID, email, displayName, photoU
 		&user.IsAdmin,
 		&user.CreatedAt,
 		&user.LastLogin,
+		&user.FCMToken,
 	)
 
 	if err == sql.ErrNoRows {
 		// User doesn't exist, create new
 		insertQuery := `INSERT INTO users (firebase_uid, email, display_name, photo_url, last_login)
 		                VALUES ($1, $2, $3, $4, $5)
-		                RETURNING id, firebase_uid, email, display_name, photo_url, is_admin, created_at, last_login`
+		                RETURNING id, firebase_uid, email, display_name, photo_url, is_admin, created_at, last_login, '' as fcm_token`
 
 		err = r.db.QueryRow(insertQuery, firebaseUID, email, displayName, photoURL, time.Now()).Scan(
 			&user.ID,
@@ -48,6 +49,7 @@ func (r *UserRepository) GetOrCreateUser(firebaseUID, email, displayName, photoU
 			&user.IsAdmin,
 			&user.CreatedAt,
 			&user.LastLogin,
+			&user.FCMToken,
 		)
 
 		if err != nil {
@@ -79,4 +81,23 @@ func (r *UserRepository) IsAdmin(firebaseUID string) (bool, error) {
 		return false, err
 	}
 	return isAdmin, nil
+}
+
+// UpdateFCMToken updates the FCM token for a user
+func (r *UserRepository) UpdateFCMToken(firebaseUID, token string) error {
+	_, err := r.db.Exec("UPDATE users SET fcm_token = $1 WHERE firebase_uid = $2", token, firebaseUID)
+	return err
+}
+
+// GetFCMToken returns the FCM token for a user
+func (r *UserRepository) GetFCMToken(firebaseUID string) (string, error) {
+	var token sql.NullString
+	err := r.db.QueryRow("SELECT fcm_token FROM users WHERE firebase_uid = $1", firebaseUID).Scan(&token)
+	if err != nil {
+		return "", err
+	}
+	if token.Valid {
+		return token.String, nil
+	}
+	return "", nil
 }

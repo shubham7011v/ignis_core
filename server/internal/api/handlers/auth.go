@@ -59,3 +59,31 @@ func (h *AuthHandler) VerifyToken(c *gin.Context) {
 		"user": user,
 	})
 }
+
+// UpdateFCMTokenRequest struct
+type UpdateFCMTokenRequest struct {
+	FCMToken string `json:"fcmToken" binding:"required"`
+}
+
+// UpdateFCMToken handles POST /api/auth/fcm-token
+func (h *AuthHandler) UpdateFCMToken(c *gin.Context) {
+	firebaseUID, exists := c.Get("firebaseUid")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	var req UpdateFCMTokenRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	err := h.userRepo.UpdateFCMToken(firebaseUID.(string), req.FCMToken)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update FCM token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "FCM token updated successfully"})
+}

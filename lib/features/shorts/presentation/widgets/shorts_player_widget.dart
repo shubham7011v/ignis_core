@@ -93,7 +93,7 @@ class _ShortsPlayerWidgetState extends State<ShortsPlayerWidget> {
           Image.network(
             widget.short.thumbnailUrl!,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) =>
+            errorBuilder: (_, _, _) =>
                 Container(color: Color(widget.short.placeholderColor)),
           ),
         const Center(

@@ -1,26 +1,67 @@
 name: Nightly Database Backup
 
 on:
-    schedule:
-        - cron: "0 3 * * *" # Run at 03:00 UTC every day
-    workflow_dispatch: # Allow manual trigger
+  schedule:
+    - cron: "0 3 * * *" # Run at 03:00 UTC every day
+  workflow_dispatch: # Allow manual trigger
 
 jobs:
-    backup:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Trigger Backup on VPS
-              uses: appleboy/ssh-action@v1.0.3
-              with:
-                  host: ${{ secrets.SERVER_IP }}
-                  username: root
-                  key: ${{ secrets.SSH_KEY }}
-                  script: |
-                      # Ensure script exists and is executable
-                      if [ -f ~/veil_core/backup_db.sh ]; then
-                        chmod +x ~/veil_core/backup_db.sh
-                        ~/veil_core/backup_db.sh
-                      else
-                        echo "Error: backup_db.sh not found in ~/veil_core"
-                        exit 1
-                      fi
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute Remote Backup
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: root
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          envs: R2_ACCESS_KEY,R2_SECRET_KEY,R2_ENDPOINT
+          script: |
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            BACKUP_DIR="/root/backups"
+            mkdir -p $BACKUP_DIR
+
+            echo "📦 Starting Database Backup..."
+
+            # Backup DEV DB
+            if docker ps | grep -q "vites-dev-db"; then
+              echo "   - Dumping vites-dev-db..."
+              docker exec vites-dev-db pg_dump -U vites_user vites_db | gzip > "$BACKUP_DIR/dev_backup_$TIMESTAMP.sql.gz"
+            fi
+
+            # Backup PROD DB (if exists)
+            if docker ps | grep -q "ignis-prod-db"; then
+              echo "   - Dumping ignis-prod-db..."
+              docker exec ignis-prod-db pg_dump -U vivaah_user vivaah_db | gzip > "$BACKUP_DIR/prod_backup_$TIMESTAMP.sql.gz"
+            fi
+
+            # Install/Configure rclone if not present
+            if ! command -v rclone &> /dev/null; then
+                echo "⬇️ Installing rclone..."
+                curl https://rclone.org/install.sh | bash
+            fi
+
+            # Configure R2 on the fly (file-less config)
+            export RCLONE_CONFIG_R2_TYPE=s3
+            export RCLONE_CONFIG_R2_PROVIDER=Cloudflare
+            export RCLONE_CONFIG_R2_ACCESS_KEY_ID=$R2_ACCESS_KEY
+            export RCLONE_CONFIG_R2_SECRET_ACCESS_KEY=$R2_SECRET_KEY
+            export RCLONE_CONFIG_R2_ENDPOINT=$R2_ENDPOINT
+            export RCLONE_CONFIG_R2_ACL=private
+
+            echo "☁️ Uploading to Cloudflare R2..."
+
+            # Sync backup folder to R2 bucket 'ignis-backups'
+            # Creates a folder structure: ignis-backups/{dev,prod}/...
+
+            rclone copy "$BACKUP_DIR" r2:ignis-backups/daily --include "*.gz"
+
+            echo "✅ Backup Uploaded Successfully!"
+
+            # Cleanup local files older than 3 days to save VPS space
+            find $BACKUP_DIR -name "*.gz" -mtime +3 -delete

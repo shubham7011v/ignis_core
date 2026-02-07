@@ -6,11 +6,13 @@ import (
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"
+	"firebase.google.com/go/v4/messaging"
 	"google.golang.org/api/option"
 )
 
 type FirebaseService struct {
-	AuthClient *auth.Client
+	AuthClient      *auth.Client
+	MessagingClient *messaging.Client
 }
 
 func NewFirebaseService(credentialsPath, credentialsJSON string) (*FirebaseService, error) {
@@ -38,10 +40,16 @@ func NewFirebaseService(credentialsPath, credentialsJSON string) (*FirebaseServi
 		return nil, err
 	}
 
+	messagingClient, err := app.Messaging(ctx)
+	if err != nil {
+		log.Printf("WARNING: Failed to initialize Firebase Messaging: %v", err)
+	}
+
 	log.Println("Firebase Admin SDK initialized successfully")
 
 	return &FirebaseService{
-		AuthClient: authClient,
+		AuthClient:      authClient,
+		MessagingClient: messagingClient,
 	}, nil
 }
 
