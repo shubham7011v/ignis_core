@@ -120,7 +120,7 @@ class _CelebrationEntryScreenState extends State<CelebrationEntryScreen>
                         ],
                       ),
                       child: const Icon(
-                        Icons.favorite, // Heart Icon for Vivaah
+                        Icons.favorite, // Heart Icon for Vites
                         size: 100,
                         color: IgnisTheme.goldAccent,
                       ),

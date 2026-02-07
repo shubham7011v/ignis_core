@@ -28,7 +28,7 @@ class HomeTopBar extends StatelessWidget {
     final String rawName = user?.displayName ?? stats?.name ?? 'Guest';
     final String displayName = rawName.split(' ').first;
     final String photoUrl = user?.photoURL ?? '';
-    // Legacy stats removed for Vivaah
+    // Legacy stats removed for Vites
 
     return Container(
       padding: const EdgeInsets.all(24),
