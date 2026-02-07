@@ -101,3 +101,4 @@ Thumbs.db
 
 # Build Artifacts
 ignis_deploy_v*.zip
+nginx_vites.conf
