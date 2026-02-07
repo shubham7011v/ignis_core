@@ -8,21 +8,18 @@ on:
 jobs:
     deploy:
         runs-on: ubuntu-latest
-        environment: dev
         steps:
             - name: Deploy to Server via SSH
               uses: appleboy/ssh-action@v1.0.3
-              env:
-                  FIREBASE_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-                  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-                  SERVER_IP: ${{ secrets.SERVER_IP }}
-                  SSH_KEY: ${{ secrets.SSH_KEY }}
               with:
                   host: ${{ secrets.SERVER_IP }}
                   username: root
                   key: ${{ secrets.SSH_KEY }}
+                  port: 22
                   envs: FIREBASE_JSON,DB_PASSWORD
                   script: |
+                      export FIREBASE_JSON="${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
+                      export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
                       APP_DIR="/opt/ignis/dev"
                       REPO_URL="https://github.com/shubham7011v/ignis_core.git"
 

@@ -13,10 +13,21 @@ type FirebaseService struct {
 	AuthClient *auth.Client
 }
 
-func NewFirebaseService(credentialsPath string) (*FirebaseService, error) {
+func NewFirebaseService(credentialsPath, credentialsJSON string) (*FirebaseService, error) {
 	ctx := context.Background()
 
-	opt := option.WithCredentialsFile(credentialsPath)
+	var opt option.ClientOption
+	if credentialsJSON != "" {
+		opt = option.WithCredentialsJSON([]byte(credentialsJSON))
+		log.Println("Initializing Firebase using FIREBASE_CREDENTIALS_JSON env var")
+	} else if credentialsPath != "" {
+		opt = option.WithCredentialsFile(credentialsPath)
+		log.Println("Initializing Firebase using config file path")
+	} else {
+		log.Println("WARNING: No Firebase credentials provided (JSON or File)")
+		return nil, nil
+	}
+
 	app, err := firebase.NewApp(ctx, nil, opt)
 	if err != nil {
 		return nil, err

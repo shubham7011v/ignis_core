@@ -14,6 +14,7 @@ type Config struct {
 	DBPassword              string
 	DBName                  string
 	FirebaseCredentialsPath string
+	FirebaseCredentialsJSON string
 	AllowedOrigins          string
 }
 
@@ -29,6 +30,7 @@ func Load() *Config {
 		DBPassword:              getEnv("DB_PASSWORD", "vites_secure_pass_2026"),
 		DBName:                  getEnv("DB_NAME", "vites_db"),
 		FirebaseCredentialsPath: getEnv("FIREBASE_CREDENTIALS_PATH", ""),
+		FirebaseCredentialsJSON: getEnv("FIREBASE_CREDENTIALS_JSON", ""),
 		AllowedOrigins:          getEnv("ALLOWED_ORIGINS", "*"),
 	}
 }
