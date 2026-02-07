@@ -87,8 +87,10 @@ jobs:
                       echo "🚀 Starting containers..."
                       export FIREBASE_CREDENTIALS_JSON="$FIREBASE_JSON"
 
-                      # Stop existing containers to avoid name conflicts
-                      docker compose down --remove-orphans
+                      # Stop and remove existing containers forcefully
+                      docker stop vites-dev vites-dev-db || true
+                      docker rm vites-dev vites-dev-db || true
+                      docker compose down --remove-orphans || true
 
                       # Start new containers
                       # We use the image 'ignis-server:dev' built above, so no need to build again
