@@ -73,8 +73,8 @@ jobs:
                       docker rmi ignis-server:dev || true
                       docker build --network=host --build-arg VERSION=$VERSION -t ignis-server:dev .
 
-                      # Return to parent directory for docker-compose operations
-                      cd ..
+                      # Return to APP_DIR for docker-compose operations
+                      cd $APP_DIR
 
                       # Ensure docker-compose.yml is up to date
                       # We are now in /opt/ignis/dev. The repo is in ./ignis_core.
