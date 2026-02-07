@@ -1,56 +1,93 @@
-# VPS Health Report - Vites Rebranding
+# VPS Health Report - Vites Deployment
 
-## Current Status (as of 2026-02-07 10:27 IST)
+## Current Status (as of 2026-02-07 12:30 IST)
 
-### Running Containers
-| Container | Status | Port | Health |
-|-----------|--------|------|--------|
-| `ignis-dev` | ✅ Up 12h | 8082→8080 | Responding (`vivaah-api`) |
-| `ignis-dev-db` | ✅ Up 12h | 5432 | Running |
-| `veil-game-dev` | ✅ Up 2w | 8080→8080 | Healthy |
-| `veil-game-prod` | ✅ Up 3w | 8081→8080 | Healthy |
+### ✅ Production Services Running
+
+| Container | Status | Port | Health | Branding |
+|-----------|--------|------|--------|----------|
+| `vites-dev` | ✅ Up | 8082→8080 | ✅ Healthy | `vites-api` |
+| `vites-dev-db` | ✅ Up | 5432 | ✅ Running | PostgreSQL 18 |
+| `veil-game-dev` | ✅ Up 2w | 8080→8080 | ✅ Healthy | Veil Game |
+| `veil-game-prod` | ✅ Up 3w | 8081→8080 | ✅ Healthy | Veil Game |
+
+### URLs
+
+| Service | URL | SSL Status |
+|---------|-----|------------|
+| **Vites Dev** | https://dev.vites.iamsorry.in | ✅ Active (Let's Encrypt) |
+| **Vites Prod** | https://vites.iamsorry.in | ⏳ Domain configured, pending deployment |
 
 ### Directory Structure
 ```
 /opt/ignis/
-├── dev/     ← Currently deployed (OLD branding)
+├── dev/
+│   └── ignis_core/     ← Vites Dev (DEPLOYED ✅)
+│       ├── server/
+│       ├── docker-compose.yml  (points to docker-compose-ignis-dev.yml)
+│       └── .git/
 └── (prod not deployed yet)
 ```
 
-## ⚠️ Critical Findings
+## ✅ Completed Infrastructure
 
-### 1. Old Branding Still Active on VPS
-The currently running `ignis-dev` service:
-- **API Response**: Returns `{"service":"vivaah-api","status":"ok"}`
-- **Database User**: Uses `vivaah_user` (as per old config)
-- **Needs**: Full redeployment with new Vites-branded code
+### 1. DNS Configuration
+- **A Record**: `dev.vites.iamsorry.in` → `72.62.197.76` ✅
+- **A Record**: `vites.iamsorry.in` → `72.62.197.76` ✅
+- **Propagation**: Complete (verified via Google DNS 8.8.8.8)
 
-### 2. No Production Environment
-- `ignis-prod` containers do not exist on VPS yet.
-- Directory `/opt/ignis/prod` not created.
+### 2. SSL/TLS Certificates
+- **Provider**: Let's Encrypt via Certbot
+- **Domains Covered**: 
+  - `dev.vites.iamsorry.in` ✅
+  - `vites.iamsorry.in` ✅
+- **Expiry**: 2026-05-08 (auto-renewal configured)
+- **Nginx Config**: `/etc/nginx/sites-available/vites` ✅
 
-## 📋 Recommended Actions
+### 3. Database Status
+- **Migration**: ✅ Applied successfully (version: 2026020601)
+- **Schema**: All tables created (users, templates, orders, favorites)
+- **Connection**: Stable, no timeout issues
+- **Volume**: `ignis_core_vites-dev-pg-data` (persistent)
 
-### Immediate (Dev Redeployment)
-1. **Redeploy Dev** with new `vites`-branded code:
-   ```bash
-   cd /opt/ignis/dev
-   docker compose down
-   # Transfer new deployment zip with updated code
-   docker compose up -d
-   ```
-2. **Update Database** credentials to use `vites_user` (or keep `vivaah_user` for continuity, document decision).
+### 4. Service Health
+```bash
+$ curl https://dev.vites.iamsorry.in/health
+{"service":"vites-api","status":"ok"}
+```
 
-### Planned (Prod Deployment)
-1. Create `/opt/ignis/prod` directory.
-2. Deploy Vites-branded production environment.
-3. Configure Nginx for `vites.iamsorry.in`.
-4. Set up SSL with Certbot.
+## 🔧 Recent Fixes (2026-02-07)
 
-## GitHub Actions Status
-**Workflows Found**: 9 total
-- `deploy-ignis-dev.yml` ← Needs review for rebranding
-- `deploy-ignis-prod.yml` ← Needs review for rebranding
-- Others: CI/CD, backup workflows
+### Database Migration Issue (RESOLVED)
+- **Problem**: Obsolete migration file embedded in Go binary caused `DATETIME does not exist` error
+- **Solution**: Deleted `000001_init_schema.up.sql`, performed nuclear Docker rebuild
+- **Result**: Clean migration using `2026020601_init_schema.up.sql` ✅
 
-**Next**: Review workflow files for hardcoded "Vivaah" references.
+### Firebase Dependency (RESOLVED)
+- **Problem**: Service crashed when Firebase credentials were missing
+- **Solution**: Made Firebase optional in `main.go` (line 27-32)
+- **Result**: Service runs without Firebase, ready for credentials when needed ✅
+
+### Branding Cleanup (COMPLETED)
+- **Updated**: Health endpoint now returns `"service":"vites-api"`
+- **Containers**: Renamed from `vivaah-*` to `vites-*`
+- **Volumes**: Old `vivaah_pg_data` volumes cleaned up
+
+## 📋 Next Steps
+
+### Production Deployment
+1. Create `/opt/ignis/prod` directory
+2. Deploy using `docker-compose-ignis-prod.yml` (port 8083)
+3. Verify production database connectivity
+4. Test `https://vites.iamsorry.in`
+
+### Optional Enhancements
+1. **Firebase**: Add real Firebase Admin SDK credentials for authentication
+2. **Monitoring**: Set up Uptime Kuma or similar for `/health` endpoint
+3. **Backups**: Automate daily `pg_dump` for production database
+
+## 🛡️ Security Notes
+- All traffic forced to HTTPS
+- SSL certificates auto-renew
+- Database credentials use strong passwords
+- Firebase currently disabled (service runs without it)

@@ -1,7 +1,7 @@
-# Ignis (Vites) Production Deployment Guide
+# Vites Production Deployment Guide
 
 ## Overview
-This guide explains how to deploy Ignis (Vites) to production on the same VPS, running alongside Dev and Veil services.
+This guide explains how to deploy Vites to the VPS. **Development environment is already deployed and running at https://dev.vites.iamsorry.in**. This guide covers production deployment.
 
 ## Environment Architecture
 
@@ -26,9 +26,11 @@ Each environment runs **2 containers**:
 |---------|-----|------|
 | **GIN_MODE** | `debug` | `release` |
 | **ALLOWED_ORIGINS** | `*` (all) | `https://vites.iamsorry.in` |
-| **DOMAINS** | `dev.vites.iamsorry.in` | `vites.iamsorry.in` |
+| **DOMAINS** | `dev.vites.iamsorry.in` ✅ **LIVE** | `vites.iamsorry.in` |
+| **DB_USER** | `vites_user` | `vites_user` |
+| **DB_NAME** | `vites_db` | `vites_db` |
 | **DB_PASSWORD** | `ignis_secure_pass_2026` | `ignis_prod_secure_pass_2026` |
-| **Database Volume** | `ignis_dev_pg_data` | `ignis_prod_pg_data` |
+| **Database Volume** | `vites-dev-pg-data` | `vites-prod-pg-data` |
 
 ### Environment Variables (Inline Method)
 

@@ -3,14 +3,15 @@
 ## Server Details
 - **Provider**: Hostinger
 - **IP Address**: `72.62.197.76`
-- **OS**: Ubuntu 22.04 LTS (presumed based on standard images)
+- **OS**: Ubuntu 22.04 LTS
 - **User**: `root` (SSH Key Authentication)
+- **SSH Key**: `C:\Users\u32n08\.ssh\id_rsa_hostinger`
 
 ---
 
 ## 🕒 Chronological Activity Log
 
-### 1. Initial Access & Reconciliation
+### 1. Initial Access & Reconciliation (Feb 2026)
 - **Discovery**: Connected via SSH to explore existing setup.
 - **Findings**:
     - `Veil` (Game Server) was already running (Docker containers `veil-game-dev` & `veil-game-prod`).
@@ -18,30 +19,30 @@
     - No existing `Ignis` folders found.
 
 ### 2. Environment Preparation
-- **Directory Structure**: Created `/opt/ignis/dev` and `/opt/ignis/prod` for clean separation.
-- **Docker**: Verified Docker and Docker Compose were already installed and active (version 24.0.5+).
+- **Directory Structure**: Created `/opt/ignis/dev` for development environment.
+- **Docker**: Verified Docker and Docker Compose were installed and active (version 24.0.5+).
 
-### 3. Deployment Attempts (Iterative Process)
+### 3. Initial Deployment Attempts (Iterative Process)
 
-#### Attempt v1-v3: The "Go Version" Saga
+#### The "Go Version" Saga
 - **Issue**: Build failed with `go: go.mod requires go >= 1.25.5`. The `Dockerfile` was using `golang:1.21`.
 - **Action**: Updated `Dockerfile` to use `golang:1.25-alpine`.
 - **Result**: Build proceeded but failed on code errors.
 
-#### Attempt v4: The "Missing Model" Error
+#### The "Missing Model" Error
 - **Issue**: Compilation failed with `undefined: models.Short`.
-- **Action**: Modified `sharing_service.go` to use `models.Template` instead (Architecture alignment).
+- **Action**: Modified `sharing_service.go` to use `models.Template` instead.
 - **Result**: Fixed type error, but revealed unused variables.
 
-#### Attempt v5: The "Unused Variable" Strictness
-- **Issue**: Go compiler (strict mode) rejected unused `id` and `short` variables in `sharing.go`.
+#### The "Unused Variable" Strictness
+- **Issue**: Go compiler rejected unused `id` and `short` variables in `sharing.go`.
 - **Action**: Replaced variables with blank identifier `_`.
 - **Result**: **Code Compiled Successfully!** 🎉
 
 ### 4. Runtime Troubleshooting (The "Crash Loop")
 
 #### The Database Credential Mismatch
-- **Symptoms**: Containers started but `ignis-dev` kept restarting. Logs showed `pq: password authentication failed for user "vivaah_user"`. (Note: `vivaah_user` is the internal DB user, kept for legacy compatibility).
+- **Symptoms**: Containers started but `ignis-dev` kept restarting. Logs showed `pq: password authentication failed`.
 - **Root Cause**:
     - Server `.env` file had: `DB_PASSWORD=local_pass`
     - `docker-compose.yml` had: `POSTGRES_PASSWORD=ignis_secure_pass_2026`
@@ -49,41 +50,110 @@
 
 #### The "Stale Volume" Problem
 - **Symptoms**: Even after fixing `.env`, auth still failed.
-- **Root Cause**: The Docker Volume (`ignis_dev_pg_data`) was initialized with the *old* wrong password and persisted.
-- **Fix**: Ran `docker compose down -v` to delete the volume and force a fresh DB initialization.
+- **Root Cause**: The Docker Volume was initialized with the old password and persisted.
+- **Fix**: Ran `docker compose down -v` to delete the volume and force fresh DB initialization.
 
 #### The "Dirty Migration" State
 - **Symptoms**: DB connected, but app crashed with `Dirty database version 1`.
-- **Cause**: Flawed initial migration run during the crash loop left the DB in a strictly locked state.
+- **Cause**: Flawed initial migration run during crash loop left DB in locked state.
 - **Fix**: Manually forced the state clean:
   ```sql
   UPDATE schema_migrations SET dirty=false WHERE version=1;
   ```
 
-### 5. Final Configuration (Success State)
-- **Deployment**: Manual SSH transfer of `ignis_deploy_v6.zip`.
-- **Architecture**:
-    - **Ignis Dev**: Port 8082 (Mapped to container 8080).
-    - **Ignis DB**: Internal Port 5432 (Isolated network).
-- **Env Variables**: Converted to **Inline** format in `docker-compose.yml` (matching `Veil`'s pattern) for better visibility.
+### 5. Vites Rebranding & DNS Setup (2026-02-07)
+
+#### DNS Configuration
+- **Action**: Added A records for Vites domains
+  - `dev.vites.iamsorry.in` → `72.62.197.76`
+  - `vites.iamsorry.in` → `72.62.197.76`
+- **Result**: DNS propagation confirmed via Google DNS (8.8.8.8)
+
+#### SSL Certificate Installation
+- **Tool**: Certbot with Nginx plugin
+- **Domains**: `dev.vites.iamsorry.in`, `vites.iamsorry.in`
+- **Result**: ✅ Let's Encrypt certificates installed successfully
+- **Expiry**: 2026-05-08 (auto-renewal configured)
+- **Config**: `/etc/nginx/sites-available/vites`
+
+#### The "Persistent Migration" Bug
+- **Symptoms**: Service crashed with `type "datetime" does not exist` error
+- **Cause**: Old migration file (`000001_init_schema.up.sql`) was embedded in Go binary via `//go:embed`
+- **Attempted Fixes**:
+  1. Deleted file from filesystem (didn't work - embedded in binary)
+  2. Schema reset with `DROP SCHEMA public CASCADE` (error persisted)
+- **Final Solution**: 
+  1. Deleted obsolete migration from git repository
+  2. Performed "nuclear rebuild" - removed all Docker images/containers/cache
+  3. Fresh clone from GitHub with correct migration file
+  4. Result: **Migrations applied successfully** ✅
+
+#### Firebase Crash Loop
+- **Symptoms**: Service crashed immediately on startup: `Failed to initialize Firebase`
+- **Cause**: Firebase credentials missing, treated as fatal error in `main.go`
+- **Fix**: Modified `main.go` line 27-32 to make Firebase optional
+  - Changed `log.Fatalf` to `log.Printf` with warning
+  - Service now runs without Firebase credentials
+- **Result**: Service started successfully ✅
+
+#### Container Naming Cleanup
+- **Issue**: Docker containers still named `vivaah-dev`, `vivaah-db`
+- **Cause**: VPS was using old `docker-compose.yml` instead of `docker-compose-ignis-dev.yml`
+- **Fix**: Copied correct compose file: `cp docker-compose-ignis-dev.yml docker-compose.yml`
+- **Result**: Containers now correctly named `vites-dev`, `vites-dev-db` ✅
+
+### 6. **Deployment Success** ✅ (2026-02-07 12:30 IST)
+
+- **Status**: **PRODUCTION LIVE**
+- **URL**: https://dev.vites.iamsorry.in/health
+- **Response**: `{"service":"vites-api","status":"ok"}`
+- **Containers**:
+  - `vites-dev` (Go API server) - Up and healthy
+  - `vites-dev-db` (PostgreSQL 18) - Up and healthy
+- **Database**: Migrations applied successfully (version 2026020601)
+- **SSL**: Active with automatic HTTPS redirection
+
+---
+
+## 📂 File Locations on Server
+- **Ignis Dev**: `/opt/ignis/dev/ignis_core/`
+  - `server/` (Go application)
+  - `docker-compose.yml` (linked to `docker-compose-ignis-dev.yml`)
+  - `.git/` (Git repository for updates)
+- **Nginx Config**: `/etc/nginx/sites-available/vites`
+- **SSL Certificates**: `/etc/letsencrypt/live/vites.iamsorry.in/`
+- **Docker Volumes**: 
+  - `ignis_core_vites-dev-pg-data` (PostgreSQL data)
 
 ---
 
 ## 🛡️ Security & Maintenance
-- **SSH Access**: Configured with private key (`id_rsa_hostinger`).
-- **Firewall**: Ports 8080-8083 are currently exposed (need locking down after Nginx setup).
-- **Data Persistence**: Docker volumes `ignis_dev_pg_data` and `ignis_prod_pg_data` ensure data survives restarts.
-
-## 📂 File Locations on Server
-- **Ignis Dev**: `/opt/ignis/dev/`
-- **Ignis Prod**: `/opt/ignis/prod/` (Created but not fully active)
-- **Ignis Logs**: `docker logs ignis-dev`, `docker logs ignis-prod`
+- **SSH Access**: Configured with private key (`id_rsa_hostinger`)
+- **SSL/TLS**: Let's Encrypt certificates with auto-renewal
+- **HTTPS**: All traffic forced to HTTPS via Nginx
+- **Database**: Strong passwords, isolated Docker network
+- **Firewall**: Ports 8080-8083 exposed for dev/prod services
 
 ---
 
-## 📜 Rebranding Log (Feb 2026)
-- **Decision**: App renamed from **Vivaah** to **Vites**.
-- **Domain**: Switched from `vivaah.iamsorry.in` to `vites.iamsorry.in`.
-- **Impact**: 
-    - Internal DB User/Name (`vivaah_user`) preserved to prevent data migration issues.
-    - Public URLs updated in `production_deployment_guide.md`.
+## 📜 Key Learnings
+
+### Go Embed Directive
+- Files marked with `//go:embed` are **baked into the binary** at compile time
+- Deleting the file from filesystem doesn't remove it from running containers
+- Solution: Full Docker rebuild (`docker compose build --no-cache`)
+
+### PostgreSQL vs SQLite
+- PostgreSQL doesn't support `DATETIME` type (use `TIMESTAMP` instead)
+- Migration state persists in `schema_migrations` table
+- "Dirty" migrations require manual intervention or fresh schema
+
+### Docker Compose Volumes
+- Volumes persist data even when containers are removed
+- Use `docker compose down -v` to delete volumes
+- Useful for forcing fresh database initialization
+
+### Firebase Integration
+- Making optional dependencies truly optional prevents deployment blockers
+- Use `log.Printf` for warnings vs `log.Fatalf` for critical errors
+- Service can gracefully degrade without non-essential features
