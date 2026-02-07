@@ -20,13 +20,12 @@ jobs:
                   username: root
                   key: ${{ secrets.SSH_KEY }}
                   port: 22
-                  debug: true
-                  command_timeout: 30m
-                  script_stop: true
                   envs: FIREBASE_JSON,DB_PASSWORD
                   script: |
-                      export FIREBASE_JSON="${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
-                      export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+                      # Use env vars passed via 'envs', do NOT interpolate secrets directly
+                      # export FIREBASE_JSON="$FIREBASE_JSON" # Already exported by action
+                      # export DB_PASSWORD="$DB_PASSWORD" # Already exported by action
+
                       APP_DIR="/opt/ignis/dev"
                       REPO_URL="https://github.com/shubham7011v/ignis_core.git"
 
