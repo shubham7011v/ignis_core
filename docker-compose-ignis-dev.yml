@@ -3,9 +3,7 @@ version: '3.8'
 services:
   server:
     container_name: vites-dev
-    build:
-      context: ./server
-      dockerfile: Dockerfile
+    image: ignis-server:dev
     ports:
       - "8082:8080" # Ignis Dev
     environment:

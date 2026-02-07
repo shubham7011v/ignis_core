@@ -68,25 +68,17 @@ jobs:
                       docker build --network=host --build-arg VERSION=$VERSION -t ignis-server:dev .
 
                       # Ensure docker-compose.yml is up to date
-                      cp ~/ignis_core/ignis_core/docker-compose-ignis-dev.yml ./docker-compose.yml
+                      cp ignis_core/docker-compose-ignis-dev.yml ./docker-compose.yml
 
                       # Run with inline secret
                       echo "🚀 Starting containers..."
                       export FIREBASE_CREDENTIALS_JSON="$FIREBASE_JSON"
-                      # Note: We build again here with compose, but since we built the image properly above with tags,
-                      # we can force compose to use that or just let compose build it if properly configured.
-                      # Ideally, docker-compose should use the image we just built or build context needs args.
-                      # Simplified: We just let compose build it but we need to pass args to compose or rely on the image tag.
-                      # BETTER APPROACH (matching veil_core): Explicit build with docker then compose up.
-
-                      # Since we did explicit build above, we should ensure compose uses that or builds correctly.
-                      # To pass args to compose build:
-                      # docker compose build --build-arg VERSION=$VERSION server # Redundant since we built explicitly above, but good for cache
 
                       # Stop existing containers to avoid name conflicts
                       docker compose down --remove-orphans
 
                       # Start new containers
+                      # We use the image 'ignis-server:dev' built above, so no need to build again
                       docker compose up -d --force-recreate
                       docker system prune -f
 
