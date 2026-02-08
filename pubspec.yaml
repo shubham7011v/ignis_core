@@ -128,19 +128,19 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
 # flutter_native_splash configuration
-# flutter_native_splash:
-#   color: "#7E1E3F"
-#   image: assets/app_icon.png
-#   android_gravity: center
-#   ios_content_mode: scaleAspectFit
-#   fullscreen: true
-#   android_12:
-#     color: "#7E1E3F"
-#     image: assets/app_icon.png
-#   ios: true
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/app_icon.png
+  android_gravity: center
+  ios_content_mode: scaleAspectFit
+  fullscreen: true
+  android_12:
+    color: "#FFFFFF"
+    image: assets/app_icon.png
+  ios: true
 
-# flutter_launcher_icons:
-#   android: "launcher_icon"
-#   ios: true
-#   image_path: "assets/app_icon.png"
-#   min_sdk_android: 21 # android min sdk min:16, default:21
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/app_icon.png"
+  min_sdk_android: 21 # android min sdk min:16, default:21
