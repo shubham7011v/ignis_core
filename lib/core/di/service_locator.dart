@@ -24,8 +24,8 @@ import '../../features/orders/domain/repositories/order_repository.dart';
 import '../../features/orders/data/repositories/firestore_order_repository.dart';
 // Shorts
 import '../../features/shorts/domain/repositories/shorts_repository.dart';
-import '../../features/shorts/data/repositories/mock_shorts_repository.dart';
 import '../../features/shorts/presentation/bloc/shorts_bloc.dart';
+import '../../features/shorts/data/repositories/shorts_repository_impl.dart';
 import '../../features/shorts/data/services/shorts_video_service.dart';
 
 class ServiceLocator {
@@ -54,6 +54,7 @@ class ServiceLocator {
   late final SystemStatusService systemStatusService;
   late final AudioService audioService;
   late final AppNotificationBloc notificationBloc;
+  late final RemoteConfigService remoteConfigService;
   late final InvitationBloc invitationBloc;
   late final CreationsBloc creationsBloc;
   late final TemplatesBloc templatesBloc;
@@ -71,6 +72,7 @@ class ServiceLocator {
 
     // Services
     shortsVideoService = ShortsVideoService();
+    remoteConfigService = RemoteConfigService();
 
     // Initialize Repositories
     authRepository = AuthRepository();
@@ -88,7 +90,7 @@ class ServiceLocator {
     // Orders
     orderRepository = FirestoreOrderRepository();
     // Shorts
-    shortsRepository = MockShortsRepository();
+    shortsRepository = ShortsRepositoryImpl();
 
     // YouTube & Notifications
     youtubeRepository = YouTubeServiceImpl();

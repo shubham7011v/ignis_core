@@ -62,6 +62,10 @@ class AppConfig {
   // Server Configuration
   late final String serverUrl;
   late final String apiBaseUrl;
+  late final bool isLocalTesting;
+  late final String localIpUrl;
+  late final String devVpsUrl;
+  late final String productionBaseUrl;
 
   // Reconnection Settings
   late final int maxReconnectAttempts;
@@ -90,12 +94,19 @@ class AppConfig {
   late List<String> adminUids;
   bool isAdmin = false;
 
+  // Billing & Products
+  late final String premiumProductKey;
+  late final String premiumPrefKey;
+
   // Legal & Support
   late final String privacyPolicyUrl;
   late final String termsUrl;
   late final String dataUsageUrl;
   late final String supportEmail;
   late final String helpCenterUrl;
+  bool maintenanceMode = false;
+  String minAppVersion = '1.0.0';
+  String? promoBannerUrl;
 
   // Feature Flags (From Remote Config / Server Override)
   late bool enableVoiceChat;
@@ -111,33 +122,54 @@ class AppConfig {
   late bool enableEliteDecks;
   late bool enableSessionChat;
 
-  /// Update configuration from server-side /api/config response
-  void updateFromServer(Map<String, dynamic> serverConfig) {
-    // Helper to check if a flag is locally overridden
-    // Helper to check if a flag is locally overridden
+  /// Update configuration from dynamic map (Server API or Firestore)
+  void updateFromMap(Map<String, dynamic> data) {
     bool isOverridden(String envKey) => _safeGetEnv(envKey) != null;
 
-    if (serverConfig['enableVoiceChat'] is bool &&
-        !isOverridden('ENABLE_VOICE_CHAT')) {
-      enableVoiceChat = serverConfig['enableVoiceChat'];
+    // Root properties
+    if (data['maintenance_mode'] is bool) {
+      maintenanceMode = data['maintenance_mode'];
     }
-    if (serverConfig['enableDailyChallenges'] is bool &&
-        !isOverridden('ENABLE_DAILY_CHALLENGES')) {
-      enableDailyChallenges = serverConfig['enableDailyChallenges'];
+    if (data['min_app_version'] is String) {
+      minAppVersion = data['min_app_version'];
     }
-    if (serverConfig['enableTournaments'] is bool &&
-        !isOverridden('ENABLE_TOURNAMENTS')) {
-      enableTournaments = serverConfig['enableTournaments'];
+    if (data['promo_banner_url'] is String) {
+      promoBannerUrl = data['promo_banner_url'];
     }
-    if (serverConfig['enableAdminDashboard'] is bool &&
-        !isOverridden('ENABLE_ADMIN_DASHBOARD')) {
-      enableAdminDashboard = serverConfig['enableAdminDashboard'];
-    }
-    if (serverConfig['enableSessionChat'] is bool &&
-        !isOverridden('ENABLE_SESSION_CHAT')) {
-      enableSessionChat = serverConfig['enableSessionChat'];
+
+    // Support legacy server key names as well
+    if (data['maintenanceMode'] is bool)
+      maintenanceMode = data['maintenanceMode'];
+
+    // Nested feature flags or flat list
+    final flags = data['feature_flags'] ?? data;
+    if (flags is Map<String, dynamic>) {
+      if (flags['enableVoiceChat'] is bool &&
+          !isOverridden('ENABLE_VOICE_CHAT')) {
+        enableVoiceChat = flags['enableVoiceChat'];
+      }
+      if (flags['enableDailyChallenges'] is bool &&
+          !isOverridden('ENABLE_DAILY_CHALLENGES')) {
+        enableDailyChallenges = flags['enableDailyChallenges'];
+      }
+      if (flags['enableTournaments'] is bool &&
+          !isOverridden('ENABLE_TOURNAMENTS')) {
+        enableTournaments = flags['enableTournaments'];
+      }
+      if (flags['enableAdminDashboard'] is bool &&
+          !isOverridden('ENABLE_ADMIN_DASHBOARD')) {
+        enableAdminDashboard = flags['enableAdminDashboard'];
+      }
+      if (flags['enableSessionChat'] is bool &&
+          !isOverridden('ENABLE_SESSION_CHAT')) {
+        enableSessionChat = flags['enableSessionChat'];
+      }
     }
   }
+
+  /// Legacy method for backend backward compatibility
+  void updateFromServer(Map<String, dynamic> serverConfig) =>
+      updateFromMap(serverConfig);
 
   /// Manually override admin status for current user (usually from AUTH_OK websocket)
   void setAdminStatus(bool isAdmin, String uid) {
@@ -194,6 +226,27 @@ class AppConfig {
   void _load() {
     // Server Configuration
     bootStep = '4a. Loading Server URLs';
+    isLocalTesting = _getBoolConfig(
+      'is_local_testing',
+      'IS_LOCAL_TESTING',
+      false,
+    );
+    localIpUrl = _getStringConfig(
+      'local_ip_url',
+      'LOCAL_IP_URL',
+      'http://192.168.1.100:8080',
+    );
+    devVpsUrl = _getStringConfig(
+      'dev_vps_url',
+      'DEV_VPS_URL',
+      'https://dev.vites.iamsorry.in',
+    );
+    productionBaseUrl = _getStringConfig(
+      'production_base_url',
+      'PRODUCTION_BASE_URL',
+      'https://api.iamsorry.in',
+    );
+
     if (isProduction) {
       serverUrl =
           _customServerUrl ??
@@ -207,7 +260,8 @@ class AppConfig {
           _safeGetEnv('API_URL') ??
           const String.fromEnvironment(
             'API_URL',
-            defaultValue: 'https://vites.iamsorry.in/api',
+            defaultValue:
+                'https://vites.iamsorry.in', // Corrected to match ApiConfig
           );
     } else {
       var defaultServerUrl =
@@ -220,14 +274,10 @@ class AppConfig {
       var defaultApiUrl =
           _customApiUrl ??
           _safeGetEnv('API_URL') ??
-          const String.fromEnvironment(
-            'API_URL',
-            defaultValue: 'https://dev.vites.iamsorry.in/api',
-          );
+          (isLocalTesting ? localIpUrl : devVpsUrl);
 
       // Handle Android Emulator localhost (10.0.2.2)
       if (!kIsWeb && Platform.isAndroid) {
-        // Only remap if explicitly pointing to localhost, not the VPS
         if (defaultServerUrl.contains('localhost')) {
           defaultServerUrl = defaultServerUrl.replaceFirst(
             'localhost',
@@ -314,6 +364,18 @@ class AppConfig {
     enableDebugMode = const bool.fromEnvironment(
       'DEBUG',
       defaultValue: kDebugMode,
+    );
+
+    // Billing & Products
+    premiumProductKey = _getStringConfig(
+      'premium_product_key',
+      'PREMIUM_PRODUCT_KEY',
+      'premium_templates_pack',
+    );
+    premiumPrefKey = _getStringConfig(
+      'premium_pref_key',
+      'PREMIUM_PREF_KEY',
+      'is_premium_user',
     );
 
     // Admin Configuration

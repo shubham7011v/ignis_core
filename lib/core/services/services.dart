@@ -10,3 +10,4 @@ export 'youtube/youtube_service_impl.dart';
 export '../models/system_status.dart';
 export 'audio/audio_service_interface.dart';
 export 'audio/audio_service_impl.dart';
+export 'remote_config/remote_config_service.dart';

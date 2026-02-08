@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -117,35 +115,39 @@ Future<void> mainCommon({required String env, required String appName}) async {
         throw 'Firebase Initialization Failed: $e';
       }
 
-      // Fully load config
-      _bootStep = '4. Loading Config';
+      // Fully load base config from .env/environment
+      _bootStep = '3. Loading Base Config';
       config.load();
-      AppLogger.info('🚀 [STARTUP] 4. Config loaded');
+      AppLogger.info('🚀 [STARTUP] 3. Base Config loaded');
 
-      // Connectivity Doctor & Server Config Sync
-      _bootStep = '5. Syncing Server Config';
+      // Initialize Service Locator (depends on Firebase and AppConfig)
+      _bootStep = '4. Setting up Service Locator';
+      await di.sl.setup();
+      AppLogger.info('🚀 [STARTUP] 4. Service Locator ready');
+
+      // Sync Remote Config from Firestore
+      _bootStep = '5. Syncing Remote Config (Firestore)';
       AppLogger.info('🚀 [STARTUP] $_bootStep...');
       try {
-        final client = HttpClient();
-        client.connectionTimeout = const Duration(seconds: 5);
-        final request = await client
-            .getUrl(Uri.parse('${config.apiBaseUrl}/config'))
-            .timeout(const Duration(seconds: 5));
-        final response = await request.close();
-
-        if (response.statusCode == 200) {
-          final body = await response.transform(utf8.decoder).join();
-          final serverData = json.decode(body) as Map<String, dynamic>;
-          config.updateFromServer(serverData);
-          AppLogger.info('🚀 [STARTUP] 5. Server Config Synced: $serverData');
-        } else {
+        // Initial fetch for boot
+        final remoteConfigMap = await di.sl.remoteConfigService.fetchConfig();
+        if (remoteConfigMap.isNotEmpty) {
+          config.updateFromMap(remoteConfigMap);
           AppLogger.info(
-            '🚀 [STARTUP] 5. Server Config Fetch Failed: Status ${response.statusCode}',
+            '🚀 [STARTUP] 5. Remote Config Initialized: $remoteConfigMap',
           );
         }
+
+        // Setup real-time listener for live updates (Maintenance mode, feature flags)
+        di.sl.remoteConfigService.watchConfig().listen((updatedConfig) {
+          if (updatedConfig.isNotEmpty) {
+            config.updateFromMap(updatedConfig);
+            AppLogger.info('🚀 [REMOTE CONFIG] Real-time update received');
+          }
+        });
       } catch (e) {
         AppLogger.info(
-          '🚀 [STARTUP] 5. Server Config Sync Failed (continuing): $e',
+          '🚀 [STARTUP] 5. Remote Config Sync Failed (continuing): $e',
         );
       }
 
@@ -169,11 +171,6 @@ Future<void> mainCommon({required String env, required String appName}) async {
         // For debugging, let's catch it but log clearly.
         AppLogger.info('🚀 [STARTUP] 6. App Check Failed (WARNING): $e');
       }
-
-      // Initialize Service Locator
-      _bootStep = '7. Setting up Service Locator';
-      await di.sl.setup();
-      AppLogger.info('🚀 [STARTUP] 7. Service Locator ready');
 
       // Initialize Notifications
       _bootStep = '8. Initializing Notifications';

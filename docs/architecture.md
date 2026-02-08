@@ -45,4 +45,6 @@ sequenceDiagram
 - **Null Safety**: Strict throughout.
 - **Orientation**: Portrait only.
 - **Auth**: Google Sign-In only (Firebase).
-- **Backend Strategy**: Hybrid (Firebase for Auth/Sync, Go VPS for heavy lifting - planned Phase 3).
+- **Backend Strategy**: **Hybrid ACTIVE** (Firebase for Auth/Sync/Real-time, Go VPS for API/Database).
+- **Real-time Config**: Firestore-backed `RemoteConfigService`.
+- **Offline Favorites**: Firestore-backed `ShortsRepository`.

@@ -2,13 +2,15 @@ import 'dart:async';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/repositories/billing_repository.dart';
+import '../../../../core/config/app_config.dart';
 import '../../../../core/utils/app_logger.dart';
 
 class BillingRepositoryImpl implements BillingRepository {
   final InAppPurchase _iap = InAppPurchase.instance;
   final _purchaseController = StreamController<bool>.broadcast();
-  final String _premiumProductKey = 'premium_templates_pack';
-  final String _premiumPrefKey = 'is_premium_user';
+
+  String get _premiumProductKey => AppConfig.instance.premiumProductKey;
+  String get _premiumPrefKey => AppConfig.instance.premiumPrefKey;
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
 
   @override

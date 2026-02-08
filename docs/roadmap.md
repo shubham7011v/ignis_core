@@ -14,13 +14,14 @@
 - [x] **Admin Tab**: Conditional access, order viewing, video delivery (YouTube link).
 - [x] **Order Flow**: Style selection -> Details Form -> Preview.
 
-## Phase 3: Backend Integration (🚧 Up Next)
-- [ ] **VPS Setup**: Provision Go server and PostgreSQL.
-- [ ] **API Development**: Order creation, status updates, template management.
-- [ ] **Integration**: Connect Flutter Repositories to Go API.
+## Phase 3: Backend Integration (✅ Completed)
+- [x] **VPS Setup**: Provision Go server and PostgreSQL.
+- [x] **API Development**: Order creation, status updates, template management.
+- [x] **Integration**: Connect Flutter Repositories to Go API.
+- [x] **Firestore**: Real-time Remote Config & Offline Favorites sync.
 - [ ] **Automation**: Setup OpenClaw for scheduled tasks.
 
-## Phase 4: Commerce & Polish
+## Phase 4: Commerce & Polish (🚧 Up Next)
 - [ ] **Billing**: Google Play In-App Purchase logic.
 - [ ] **Analytics**: Integrate revenue tracking.
 - [ ] **Testing**: E2E verification of order flow.

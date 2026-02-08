@@ -3,6 +3,8 @@ package repository
 import (
 	"database/sql"
 	"ignis_server/internal/models"
+
+	"github.com/lib/pq"
 )
 
 type TemplateRepository struct {
@@ -31,7 +33,7 @@ func (r *TemplateRepository) GetAll() ([]models.Template, error) {
 		var t models.Template
 		err := rows.Scan(
 			&t.ID, &t.YoutubeID, &t.VideoURL, &t.ThumbnailURL, &t.PlaceholderColor, &t.ViewCount,
-			&t.Title, &t.Description, &t.PriceCents, &t.Category, &t.Tags,
+			&t.Title, &t.Description, &t.PriceCents, &t.Category, (*pq.StringArray)(&t.Tags),
 			&t.IsActive, &t.CreatedAt, &t.UpdatedAt,
 		)
 		if err != nil {
@@ -52,7 +54,7 @@ func (r *TemplateRepository) GetByID(id string) (*models.Template, error) {
 	var t models.Template
 	err := r.db.QueryRow(query, id).Scan(
 		&t.ID, &t.YoutubeID, &t.VideoURL, &t.ThumbnailURL, &t.PlaceholderColor, &t.ViewCount,
-		&t.Title, &t.Description, &t.PriceCents, &t.Category, &t.Tags,
+		&t.Title, &t.Description, &t.PriceCents, &t.Category, (*pq.StringArray)(&t.Tags),
 		&t.IsActive, &t.CreatedAt, &t.UpdatedAt,
 	)
 

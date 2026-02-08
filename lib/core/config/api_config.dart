@@ -1,24 +1,14 @@
+import 'app_config.dart';
+
 class ApiConfig {
-  // Set to true for local testing, false for production
-  static const bool isLocalTesting = true;
+  // Environmental settings from AppConfig
+  static bool get isLocalTesting => AppConfig.instance.isLocalTesting;
+  static String get localIpUrl => AppConfig.instance.localIpUrl;
+  static String get devVpsUrl => AppConfig.instance.devVpsUrl;
+  static String get productionBaseUrl => AppConfig.instance.productionBaseUrl;
 
-  // Local URLs for different platforms
-  static const String androidEmulatorUrl = 'http://10.0.2.2:8080';
-  static const String iosSimulatorUrl = 'http://localhost:8080';
-  static const String physicalDeviceUrl =
-      'http://192.168.1.x:8080'; // Update with your PC's IP
-
-  // Production URL
-  static const String productionBaseUrl = 'https://api.iamsorry.in';
-
-  // Auto-detect platform and return appropriate URL
-  static String get baseUrl {
-    if (!isLocalTesting) return productionBaseUrl;
-
-    // For local testing, default to Android Emulator
-    // Update this based on your testing device
-    return androidEmulatorUrl;
-  }
+  // Auto-detect environment and return appropriate URL
+  static String get baseUrl => AppConfig.instance.apiBaseUrl;
 
   // API Endpoints
   static String get authVerify => '$baseUrl/api/auth/verify';
