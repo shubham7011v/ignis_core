@@ -10,8 +10,12 @@
 ### 1. Foundation & Architecture
 - [x] **Project Structure**: Clean Architecture + BLoC pattern for Flutter.
 - [x] **Backend**: Dedicated Go API server with Gin framework.
-- [x] **Database**: PostgreSQL 18 with migration system.
-- [x] **Authentication**: Firebase Auth integration (Google Sign-In).
+- [x] VPS Setup (Hostinger)
+- [x] Docker Containerization (Go + PostgreSQL)
+- [x] SSL/TLS via Certbot
+- [x] Firebase Hybrid Integration (Phase 1 & 2 complete)
+- [x] Environment Config Migration (.env support)
+- [x] Database Seeding (MVP data live)
 - [x] **Branding**: Fully migrated from "Vivaah" to "Vites".
 
 ### 2. User Interface (Flutter)
@@ -100,14 +104,15 @@
 
 ## 🎯 Current Focus
 
-**Development environment is LIVE and stable!** 
+## 🏗️ Backend Strategy: Hybrid Model (ACTIVE)
 
-Next priority:
-1. Production deployment following same pattern as dev
-2. Adding real Firebase credentials for authentication
-3. Testing end-to-end order flow
+The application utilizes a **Hybrid Backend Strategy** to optimize for high availability, real-time features, and zero cost:
+
+1.  **Firebase Firestore**: Handles real-time configurations (`RemoteConfigService`) and offline-first user favorites.
+2.  **Go VPS (ignis-core)**: Handles transactional data (Templates, Orders, User Sync via PostgreSQL).
+
+**Environment Configuration**: Managed via `.env` files and `AppConfig` to ensure seamless switching between local development, Dev VPS, and Production.
 
 ## 🛠️ Technical Debt / Maintenance
 - **Monitoring**: Setting up uptime monitor for `/health` endpoint
 - **Backups**: Automating daily `pg_dump` for production database
-- **Logs**: Centralized logging for debugging and monitoring

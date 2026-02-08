@@ -113,6 +113,29 @@
 - **Database**: Migrations applied successfully (version 2026020601)
 - **SSL**: Active with automatic HTTPS redirection
 
+### 7. Post-Deployment Optimization (2026-02-08)
+
+#### The "pq.StringArray" Fix (Critical Repair)
+- **Symptoms**: `/api/templates` returned 500 Internal Server Error.
+- **Root Cause**: Go's default `sql` package cannot scan PostgreSQL `TEXT[]` arrays directly into `[]string`.
+- **Fix**: 
+    - Imported `github.com/lib/pq` in `TemplateRepository` and `ShortsRepository`. (Local and VPS files updated).
+    - Cast `tags` to `(*pq.StringArray)(&t.Tags)` during the `Scan` process.
+- **Result**: API now correctly returns template lists with tags ✅
+
+#### Database Seeding
+- **Action**: Manually seeded the dev database (`vites_db`) with 5 initial video templates via SQL script.
+- **Reason**: Database was empty, causing empty gallery state.
+- **Result**: App now displays initial set of Royal/Floral templates in gallery and shorts feed ✅
+
+#### Environment Variable Migration
+- **Action**: Fully standardized configuration via `.env` files.
+- **Changes**:
+    - Replaced remaining hardcoded variables in `ApiConfig` and `AppConfig`.
+    - Integrated `premium_product_key` and `premium_pref_key` into `.env`.
+    - Established `.env.example` as the source of truth for new environments.
+- **Result**: Secure, portable configuration system established ✅
+
 ---
 
 ## 📂 File Locations on Server

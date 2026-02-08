@@ -41,10 +41,18 @@ sequenceDiagram
     App-->>User: "My Creations" -> "Watch Video"
 ```
 
-## 4. Technical Constraints (v1.0)
+## 5. Environment & Configuration
+The app uses a standardized environment management system:
+- **`.env`**: Local file (git-ignored) for secrets and environment-specific URLs.
+- **`AppConfig`**: Loads `.env` or system environment variables into a singleton.
+- **`ApiConfig`**: Exposes dynamic getters that adapt to the active environment (Local, Dev VPS, Prod).
+
+---
+
+## 6. Technical Constraints (v1.0)
 - **Null Safety**: Strict throughout.
 - **Orientation**: Portrait only.
 - **Auth**: Google Sign-In only (Firebase).
-- **Backend Strategy**: **Hybrid ACTIVE** (Firebase for Auth/Sync/Real-time, Go VPS for API/Database).
+- **Backend Strategy**: **Hybrid ACTIVE** (Firebase for Auth/Sync, Go VPS for API/Database).
 - **Real-time Config**: Firestore-backed `RemoteConfigService`.
-- **Offline Favorites**: Firestore-backed `ShortsRepository`.
+- **Rebranding**: Successfully migrated from "Vivaah" to **"Vites"**.

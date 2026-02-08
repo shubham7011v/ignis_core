@@ -138,8 +138,9 @@ class AppConfig {
     }
 
     // Support legacy server key names as well
-    if (data['maintenanceMode'] is bool)
+    if (data['maintenanceMode'] is bool) {
       maintenanceMode = data['maintenanceMode'];
+    }
 
     // Nested feature flags or flat list
     final flags = data['feature_flags'] ?? data;
