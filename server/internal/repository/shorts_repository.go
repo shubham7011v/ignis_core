@@ -3,6 +3,8 @@ package repository
 import (
 	"database/sql"
 	"ignis_server/internal/models"
+
+	"github.com/lib/pq"
 )
 
 type ShortsRepository struct {
@@ -35,7 +37,7 @@ func (r *ShortsRepository) GetRandomShorts(userID string, limit int) ([]models.T
 		var t models.Template
 		err := rows.Scan(
 			&t.ID, &t.YoutubeID, &t.VideoURL, &t.ThumbnailURL, &t.PlaceholderColor,
-			&t.ViewCount, &t.Title, &t.Description, &t.PriceCents, &t.Category, &t.Tags,
+			&t.ViewCount, &t.Title, &t.Description, &t.PriceCents, &t.Category, (*pq.StringArray)(&t.Tags),
 			&t.IsActive, &t.CreatedAt, &t.UpdatedAt, &t.IsFavorited,
 		)
 		if err != nil {
@@ -68,7 +70,7 @@ func (r *ShortsRepository) GetFavorites(userID string) ([]models.Template, error
 		var t models.Template
 		err := rows.Scan(
 			&t.ID, &t.YoutubeID, &t.VideoURL, &t.ThumbnailURL, &t.PlaceholderColor,
-			&t.ViewCount, &t.Title, &t.Description, &t.PriceCents, &t.Category, &t.Tags,
+			&t.ViewCount, &t.Title, &t.Description, &t.PriceCents, &t.Category, (*pq.StringArray)(&t.Tags),
 			&t.IsActive, &t.CreatedAt, &t.UpdatedAt, &t.IsFavorited,
 		)
 		if err != nil {
