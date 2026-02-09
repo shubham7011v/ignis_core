@@ -125,12 +125,22 @@ Future<void> mainCommon({required String env, required String appName}) async {
       await di.sl.setup();
       AppLogger.info('🚀 [STARTUP] 4. Service Locator ready');
 
-      // Sync Remote Config from Firestore
+      // Sync Remote Config from Firestore (Low latency timeout for Android One)
       _bootStep = '5. Syncing Remote Config (Firestore)';
       AppLogger.info('🚀 [STARTUP] $_bootStep...');
       try {
-        // Initial fetch for boot
-        final remoteConfigMap = await di.sl.remoteConfigService.fetchConfig();
+        // Reduced timeout for low-end devices and slow internet
+        final remoteConfigMap = await di.sl.remoteConfigService
+            .fetchConfig()
+            .timeout(
+              const Duration(seconds: 3),
+              onTimeout: () {
+                AppLogger.info(
+                  '🚀 [STARTUP] 5. Remote Config timeout - using defaults',
+                );
+                return <String, dynamic>{};
+              },
+            );
         if (remoteConfigMap.isNotEmpty) {
           config.updateFromMap(remoteConfigMap);
           AppLogger.info(
@@ -163,7 +173,7 @@ Future<void> mainCommon({required String env, required String appName}) async {
                     : const AndroidPlayIntegrityProvider(),
                 providerApple: const AppleDeviceCheckProvider(),
               )
-              .timeout(const Duration(seconds: 5));
+              .timeout(const Duration(seconds: 2)); // Reduced wait time
           AppLogger.info('🚀 [STARTUP] 6. App Check activated');
         }
       } catch (e) {
@@ -177,7 +187,7 @@ Future<void> mainCommon({required String env, required String appName}) async {
       AppLogger.info('🚀 [STARTUP] $_bootStep...');
       try {
         await di.sl.notificationService.initialize().timeout(
-          const Duration(seconds: 5),
+          const Duration(seconds: 2), // Reduced wait time
         );
         AppLogger.info('🚀 [STARTUP] 8. Notifications initialized');
       } catch (e) {

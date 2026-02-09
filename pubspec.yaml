@@ -126,14 +126,14 @@ flutter:
   # see https://flutter.dev/to/font-from-package
 # Flutter Native Splash Configuration
 flutter_native_splash:
-  # Background color - Gold (#F59D06)
-  color: "#F59D06"
+  # Background color - Black (#000000) for low CPU rendering
+  color: "#000000"
   image: assets/splash.png
 
   # Android 12+ configuration
   android_12:
     image: assets/splash.png
-    color: "#F59D06"
+    color: "#000000"
 
   web: false
   ios: false
