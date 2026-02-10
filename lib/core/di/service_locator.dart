@@ -21,7 +21,7 @@ import '../../features/billing/data/repositories/billing_repository_impl.dart';
 import '../../features/billing/presentation/bloc/billing_bloc.dart';
 // Orders
 import '../../features/orders/domain/repositories/order_repository.dart';
-import '../../features/orders/data/repositories/firestore_order_repository.dart';
+import '../../features/orders/data/repositories/server_order_repository.dart';
 // Shorts
 import '../../features/shorts/domain/repositories/shorts_repository.dart';
 import '../../features/shorts/presentation/bloc/shorts_bloc.dart';
@@ -88,7 +88,7 @@ class ServiceLocator {
     // Billing
     billingRepository = BillingRepositoryImpl(); // Fixed import path if needed
     // Orders
-    orderRepository = FirestoreOrderRepository();
+    orderRepository = ServerOrderRepository();
     // Shorts
     shortsRepository = ShortsRepositoryImpl();
 

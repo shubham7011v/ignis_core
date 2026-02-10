@@ -39,7 +39,7 @@ func (r *OrderRepository) Create(order *models.Order) (*models.Order, error) {
 func (r *OrderRepository) GetByUser(userID string) ([]models.Order, error) {
 	query := `SELECT id, user_id, template_id, bride_name, groom_name, wedding_date,
 	          venue, custom_message, status, video_url, payment_status, amount_cents,
-	          transaction_id, created_at, delivered_at, admin_notes
+	          transaction_id, created_at, delivered_at, downloaded_at, admin_notes
 	          FROM orders WHERE user_id = $1
 	          ORDER BY created_at DESC`
 
@@ -55,7 +55,7 @@ func (r *OrderRepository) GetByUser(userID string) ([]models.Order, error) {
 		err := rows.Scan(
 			&o.ID, &o.UserID, &o.TemplateID, &o.BrideName, &o.GroomName, &o.WeddingDate,
 			&o.Venue, &o.CustomMessage, &o.Status, &o.VideoURL, &o.PaymentStatus,
-			&o.AmountCents, &o.TransactionID, &o.CreatedAt, &o.DeliveredAt, &o.AdminNotes,
+			&o.AmountCents, &o.TransactionID, &o.CreatedAt, &o.DeliveredAt, &o.DownloadedAt, &o.AdminNotes,
 		)
 		if err != nil {
 			return nil, err
@@ -70,14 +70,14 @@ func (r *OrderRepository) GetByUser(userID string) ([]models.Order, error) {
 func (r *OrderRepository) GetByID(id string) (*models.Order, error) {
 	query := `SELECT id, user_id, template_id, bride_name, groom_name, wedding_date,
 	          venue, custom_message, status, video_url, payment_status, amount_cents,
-	          transaction_id, created_at, delivered_at, admin_notes
+	          transaction_id, created_at, delivered_at, downloaded_at, admin_notes
 	          FROM orders WHERE id = $1`
 
 	var o models.Order
 	err := r.db.QueryRow(query, id).Scan(
 		&o.ID, &o.UserID, &o.TemplateID, &o.BrideName, &o.GroomName, &o.WeddingDate,
 		&o.Venue, &o.CustomMessage, &o.Status, &o.VideoURL, &o.PaymentStatus,
-		&o.AmountCents, &o.TransactionID, &o.CreatedAt, &o.DeliveredAt, &o.AdminNotes,
+		&o.AmountCents, &o.TransactionID, &o.CreatedAt, &o.DeliveredAt, &o.DownloadedAt, &o.AdminNotes,
 	)
 
 	if err != nil {
@@ -102,7 +102,7 @@ func (r *OrderRepository) UpdateStatus(id, status string, videoURL *string, admi
 func (r *OrderRepository) GetAll() ([]models.Order, error) {
 	query := `SELECT id, user_id, template_id, bride_name, groom_name, wedding_date,
 	          venue, custom_message, status, video_url, payment_status, amount_cents,
-	          transaction_id, created_at, delivered_at, admin_notes
+	          transaction_id, created_at, delivered_at, downloaded_at, admin_notes
 	          FROM orders
 	          ORDER BY created_at DESC`
 
@@ -118,7 +118,7 @@ func (r *OrderRepository) GetAll() ([]models.Order, error) {
 		err := rows.Scan(
 			&o.ID, &o.UserID, &o.TemplateID, &o.BrideName, &o.GroomName, &o.WeddingDate,
 			&o.Venue, &o.CustomMessage, &o.Status, &o.VideoURL, &o.PaymentStatus,
-			&o.AmountCents, &o.TransactionID, &o.CreatedAt, &o.DeliveredAt, &o.AdminNotes,
+			&o.AmountCents, &o.TransactionID, &o.CreatedAt, &o.DeliveredAt, &o.DownloadedAt, &o.AdminNotes,
 		)
 		if err != nil {
 			return nil, err
@@ -133,7 +133,7 @@ func (r *OrderRepository) GetAll() ([]models.Order, error) {
 func (r *OrderRepository) GetByStatus(status string) ([]models.Order, error) {
 	query := `SELECT id, user_id, template_id, bride_name, groom_name, wedding_date,
 	          venue, custom_message, status, video_url, payment_status, amount_cents,
-	          transaction_id, created_at, delivered_at, admin_notes
+	          transaction_id, created_at, delivered_at, downloaded_at, admin_notes
 	          FROM orders WHERE status = $1
 	          ORDER BY created_at ASC`
 
@@ -149,7 +149,7 @@ func (r *OrderRepository) GetByStatus(status string) ([]models.Order, error) {
 		err := rows.Scan(
 			&o.ID, &o.UserID, &o.TemplateID, &o.BrideName, &o.GroomName, &o.WeddingDate,
 			&o.Venue, &o.CustomMessage, &o.Status, &o.VideoURL, &o.PaymentStatus,
-			&o.AmountCents, &o.TransactionID, &o.CreatedAt, &o.DeliveredAt, &o.AdminNotes,
+			&o.AmountCents, &o.TransactionID, &o.CreatedAt, &o.DeliveredAt, &o.DownloadedAt, &o.AdminNotes,
 		)
 		if err != nil {
 			return nil, err
@@ -158,4 +158,11 @@ func (r *OrderRepository) GetByStatus(status string) ([]models.Order, error) {
 	}
 
 	return orders, nil
+}
+
+// MarkAsDownloaded updates the downloaded_at timestamp for an order
+func (r *OrderRepository) MarkAsDownloaded(id string) error {
+	query := `UPDATE orders SET downloaded_at = $1 WHERE id = $2`
+	_, err := r.db.Exec(query, time.Now(), id)
+	return err
 }

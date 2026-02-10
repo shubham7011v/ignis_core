@@ -47,5 +47,6 @@ type Order struct {
 	TransactionID string     `json:"transactionId" db:"transaction_id"`
 	CreatedAt     time.Time  `json:"createdAt" db:"created_at"`
 	DeliveredAt   *time.Time `json:"deliveredAt" db:"delivered_at"`
+	DownloadedAt  *time.Time `json:"downloadedAt" db:"downloaded_at"`
 	AdminNotes    *string    `json:"adminNotes" db:"admin_notes"`
 }

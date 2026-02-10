@@ -5,6 +5,7 @@ import (
 	"ignis_server/internal/models"
 	"ignis_server/internal/repository"
 	"log"
+	"os"
 	"path/filepath"
 	"time"
 )
@@ -32,19 +33,27 @@ func NewOrderWorker(
 // Start runs the background worker loop
 func (w *OrderWorker) Start(ctx context.Context) {
 	log.Println("Starting automated order fulfillment worker...")
-	ticker := time.NewTicker(w.interval)
-	defer ticker.Stop()
 
-	// Initial run
+	pollTicker := time.NewTicker(w.interval)
+	defer pollTicker.Stop()
+
+	// Cleanup ticker - runs every hour
+	cleanupTicker := time.NewTicker(1 * time.Hour)
+	defer cleanupTicker.Stop()
+
+	// Initial runs
 	w.processPendingOrders()
+	w.CleanupOldRenders()
 
 	for {
 		select {
 		case <-ctx.Done():
 			log.Println("Stopping order worker...")
 			return
-		case <-ticker.C:
+		case <-pollTicker.C:
 			w.processPendingOrders()
+		case <-cleanupTicker.C:
+			w.CleanupOldRenders()
 		}
 	}
 }
@@ -87,16 +96,55 @@ func (w *OrderWorker) processOrder(order models.Order) {
 	}
 
 	// 4. Update order with completion
-	// In a real app, you'd upload the file to cloud storage here.
-	// We'll use the internal file path as a reference for now.
+	// Since we are using the Zero-Storage model, we provide a local download URL.
+	// The file will be cleaned up after 24 hours.
 	videoURL := "/api/orders/download/" + filepath.Base(outputPath)
 
-	adminNote := "Automated rendering successful"
+	adminNote := "Automated rendering successful (Available for 1 week)"
 	err = w.orderRepo.UpdateStatus(order.ID, "completed", &videoURL, &adminNote)
 	if err != nil {
 		log.Printf("[Worker] Error: failed to finalize order %s: %v", order.ID, err)
 	} else {
 		log.Printf("[Worker] Successfully completed order %s", order.ID)
+	}
+}
+
+// CleanupOldRenders deletes files in the output directory that are older than 1 week
+func (w *OrderWorker) CleanupOldRenders() {
+	log.Println("[Worker] Running scheduled cleanup of old renders...")
+
+	files, err := os.ReadDir(w.renderService.OutputDir)
+	if err != nil {
+		log.Printf("[Worker] Cleanup error: failed to read output dir: %v", err)
+		return
+	}
+
+	now := time.Now()
+	count := 0
+
+	for _, f := range files {
+		if f.IsDir() {
+			continue
+		}
+
+		info, err := f.Info()
+		if err != nil {
+			continue
+		}
+
+		// Delete if older than 1 week (168 hours)
+		if now.Sub(info.ModTime()) > 7*24*time.Hour {
+			path := filepath.Join(w.renderService.OutputDir, f.Name())
+			if err := os.Remove(path); err != nil {
+				log.Printf("[Worker] Cleanup error: failed to delete %s: %v", path, err)
+			} else {
+				count++
+			}
+		}
+	}
+
+	if count > 0 {
+		log.Printf("[Worker] Cleaned up %d expired render file(s)", count)
 	}
 }
 

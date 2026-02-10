@@ -91,10 +91,7 @@ class Order extends Equatable {
         venue: map['venue'] ?? '',
         customMessage: map['customMessage'],
       ),
-      status: OrderStatus.values.firstWhere(
-        (e) => e.name == map['status'],
-        orElse: () => OrderStatus.pending,
-      ),
+      status: _mapServerStatus(map['status']),
       videoUrl: map['videoUrl'],
       thumbnailUrl: map['thumbnailUrl'],
       createdAt: DateTime.tryParse(map['createdAt'] ?? '') ?? DateTime.now(),
@@ -106,6 +103,19 @@ class Order extends Equatable {
           ? PaymentInfo.fromMap(map['paymentInfo'])
           : null,
     );
+  }
+
+  static OrderStatus _mapServerStatus(String? status) {
+    switch (status) {
+      case 'processing':
+        return OrderStatus.inProgress;
+      case 'completed':
+        return OrderStatus.delivered;
+      case 'failed':
+        return OrderStatus.cancelled;
+      default:
+        return OrderStatus.pending;
+    }
   }
 
   @override
