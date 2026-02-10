@@ -241,12 +241,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: 'Only Saved Templates',
                   palette: palette,
                   onTap: () {
-                    // TODO: Navigate to SavedTemplatesScreen
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Saved Templates coming soon!'),
-                      ),
-                    );
+                    Navigator.pushNamed(context, '/saved_templates');
                   },
                 ),
                 SettingsAccountSection(

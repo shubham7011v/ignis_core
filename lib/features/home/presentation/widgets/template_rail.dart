@@ -104,7 +104,7 @@ class _TemplatePoster extends StatelessWidget {
                       height: double.infinity,
                       fit: BoxFit.cover,
                     ),
-                    if (template.isPremium)
+                    if (template.cost > 0)
                       Positioned(
                         top: 8,
                         right: 8,
@@ -117,10 +117,13 @@ class _TemplatePoster extends StatelessWidget {
                             color: IgnisTheme.goldAccent,
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Icon(
-                            Icons.star,
-                            size: 10,
-                            color: Colors.black,
+                          child: Text(
+                            '₹${template.cost.toStringAsFixed(0)}',
+                            style: GoogleFonts.inter(
+                              color: Colors.black,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),

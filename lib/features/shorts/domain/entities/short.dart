@@ -9,6 +9,7 @@ class Short extends Equatable {
   final String? thumbnailUrl;
   final int placeholderColor;
   final bool isFavorite;
+  final String? templateId;
 
   const Short({
     required this.id,
@@ -17,6 +18,7 @@ class Short extends Equatable {
     this.videoUrl,
     this.thumbnailUrl,
     required this.placeholderColor,
+    this.templateId,
     this.isFavorite = false,
   });
 
@@ -27,6 +29,7 @@ class Short extends Equatable {
     String? videoUrl,
     String? thumbnailUrl,
     int? placeholderColor,
+    String? templateId,
     bool? isFavorite,
   }) {
     return Short(
@@ -36,6 +39,7 @@ class Short extends Equatable {
       videoUrl: videoUrl ?? this.videoUrl,
       thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
       placeholderColor: placeholderColor ?? this.placeholderColor,
+      templateId: templateId ?? this.templateId,
       isFavorite: isFavorite ?? this.isFavorite,
     );
   }
@@ -48,6 +52,7 @@ class Short extends Equatable {
     videoUrl,
     thumbnailUrl,
     placeholderColor,
+    templateId,
     isFavorite,
   ];
 }

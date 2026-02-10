@@ -32,10 +32,11 @@ func (s *NotificationService) SendOrderUpdate(fcmToken, orderID, status string) 
 	title := "Order Update"
 	body := fmt.Sprintf("Your order #%s is now %s", orderID, status)
 
-	if status == "completed" {
+	switch status {
+	case "completed":
 		title = "Video Ready! 🎬"
 		body = "Your wedding invitation video is ready to download!"
-	} else if status == "processing" {
+	case "processing":
 		title = "Order in Progress ⏳"
 		body = "We have started working on your order."
 	}

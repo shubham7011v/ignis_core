@@ -8,18 +8,21 @@ import (
 
 	"ignis_server/internal/models"
 	"ignis_server/internal/repository"
+	"ignis_server/internal/services"
 
 	"github.com/gin-gonic/gin"
 )
 
 type OrdersHandler struct {
 	orderRepo       *repository.OrderRepository
+	googlePlay      *services.GooglePlayService
 	renderOutputDir string
 }
 
-func NewOrdersHandler(orderRepo *repository.OrderRepository, renderOutputDir string) *OrdersHandler {
+func NewOrdersHandler(orderRepo *repository.OrderRepository, googlePlay *services.GooglePlayService, renderOutputDir string) *OrdersHandler {
 	return &OrdersHandler{
 		orderRepo:       orderRepo,
+		googlePlay:      googlePlay,
 		renderOutputDir: renderOutputDir,
 	}
 }
@@ -56,8 +59,9 @@ type CreateOrderRequest struct {
 	WeddingDate   string `json:"weddingDate" binding:"required"`
 	Venue         string `json:"venue"`
 	CustomMessage string `json:"customMessage"`
-	AmountCents   int    `json:"amountCents" binding:"required"`
-	TransactionID string `json:"transactionId" binding:"required"`
+	AmountCents   int    `json:"amountCents"` // Optional as server can verify from template
+	PurchaseToken string `json:"purchaseToken" binding:"required"`
+	ProductID     string `json:"productId" binding:"required"`
 }
 
 // CreateOrder handles POST /api/orders
@@ -81,6 +85,21 @@ func (h *OrdersHandler) CreateOrder(c *gin.Context) {
 		return
 	}
 
+	// Verify purchase with Google Play
+	var transactionID string
+	if h.googlePlay != nil {
+		playPurchase, err := h.googlePlay.VerifyAndConsumePurchase(c.Request.Context(), req.ProductID, req.PurchaseToken)
+		if err != nil {
+			c.JSON(http.StatusPaymentRequired, gin.H{"error": "Payment verification failed: " + err.Error()})
+			return
+		}
+		// If verification succeeds, we use the OrderID from Play as the TransactionID
+		transactionID = playPurchase.OrderId
+	} else {
+		// If Google Play Service is not initialized (dev/local), allow mock transaction
+		transactionID = "mock_" + time.Now().String()
+	}
+
 	order := &models.Order{
 		UserID:        firebaseUID.(string),
 		TemplateID:    req.TemplateID,
@@ -92,7 +111,7 @@ func (h *OrdersHandler) CreateOrder(c *gin.Context) {
 		Status:        "pending",
 		PaymentStatus: "paid",
 		AmountCents:   req.AmountCents,
-		TransactionID: req.TransactionID,
+		TransactionID: transactionID,
 	}
 
 	createdOrder, err := h.orderRepo.Create(order)

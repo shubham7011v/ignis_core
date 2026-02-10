@@ -19,6 +19,8 @@ import '../../features/templates/data/services/template_download_service.dart';
 import '../../features/billing/domain/repositories/billing_repository.dart';
 import '../../features/billing/data/repositories/billing_repository_impl.dart';
 import '../../features/billing/presentation/bloc/billing_bloc.dart';
+import '../../features/billing/domain/services/order_payment_service.dart';
+import '../../features/billing/data/services/order_payment_service_impl.dart';
 // Orders
 import '../../features/orders/domain/repositories/order_repository.dart';
 import '../../features/orders/data/repositories/server_order_repository.dart';
@@ -48,6 +50,7 @@ class ServiceLocator {
   late final TemplateDownloadService templateDownloadService;
   late final BillingRepository billingRepository;
   late final OrderRepository orderRepository;
+  late final OrderPaymentService orderPaymentService;
   late final ShortsRepository shortsRepository;
   late final ShortsVideoService shortsVideoService;
   late final GreetingService greetingService;
@@ -87,6 +90,9 @@ class ServiceLocator {
     templateDownloadService = TemplateDownloadService();
     // Billing
     billingRepository = BillingRepositoryImpl(); // Fixed import path if needed
+    orderPaymentService = OrderPaymentServiceImpl(
+      billingRepository: billingRepository,
+    );
     // Orders
     orderRepository = ServerOrderRepository();
     // Shorts
@@ -105,6 +111,7 @@ class ServiceLocator {
     invitationBloc = InvitationBloc(
       repository: invitationRepository,
       orderRepository: orderRepository,
+      paymentService: orderPaymentService,
     );
     creationsBloc = CreationsBloc(orderRepository: orderRepository);
     templatesBloc = TemplatesBloc(repository: templatesRepository);

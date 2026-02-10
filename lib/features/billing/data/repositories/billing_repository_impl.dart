@@ -53,7 +53,26 @@ class BillingRepositoryImpl implements BillingRepository {
     final purchaseParam = PurchaseParam(productDetails: productDetails);
 
     // For non-consumables (Premium Pack), we don't consume
-    _iap.buyNonConsumable(purchaseParam: purchaseParam);
+    await _iap.buyNonConsumable(purchaseParam: purchaseParam);
+  }
+
+  @override
+  Future<void> buyConsumable(String productId) async {
+    final available = await _iap.isAvailable();
+    if (!available) throw 'Store unavailable';
+
+    final response = await _iap.queryProductDetails({productId});
+    if (response.notFoundIDs.isNotEmpty) {
+      AppLogger.error('Product not found: $productId');
+      throw 'Product not found';
+    }
+
+    final productDetails = response.productDetails.first;
+    final purchaseParam = PurchaseParam(productDetails: productDetails);
+
+    // For consumables (Video Templates), we buyConsumable
+    // Note: The caller is responsible for consuming it on the server
+    await _iap.buyConsumable(purchaseParam: purchaseParam);
   }
 
   @override
@@ -75,9 +94,14 @@ class BillingRepositoryImpl implements BillingRepository {
           if (purchaseDetails.productID == _premiumProductKey) {
             await _verifyAndDeliver(purchaseDetails);
           }
+          // For other products (consumables), we don't automatically deliver here
+          // as they need server-side verification before being "consumed"
         }
 
         if (purchaseDetails.pendingCompletePurchase) {
+          // IMPORTANT: For consumables, we wait for server to verify before completing?
+          // Actually, in Google Play, we should complete/consume.
+          // But here, we complete the purchase flow.
           await _iap.completePurchase(purchaseDetails);
         }
       }

@@ -15,21 +15,3 @@ class ProfileViewRequested extends ProfileEvent {
   @override
   List<Object?> get props => [userId];
 }
-
-class ProfileFriendAdded extends ProfileEvent {
-  final String userId;
-
-  const ProfileFriendAdded(this.userId);
-
-  @override
-  List<Object?> get props => [userId];
-}
-
-class ProfileFriendRemoved extends ProfileEvent {
-  final String userId;
-
-  const ProfileFriendRemoved(this.userId);
-
-  @override
-  List<Object?> get props => [userId];
-}

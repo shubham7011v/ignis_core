@@ -4,18 +4,22 @@ import '../../domain/entities/invitation_style.dart';
 import 'invitation_event.dart';
 import 'invitation_state.dart';
 import '../../../orders/domain/repositories/order_repository.dart';
+import '../../../billing/domain/services/order_payment_service.dart';
 import '../../../orders/domain/entities/order.dart';
 import '../../../orders/domain/entities/payment_info.dart';
 
 class InvitationBloc extends Bloc<InvitationEvent, InvitationState> {
   final InvitationRepository _repository;
   final OrderRepository _orderRepository;
+  final OrderPaymentService _paymentService;
 
   InvitationBloc({
     required InvitationRepository repository,
     required OrderRepository orderRepository,
+    required OrderPaymentService paymentService,
   }) : _repository = repository,
        _orderRepository = orderRepository,
+       _paymentService = paymentService,
        super(InvitationState.initial()) {
     on<InvitationStarted>(_onStarted);
     on<StyleSelected>(_onStyleSelected);
@@ -64,19 +68,26 @@ class InvitationBloc extends Bloc<InvitationEvent, InvitationState> {
     emit(state.copyWith(status: InvitationStatus.placingOrder));
 
     try {
+      // 1. Initiate Google Play Purchase
+      // Using style ID as template ID for now
+      final purchaseToken = await _paymentService.purchaseTemplate(
+        state.selectedStyle!.id,
+      );
+
+      // 2. Create Order on Server with Purchase Token
       final order = Order(
         id: '', // Repository will generate ID
         userId: event.userId,
         styleId: state.selectedStyle!.id,
         details: state.details,
         createdAt: DateTime.now(),
-        // Payment info would ideally come from valid transaction
+        // Payment info comes from Google Play Token
         paymentInfo: PaymentInfo(
-          transactionId: 'manual_pending', // Placeholder until payment flow
-          amount: 0.0,
+          transactionId: purchaseToken,
+          amount: 0.0, // Server knows the price
           currency: 'INR',
           paidAt: DateTime.now(),
-          status: 'pending',
+          status: 'paid', // We mark as paid locally, server will verify
         ),
       );
 

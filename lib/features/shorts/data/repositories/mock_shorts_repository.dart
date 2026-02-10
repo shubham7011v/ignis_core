@@ -1,5 +1,6 @@
 import '../../domain/entities/short.dart';
 import '../../domain/repositories/shorts_repository.dart';
+import '../../../templates/data/template_config.dart';
 
 /// Mock implementation of ShortsRepository
 /// TODO: Replace with Firebase/API implementation in backend phase
@@ -11,26 +12,23 @@ class MockShortsRepository implements ShortsRepository {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 500));
 
-    return [
-      const Short(
-        id: 'short_1',
-        title: 'Royal Heritage Wedding',
-        category: 'Traditional • Premium',
-        placeholderColor: 0xFF3E2723,
-      ),
-      const Short(
-        id: 'short_2',
-        title: 'Modern Minimalist',
-        category: 'Contemporary • Popular',
-        placeholderColor: 0xFF1A237E,
-      ),
-      const Short(
-        id: 'short_3',
-        title: 'Golden Haldi Ceremony',
-        category: 'Sangeet • Trending',
-        placeholderColor: 0xFFF57F17,
-      ),
-    ];
+    // Generate Shorts dynamically from TemplateConfig
+    // limit to first 5 or specific ones for the feed
+    return TemplateConfig.templates.map((template) {
+      // Deterministic pseudo-random color based on title length
+      final color = 0xFF000000 | (template.title.hashCode & 0xFFFFFF);
+
+      return Short(
+        id: 'short_${template.id}',
+        title: template.title,
+        category:
+            '${template.category} • ${template.cost > 0 ? "Premium" : "Free"}',
+        placeholderColor: color,
+        templateId: template.id,
+        videoUrl: template.videoUrl,
+        thumbnailUrl: template.thumbnailUrl,
+      );
+    }).toList();
   }
 
   @override

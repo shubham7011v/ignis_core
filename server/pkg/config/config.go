@@ -7,17 +7,19 @@ import (
 )
 
 type Config struct {
-	Port                    string
-	DBHost                  string
-	DBPort                  string
-	DBUser                  string
-	DBPassword              string
-	DBName                  string
-	FirebaseCredentialsPath string
-	FirebaseCredentialsJSON string
-	AllowedOrigins          string
-	TemplatesDir            string
-	RenderOutputDir         string
+	Port                         string
+	DBHost                       string
+	DBPort                       string
+	DBUser                       string
+	DBPassword                   string
+	DBName                       string
+	FirebaseCredentialsPath      string
+	FirebaseCredentialsJSON      string
+	AllowedOrigins               string
+	TemplatesDir                 string
+	RenderOutputDir              string
+	GooglePlayPackageName        string
+	GoogleApplicationCredentials string
 }
 
 func Load() *Config {
@@ -25,17 +27,19 @@ func Load() *Config {
 	_ = godotenv.Load()
 
 	return &Config{
-		Port:                    getEnv("PORT", "8080"),
-		DBHost:                  getEnv("DB_HOST", "localhost"),
-		DBPort:                  getEnv("DB_PORT", "5432"),
-		DBUser:                  getEnv("DB_USER", "vites_user"),
-		DBPassword:              getEnv("DB_PASSWORD", "vites_secure_pass_2026"),
-		DBName:                  getEnv("DB_NAME", "vites_db"),
-		FirebaseCredentialsPath: getEnv("FIREBASE_CREDENTIALS_PATH", ""),
-		FirebaseCredentialsJSON: getEnv("FIREBASE_CREDENTIALS_JSON", ""),
-		AllowedOrigins:          getEnv("ALLOWED_ORIGINS", "*"),
-		TemplatesDir:            getEnv("TEMPLATES_DIR", "./storage/templates"),
-		RenderOutputDir:         getEnv("RENDER_OUTPUT_DIR", "./storage/renders"),
+		Port:                         getEnv("PORT", "8080"),
+		DBHost:                       getEnv("DB_HOST", "localhost"),
+		DBPort:                       getEnv("DB_PORT", "5432"),
+		DBUser:                       getEnv("DB_USER", "vites_user"),
+		DBPassword:                   getEnv("DB_PASSWORD", "vites_secure_pass_2026"),
+		DBName:                       getEnv("DB_NAME", "vites_db"),
+		FirebaseCredentialsPath:      getEnv("FIREBASE_CREDENTIALS_PATH", ""),
+		FirebaseCredentialsJSON:      getEnv("FIREBASE_CREDENTIALS_JSON", ""),
+		AllowedOrigins:               getEnv("ALLOWED_ORIGINS", "*"),
+		TemplatesDir:                 getEnv("TEMPLATES_DIR", "./storage/templates"),
+		RenderOutputDir:              getEnv("RENDER_OUTPUT_DIR", "./storage/renders"),
+		GooglePlayPackageName:        getEnv("GOOGLE_PLAY_PACKAGE_NAME", "com.iamsorry.vites"),
+		GoogleApplicationCredentials: getEnv("GOOGLE_APPLICATION_CREDENTIALS", ""),
 	}
 }
 

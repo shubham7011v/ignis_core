@@ -15,6 +15,7 @@ import '../../features/creations/presentation/screens/creations_gallery_screen.d
 import '../../features/creations/presentation/bloc/creations_event.dart';
 import '../../features/admin/presentation/screens/admin_screen.dart';
 import '../../features/templates/presentation/screens/search_screen.dart';
+import '../../features/templates/presentation/screens/saved_templates_screen.dart';
 
 class AppRouter {
   static const String splash = '/splash';
@@ -30,6 +31,7 @@ class AppRouter {
   static const String detailsForm = '/details_form';
   static const String preview = '/preview';
   static const String admin = '/admin';
+  static const String savedTemplates = '/saved_templates';
 
   static Map<String, WidgetBuilder> get routes => {
     splash: (context) => const SplashScreen(),
@@ -57,10 +59,11 @@ class AppRouter {
     ),
     creations: (context) {
       final userId = di.sl.authRepository.currentUser?.uid ?? '';
-      return BlocProvider.value(
-        value: di.sl.creationsBloc..add(LoadUserOrders(userId)),
+      return BlocProvider(
+        create: (context) => di.sl.creationsBloc..add(LoadUserOrders(userId)),
         child: const CreationsGalleryScreen(),
       );
     },
+    savedTemplates: (context) => const SavedTemplatesScreen(),
   };
 }

@@ -8,9 +8,6 @@ import '../bloc/templates_state.dart';
 import '../widgets/template_card.dart';
 import '../../../invitation_creator/presentation/bloc/invitation_bloc.dart';
 import '../../../invitation_creator/presentation/bloc/invitation_event.dart';
-import '../../../billing/presentation/bloc/billing_bloc.dart';
-import '../../../billing/presentation/bloc/billing_state.dart';
-import '../../../billing/presentation/bloc/billing_event.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -95,42 +92,30 @@ class _SearchScreenState extends State<SearchScreen> {
                         ),
                       );
                     }
-                    return BlocBuilder<BillingBloc, BillingState>(
-                      builder: (context, billingState) {
-                        final isPremiumUser =
-                            billingState is BillingAvailable &&
-                            billingState.isPremium;
+                    return GridView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.8,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                          ),
+                      itemCount: state.templates.length,
+                      itemBuilder: (context, index) {
+                        final template = state.templates[index];
+                        // No locking logic based on premium anymore
 
-                        return GridView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                childAspectRatio: 0.8,
-                                crossAxisSpacing: 16,
-                                mainAxisSpacing: 16,
-                              ),
-                          itemCount: state.templates.length,
-                          itemBuilder: (context, index) {
-                            final template = state.templates[index];
-                            final isLocked =
-                                template.isPremium && !isPremiumUser;
-
-                            return TemplateCard(
-                              template: template,
-                              isLocked: isLocked,
-                              onUnlock: () {
-                                context.read<BillingBloc>().add(
-                                  PurchasePremiumRequested(),
-                                );
-                              },
-                              onTap: () {
-                                context.read<InvitationBloc>().add(
-                                  TemplateSelected(template),
-                                );
-                                Navigator.pushNamed(context, '/details_form');
-                              },
+                        return TemplateCard(
+                          template: template,
+                          onUnlock: () {
+                            // No-op
+                          },
+                          onTap: () {
+                            context.read<InvitationBloc>().add(
+                              TemplateSelected(template),
                             );
+                            Navigator.pushNamed(context, '/details_form');
                           },
                         );
                       },

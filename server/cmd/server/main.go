@@ -39,6 +39,13 @@ func main() {
 	// Initialize sharing service
 	sharingService := services.NewSharingService("https://iamsorry.in")
 
+	// Initialize Google Play service (for IAP verification)
+	googlePlayService, err := services.NewGooglePlayService(context.Background(), cfg.GooglePlayPackageName, cfg.GoogleApplicationCredentials)
+	if err != nil {
+		log.Printf("WARNING: Google Play Billing not initialized: %v (continuing without verification)", err)
+		googlePlayService = nil
+	}
+
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(database)
 	templateRepo := repository.NewTemplateRepository(database)
@@ -65,7 +72,7 @@ func main() {
 	authHandler := handlers.NewAuthHandler(userRepo)
 	templatesHandler := handlers.NewTemplatesHandler(templateRepo)
 	shortsHandler := handlers.NewShortsHandler(shortsRepo)
-	ordersHandler := handlers.NewOrdersHandler(orderRepo, cfg.RenderOutputDir)
+	ordersHandler := handlers.NewOrdersHandler(orderRepo, googlePlayService, cfg.RenderOutputDir)
 	adminHandler := handlers.NewAdminHandler(orderRepo, userRepo, notificationService)
 	sharingHandler := handlers.NewSharingHandler(sharingService, shortsRepo, templateRepo)
 

@@ -14,8 +14,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     : _repository = repository,
       super(ProfileInitial()) {
     on<ProfileViewRequested>(_onViewRequested);
-    on<ProfileFriendAdded>(_onFriendAdded);
-    on<ProfileFriendRemoved>(_onFriendRemoved);
   }
 
   @override
@@ -38,34 +36,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       emit(ProfileLoaded(profile: profile, isOwnProfile: isOwnProfile));
     } catch (e) {
       emit(ProfileError(ServerFailure('Failed to load profile: $e')));
-    }
-  }
-
-  Future<void> _onFriendAdded(
-    ProfileFriendAdded event,
-    Emitter<ProfileState> emit,
-  ) async {
-    try {
-      await _repository.addFriend(event.userId);
-
-      // Reload profile to update friend status
-      add(ProfileViewRequested(event.userId));
-    } catch (e) {
-      emit(ProfileError(UnknownFailure('Failed to add friend: $e')));
-    }
-  }
-
-  Future<void> _onFriendRemoved(
-    ProfileFriendRemoved event,
-    Emitter<ProfileState> emit,
-  ) async {
-    try {
-      await _repository.removeFriend(event.userId);
-
-      // Reload profile to update friend status
-      add(ProfileViewRequested(event.userId));
-    } catch (e) {
-      emit(ProfileError(UnknownFailure('Failed to remove friend: $e')));
     }
   }
 }

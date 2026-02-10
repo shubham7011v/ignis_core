@@ -10,4 +10,7 @@ abstract class BillingRepository {
 
   /// Check initial state on app start
   Future<void> initialize();
+
+  /// Purchase a consumable product (like a video template)
+  Future<void> buyConsumable(String productId);
 }

@@ -171,19 +171,22 @@ class _HeroSlide extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (template.isPremium) ...[
-                    const Icon(
-                      Icons.star,
-                      color: IgnisTheme.goldAccent,
-                      size: 14,
-                    ),
-                    const SizedBox(width: 4),
+                  if (template.cost > 0) ...[
                     Text(
-                      'PREMIUM',
+                      '₹${template.cost.toStringAsFixed(0)}',
                       style: GoogleFonts.inter(
                         color: IgnisTheme.goldAccent,
-                        fontSize: 12,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Container(
+                      width: 4,
+                      height: 4,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
                       ),
                     ),
                     const SizedBox(width: 12),

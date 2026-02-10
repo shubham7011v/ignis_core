@@ -8,7 +8,6 @@ class UserProfile extends Equatable {
   final String? bio;
   final UserStats stats;
   final bool isOnline;
-  final bool isFriend;
   final DateTime joinedDate;
 
   const UserProfile({
@@ -18,7 +17,6 @@ class UserProfile extends Equatable {
     this.bio,
     required this.stats,
     required this.isOnline,
-    required this.isFriend,
     required this.joinedDate,
   });
 
@@ -30,7 +28,6 @@ class UserProfile extends Equatable {
       bio: json['bio'] as String?,
       stats: UserStats.fromJson(json['stats'] as Map<String, dynamic>),
       isOnline: json['isOnline'] as bool? ?? false,
-      isFriend: json['isFriend'] as bool? ?? false,
       joinedDate: DateTime.parse(json['joinedDate'] as String),
     );
   }
@@ -43,7 +40,6 @@ class UserProfile extends Equatable {
       'bio': bio,
       'stats': stats.toJson(),
       'isOnline': isOnline,
-      'isFriend': isFriend,
       'joinedDate': joinedDate.toIso8601String(),
     };
   }
@@ -56,7 +52,6 @@ class UserProfile extends Equatable {
     bio,
     stats,
     isOnline,
-    isFriend,
     joinedDate,
   ];
 }

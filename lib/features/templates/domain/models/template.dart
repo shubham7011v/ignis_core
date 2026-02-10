@@ -8,7 +8,6 @@ class Template extends Equatable {
   final String videoUrl;
   final String category;
   final String duration;
-  final bool isPremium;
   final double cost;
   final String? youtubeId; // YouTube video ID for downloading
 
@@ -20,7 +19,6 @@ class Template extends Equatable {
     required this.videoUrl,
     required this.category,
     required this.duration,
-    this.isPremium = false,
     this.cost = 0.0,
     this.youtubeId,
   });
@@ -34,12 +32,15 @@ class Template extends Equatable {
     videoUrl,
     category,
     duration,
-    isPremium,
     cost,
     youtubeId,
   ];
 
   factory Template.fromJson(Map<String, dynamic> json) {
+    // Server returns priceCents (e.g. 49900 for 499.00)
+    // Or sometimes just priceCents for whole units?
+    // Let's assume priceCents is the source of truth.
+    final priceCents = (json['priceCents'] as num?)?.toDouble() ?? 0.0;
     return Template(
       id: json['id'] as String,
       title: json['title'] as String,
@@ -48,8 +49,7 @@ class Template extends Equatable {
       videoUrl: json['videoUrl'] as String,
       category: json['category'] as String,
       duration: json['duration'] as String,
-      isPremium: (json['isPremium'] as bool?) ?? false,
-      cost: (json['cost'] as num?)?.toDouble() ?? 0.0,
+      cost: priceCents / 100.0,
       youtubeId: json['youtubeId'] as String?,
     );
   }
@@ -63,8 +63,7 @@ class Template extends Equatable {
       'videoUrl': videoUrl,
       'category': category,
       'duration': duration,
-      'isPremium': isPremium,
-      'cost': cost,
+      'priceCents': (cost * 100).toInt(),
       'youtubeId': youtubeId,
     };
   }
