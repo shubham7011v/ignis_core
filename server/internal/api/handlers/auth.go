@@ -51,7 +51,7 @@ func (h *AuthHandler) VerifyToken(c *gin.Context) {
 	)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to sync user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to sync user: " + err.Error()})
 		return
 	}
 

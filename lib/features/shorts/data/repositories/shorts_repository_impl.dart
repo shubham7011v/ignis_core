@@ -39,7 +39,8 @@ class ShortsRepositoryImpl implements ShortsRepository {
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
+        final Map<String, dynamic> body = json.decode(response.body);
+        final List<dynamic> data = body['shorts'] ?? [];
         return data.map((item) => _mapToShort(item)).toList();
       } else {
         AppLogger.error(

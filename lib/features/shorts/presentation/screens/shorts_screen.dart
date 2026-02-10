@@ -147,7 +147,7 @@ class _ShortsScreenState extends State<ShortsScreen> {
                   message:
                       'We are curating the best wedding templates for you.\nCheck back soon!',
                   actionLabel: 'Browse Templates',
-                  onAction: () => Navigator.pushNamed(context, '/templates'),
+                  onAction: () => Navigator.pushNamed(context, '/search'),
                 ),
               );
             }

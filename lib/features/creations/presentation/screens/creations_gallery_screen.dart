@@ -154,7 +154,7 @@ class CreationsGalleryScreen extends StatelessWidget {
         message:
             'Choose a template to create your stunning wedding invitation.',
         actionLabel: 'BROWSE TEMPLATES',
-        onAction: () => Navigator.pushNamed(context, '/shorts'),
+        onAction: () => Navigator.pushNamed(context, '/search'),
       ),
     );
   }
