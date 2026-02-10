@@ -21,6 +21,13 @@ class CreationsBloc extends Bloc<CreationsEvent, CreationsState> {
     LoadUserOrders event,
     Emitter<CreationsState> emit,
   ) async {
+    // If no user is logged in (empty ID), show empty list immediately
+    if (event.userId.isEmpty) {
+      await _ordersSubscription?.cancel();
+      emit(const CreationsLoaded(orders: []));
+      return;
+    }
+
     emit(CreationsLoading());
     await _ordersSubscription?.cancel();
 

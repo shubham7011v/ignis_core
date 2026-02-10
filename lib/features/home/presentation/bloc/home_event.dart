@@ -25,3 +25,5 @@ class HomeSessionStateChanged extends HomeEvent {
   final bool hasActiveSession;
   const HomeSessionStateChanged(this.hasActiveSession);
 }
+
+class HomeRefreshSystemStatus extends HomeEvent {}

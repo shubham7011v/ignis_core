@@ -23,7 +23,21 @@ class ShortsRepositoryImpl implements ShortsRepository {
   @override
   Future<List<Short>> getShorts() async {
     try {
-      final response = await http.get(Uri.parse(ApiConfig.shorts));
+      final user = _auth.currentUser;
+      final headers = <String, String>{};
+
+      if (user != null) {
+        final token = await user.getIdToken();
+        if (token != null) {
+          headers['Authorization'] = 'Bearer $token';
+        }
+      }
+
+      final response = await http.get(
+        Uri.parse(ApiConfig.shorts),
+        headers: headers,
+      );
+
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         return data.map((item) => _mapToShort(item)).toList();

@@ -32,7 +32,7 @@ func (r *ShortsRepository) GetRandomShorts(userID string, limit int) ([]models.T
 	}
 	defer rows.Close()
 
-	var templates []models.Template
+	templates := []models.Template{}
 	for rows.Next() {
 		var t models.Template
 		err := rows.Scan(
@@ -65,7 +65,7 @@ func (r *ShortsRepository) GetFavorites(userID string) ([]models.Template, error
 	}
 	defer rows.Close()
 
-	var templates []models.Template
+	templates := []models.Template{}
 	for rows.Next() {
 		var t models.Template
 		err := rows.Scan(

@@ -7,6 +7,7 @@ import '../bloc/shorts_event.dart';
 import '../bloc/shorts_state.dart';
 import '../widgets/shorts_action_bar.dart';
 import '../widgets/shorts_info_sheet.dart';
+import '../../../../core/widgets/empty_state_widget.dart';
 import '../managers/video_controller_manager.dart';
 import '../widgets/shorts_player_widget.dart';
 import '../../../../core/di/service_locator.dart';
@@ -140,9 +141,13 @@ class _ShortsScreenState extends State<ShortsScreen> {
 
             if (shorts.isEmpty) {
               return Center(
-                child: Text(
-                  'No shorts available',
-                  style: GoogleFonts.inter(color: Colors.white, fontSize: 18),
+                child: EmptyStateWidget(
+                  icon: Icons.movie_filter_outlined,
+                  title: 'No Shorts Yet',
+                  message:
+                      'We are curating the best wedding templates for you.\nCheck back soon!',
+                  actionLabel: 'Browse Templates',
+                  onAction: () => Navigator.pushNamed(context, '/templates'),
                 ),
               );
             }

@@ -49,7 +49,7 @@ func (r *OrderRepository) GetByUser(userID string) ([]models.Order, error) {
 	}
 	defer rows.Close()
 
-	var orders []models.Order
+	orders := []models.Order{}
 	for rows.Next() {
 		var o models.Order
 		err := rows.Scan(

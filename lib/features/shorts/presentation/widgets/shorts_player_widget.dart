@@ -96,11 +96,30 @@ class _ShortsPlayerWidgetState extends State<ShortsPlayerWidget> {
             errorBuilder: (_, _, _) =>
                 Container(color: Color(widget.short.placeholderColor)),
           ),
-        const Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        if (widget.short.videoUrl == null || widget.short.videoUrl!.isEmpty)
+          const Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.broken_image_outlined,
+                  color: Colors.white,
+                  size: 48,
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Video Unavailable',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
+          )
+        else
+          const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
           ),
-        ),
       ],
     );
   }

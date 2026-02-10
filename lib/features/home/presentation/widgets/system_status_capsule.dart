@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/models/system_status.dart';
+import '../bloc/home_bloc.dart';
 import 'system_status_diagnostics_modal.dart';
 
 class SystemStatusCapsule extends StatelessWidget {
@@ -69,8 +71,14 @@ class SystemStatusCapsule extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) =>
-          SystemStatusDiagnosticsModal(status: status, palette: palette),
+      builder: (modalContext) => SystemStatusDiagnosticsModal(
+        status: status,
+        palette: palette,
+        onAction: () {
+          context.read<HomeBloc>().add(HomeRefreshSystemStatus());
+          Navigator.pop(modalContext);
+        },
+      ),
     );
   }
 }

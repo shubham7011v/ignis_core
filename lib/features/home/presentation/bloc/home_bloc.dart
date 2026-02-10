@@ -32,6 +32,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<HomeStarted>(_onHomeStarted);
     on<HomeBottomNavTapped>(_onBottomNavTapped);
     on<HomeSystemStatusChanged>(_onSystemStatusChanged);
+    on<HomeRefreshSystemStatus>(_onRefreshStatus);
 
     // Subscribe to System Status
     _statusSubscription = _systemStatusService.statusStream.listen((status) {
@@ -75,5 +76,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     Emitter<HomeState> emit,
   ) async {
     emit(state.copyWith(systemStatus: event.status));
+  }
+
+  Future<void> _onRefreshStatus(
+    HomeRefreshSystemStatus event,
+    Emitter<HomeState> emit,
+  ) async {
+    // Force a manual refresh in the service
+    await _systemStatusService.refresh();
   }
 }

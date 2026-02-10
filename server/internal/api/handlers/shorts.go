@@ -30,7 +30,7 @@ func (h *ShortsHandler) GetShorts(c *gin.Context) {
 
 	templates, err := h.shortsRepo.GetRandomShorts(firebaseUID.(string), 50)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch shorts"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch shorts: " + err.Error()})
 		return
 	}
 

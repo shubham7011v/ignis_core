@@ -7,6 +7,7 @@ import '../bloc/creations_state.dart';
 import '../widgets/order_card.dart';
 import '../../../orders/domain/entities/order.dart';
 import '../../../orders/domain/entities/order_status.dart';
+import '../../../../core/widgets/empty_state_widget.dart';
 
 class CreationsGalleryScreen extends StatelessWidget {
   const CreationsGalleryScreen({super.key});
@@ -147,34 +148,13 @@ class CreationsGalleryScreen extends StatelessWidget {
 
   Widget _buildEmptyState(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.video_library_outlined,
-            size: 64,
-            color: Colors.white12,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'START YOUR FIRST CREATION',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.cinzel(
-              color: Colors.white24,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 24),
-          OutlinedButton(
-            onPressed: () => Navigator.pushNamed(context, '/style_selection'),
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: IgnisTheme.goldAccent),
-              foregroundColor: IgnisTheme.goldAccent,
-            ),
-            child: const Text('BROWSE TEMPLATES'),
-          ),
-        ],
+      child: EmptyStateWidget(
+        icon: Icons.video_library_outlined,
+        title: 'START YOUR FIRST CREATION',
+        message:
+            'Choose a template to create your stunning wedding invitation.',
+        actionLabel: 'BROWSE TEMPLATES',
+        onAction: () => Navigator.pushNamed(context, '/shorts'),
       ),
     );
   }

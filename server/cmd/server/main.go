@@ -77,6 +77,14 @@ func main() {
 
 	// Health check
 	router.GET("/health", func(c *gin.Context) {
+		if err := database.Ping(); err != nil {
+			c.JSON(503, gin.H{
+				"status":  "error",
+				"service": "vites-api",
+				"error":   "Database unreachable",
+			})
+			return
+		}
 		c.JSON(200, gin.H{
 			"status":  "ok",
 			"service": "vites-api",

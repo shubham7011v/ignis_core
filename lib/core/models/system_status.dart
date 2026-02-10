@@ -8,6 +8,7 @@ enum SystemStatusType {
   syncing,
   reconnecting,
   failed,
+  maintenance,
 }
 
 class SystemStatus {
@@ -88,5 +89,14 @@ class SystemStatus {
     actionLabel: 'RETRY ALL',
     icon: Icons.error_rounded,
     statusColor: Color(0xFFF43F5E),
+  );
+
+  factory SystemStatus.maintenance() => const SystemStatus(
+    type: SystemStatusType.maintenance,
+    label: 'Maintenance',
+    description: 'Server is currently undergoing maintenance.',
+    actionLabel: 'TRY LATER',
+    icon: Icons.engineering_rounded,
+    statusColor: Color(0xFFFFC107), // Amber
   );
 }
