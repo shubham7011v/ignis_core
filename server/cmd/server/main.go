@@ -3,12 +3,14 @@ package main
 import (
 	"log"
 
+	"context"
 	"ignis_server/db"
 	"ignis_server/internal/api/handlers"
 	"ignis_server/internal/api/middleware"
 	"ignis_server/internal/repository"
 	"ignis_server/internal/services"
 	"ignis_server/pkg/config"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -43,6 +45,19 @@ func main() {
 	shortsRepo := repository.NewShortsRepository(database)
 	orderRepo := repository.NewOrderRepository(database)
 
+	// Initialize rendering & automated fulfillment
+	renderService := services.NewRenderService(cfg.TemplatesDir, cfg.RenderOutputDir)
+	orderWorker := services.NewOrderWorker(orderRepo, templateRepo, renderService)
+
+	// Ensure storage directories exist
+	os.MkdirAll(cfg.TemplatesDir, 0755)
+	os.MkdirAll(cfg.RenderOutputDir, 0755)
+
+	// Start automated order worker in background
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go orderWorker.Start(ctx)
+
 	// Initialize notification service
 	notificationService := services.NewNotificationService(firebaseService)
 
@@ -50,7 +65,7 @@ func main() {
 	authHandler := handlers.NewAuthHandler(userRepo)
 	templatesHandler := handlers.NewTemplatesHandler(templateRepo)
 	shortsHandler := handlers.NewShortsHandler(shortsRepo)
-	ordersHandler := handlers.NewOrdersHandler(orderRepo)
+	ordersHandler := handlers.NewOrdersHandler(orderRepo, cfg.RenderOutputDir)
 	adminHandler := handlers.NewAdminHandler(orderRepo, userRepo, notificationService)
 	sharingHandler := handlers.NewSharingHandler(sharingService, shortsRepo, templateRepo)
 
@@ -143,6 +158,7 @@ func main() {
 			orders.POST("", ordersHandler.CreateOrder)
 			orders.GET("", ordersHandler.GetOrders)
 			orders.GET("/:id", ordersHandler.GetOrder)
+			orders.GET("/download/:filename", ordersHandler.DownloadVideo)
 		}
 
 		// Admin (protected + admin only)

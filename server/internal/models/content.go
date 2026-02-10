@@ -21,6 +21,9 @@ type Template struct {
 	Category    string   `json:"category" db:"category"`
 	Tags        []string `json:"tags" db:"tags"`
 
+	// Overlay Configuration for automated rendering
+	OverlayConfig []byte `json:"overlayConfig" db:"overlay_config"` // JSON data
+
 	// Metadata
 	IsActive    bool      `json:"isActive" db:"is_active"`
 	IsFavorited bool      `json:"isFavorited" db:"is_favorited"` // Computed field from JOIN

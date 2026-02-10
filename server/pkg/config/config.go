@@ -16,6 +16,8 @@ type Config struct {
 	FirebaseCredentialsPath string
 	FirebaseCredentialsJSON string
 	AllowedOrigins          string
+	TemplatesDir            string
+	RenderOutputDir         string
 }
 
 func Load() *Config {
@@ -32,6 +34,8 @@ func Load() *Config {
 		FirebaseCredentialsPath: getEnv("FIREBASE_CREDENTIALS_PATH", ""),
 		FirebaseCredentialsJSON: getEnv("FIREBASE_CREDENTIALS_JSON", ""),
 		AllowedOrigins:          getEnv("ALLOWED_ORIGINS", "*"),
+		TemplatesDir:            getEnv("TEMPLATES_DIR", "./storage/templates"),
+		RenderOutputDir:         getEnv("RENDER_OUTPUT_DIR", "./storage/renders"),
 	}
 }
 

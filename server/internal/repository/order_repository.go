@@ -128,3 +128,34 @@ func (r *OrderRepository) GetAll() ([]models.Order, error) {
 
 	return orders, nil
 }
+
+// GetByStatus returns all orders with a specific status
+func (r *OrderRepository) GetByStatus(status string) ([]models.Order, error) {
+	query := `SELECT id, user_id, template_id, bride_name, groom_name, wedding_date,
+	          venue, custom_message, status, video_url, payment_status, amount_cents,
+	          transaction_id, created_at, delivered_at, admin_notes
+	          FROM orders WHERE status = $1
+	          ORDER BY created_at ASC`
+
+	rows, err := r.db.Query(query, status)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var orders []models.Order
+	for rows.Next() {
+		var o models.Order
+		err := rows.Scan(
+			&o.ID, &o.UserID, &o.TemplateID, &o.BrideName, &o.GroomName, &o.WeddingDate,
+			&o.Venue, &o.CustomMessage, &o.Status, &o.VideoURL, &o.PaymentStatus,
+			&o.AmountCents, &o.TransactionID, &o.CreatedAt, &o.DeliveredAt, &o.AdminNotes,
+		)
+		if err != nil {
+			return nil, err
+		}
+		orders = append(orders, o)
+	}
+
+	return orders, nil
+}

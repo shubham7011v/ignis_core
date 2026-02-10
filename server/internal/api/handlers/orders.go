@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"net/http"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"ignis_server/internal/models"
@@ -11,13 +13,40 @@ import (
 )
 
 type OrdersHandler struct {
-	orderRepo *repository.OrderRepository
+	orderRepo       *repository.OrderRepository
+	renderOutputDir string
 }
 
-func NewOrdersHandler(orderRepo *repository.OrderRepository) *OrdersHandler {
+func NewOrdersHandler(orderRepo *repository.OrderRepository, renderOutputDir string) *OrdersHandler {
 	return &OrdersHandler{
-		orderRepo: orderRepo,
+		orderRepo:       orderRepo,
+		renderOutputDir: renderOutputDir,
 	}
+}
+
+// DownloadVideo handles GET /api/orders/download/:filename
+func (h *OrdersHandler) DownloadVideo(c *gin.Context) {
+	filename := c.Param("filename")
+	if filename == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Filename required"})
+		return
+	}
+
+	// Security check: ensure path is within renderOutputDir and is an mp4
+	filePath := filepath.Join(h.renderOutputDir, filename)
+
+	// Basic safety: prevent directory traversal
+	if !strings.HasPrefix(filepath.Clean(filePath), filepath.Clean(h.renderOutputDir)) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid path"})
+		return
+	}
+
+	if !strings.HasSuffix(filename, ".mp4") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file type"})
+		return
+	}
+
+	c.File(filePath)
 }
 
 type CreateOrderRequest struct {
