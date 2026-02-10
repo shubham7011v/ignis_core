@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -8,17 +7,10 @@ import '../../../../core/config/api_config.dart';
 import '../../../../core/utils/app_logger.dart';
 
 class ShortsRepositoryImpl implements ShortsRepository {
-  final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
 
-  ShortsRepositoryImpl({FirebaseFirestore? firestore, FirebaseAuth? auth})
-    : _firestore = firestore ?? FirebaseFirestore.instance,
-      _auth = auth ?? FirebaseAuth.instance;
-
-  CollectionReference get _favoritesCollection => _firestore
-      .collection('users')
-      .doc(_auth.currentUser?.uid)
-      .collection('favorites');
+  ShortsRepositoryImpl({FirebaseAuth? auth})
+    : _auth = auth ?? FirebaseAuth.instance;
 
   @override
   Future<List<Short>> getShorts() async {
@@ -41,7 +33,7 @@ class ShortsRepositoryImpl implements ShortsRepository {
       if (response.statusCode == 200) {
         final Map<String, dynamic> body = json.decode(response.body);
         final List<dynamic> data = body['shorts'] ?? [];
-        return data.map((item) => _mapToShort(item)).toList();
+        return data.map((item) => Short.fromJson(item)).toList();
       } else {
         AppLogger.error(
           'ShortsRepository: Failed to fetch shorts (${response.statusCode})',
@@ -59,29 +51,22 @@ class ShortsRepositoryImpl implements ShortsRepository {
     if (user == null) return;
 
     try {
-      // 1. Sync to Firestore (Free Tier - Real-time & Offline)
-      if (isFavorite) {
-        await _favoritesCollection.doc(shortId).set({
-          'templateId': shortId,
-          'addedAt': FieldValue.serverTimestamp(),
-        });
-      } else {
-        await _favoritesCollection.doc(shortId).delete();
-      }
-
-      // 2. Notify Backend (Sync PostgreSQL)
       final token = await user.getIdToken();
       final url = ApiConfig.shortsToggleFavorite(shortId);
 
-      if (isFavorite) {
-        await http.post(
-          Uri.parse(url),
-          headers: {'Authorization': 'Bearer $token'},
-        );
-      } else {
-        await http.delete(
-          Uri.parse(url),
-          headers: {'Authorization': 'Bearer $token'},
+      final response = isFavorite
+          ? await http.post(
+              Uri.parse(url),
+              headers: {'Authorization': 'Bearer $token'},
+            )
+          : await http.delete(
+              Uri.parse(url),
+              headers: {'Authorization': 'Bearer $token'},
+            );
+
+      if (response.statusCode != 200) {
+        AppLogger.error(
+          'ShortsRepository: Toggle favorite failed (${response.statusCode})',
         );
       }
     } catch (e) {
@@ -89,6 +74,7 @@ class ShortsRepositoryImpl implements ShortsRepository {
         'ShortsRepository: Toggle favorite exception',
         exception: e,
       );
+      rethrow;
     }
   }
 
@@ -98,37 +84,23 @@ class ShortsRepositoryImpl implements ShortsRepository {
     if (user == null) return {};
 
     try {
-      final snapshot = await _favoritesCollection.get();
-      return snapshot.docs.map((doc) => doc.id).toSet();
+      final token = await user.getIdToken();
+      final response = await http.get(
+        Uri.parse(ApiConfig.shortsFavorites),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> body = json.decode(response.body);
+        final List<dynamic> data = body['shorts'] ?? [];
+        return data.map((item) => item['id'] as String).toSet();
+      }
     } catch (e) {
       AppLogger.error(
         'ShortsRepository: Get favorite IDs exception',
         exception: e,
       );
-      return {};
     }
-  }
-
-  Short _mapToShort(Map<String, dynamic> item) {
-    return Short(
-      id: item['id'] ?? '',
-      title: item['title'] ?? '',
-      category: item['category'] ?? '',
-      videoUrl: item['videoUrl'],
-      thumbnailUrl: item['thumbnailUrl'],
-      placeholderColor: _parseColor(item['placeholderColor']),
-    );
-  }
-
-  int _parseColor(String? colorStr) {
-    if (colorStr == null) return 0xFF000000;
-    try {
-      if (colorStr.startsWith('#')) {
-        return int.parse(colorStr.replaceFirst('#', '0xFF'));
-      }
-      return int.parse(colorStr);
-    } catch (_) {
-      return 0xFF000000;
-    }
+    return {};
   }
 }

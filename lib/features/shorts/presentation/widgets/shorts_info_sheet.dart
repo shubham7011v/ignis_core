@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/ignis_theme.dart';
 import '../../domain/entities/short.dart';
-import '../../../templates/data/template_config.dart';
 import '../../../invitation_creator/presentation/bloc/invitation_bloc.dart';
 import '../../../invitation_creator/presentation/bloc/invitation_event.dart';
 
@@ -69,35 +68,15 @@ class ShortsInfoSheet extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                final templateId = short.templateId;
-                if (templateId != null) {
-                  try {
-                    final template = TemplateConfig.templates.firstWhere(
-                      (t) => t.id == templateId,
-                    );
+                Navigator.pop(context); // Close sheet
 
-                    Navigator.pop(context); // Close sheet
+                // Convert Short to Template and dispatch
+                context.read<InvitationBloc>().add(
+                  TemplateSelected(short.toTemplate()),
+                );
 
-                    // Dispatch event to set selected template
-                    context.read<InvitationBloc>().add(
-                      TemplateSelected(template),
-                    );
-
-                    // Navigate to details form
-                    Navigator.pushNamed(context, '/details_form');
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Template not available for this Short'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                } else {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('Coming soon!')));
-                }
+                // Navigate to details form
+                Navigator.pushNamed(context, '/details_form');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: IgnisTheme.goldAccent,
