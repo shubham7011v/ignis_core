@@ -169,6 +169,7 @@ Future<void> mainCommon({required String env, required String appName}) async {
         );
       }
 
+      /*
       _bootStep = '6. Activating App Check';
       AppLogger.info('🚀 [STARTUP] $_bootStep...');
       try {
@@ -194,6 +195,7 @@ Future<void> mainCommon({required String env, required String appName}) async {
         // For debugging, let's catch it but log clearly.
         AppLogger.info('🚀 [STARTUP] 6. App Check Failed (WARNING): $e');
       }
+      */
 
       // Initialize Notifications
       _bootStep = '8. Initializing Notifications';

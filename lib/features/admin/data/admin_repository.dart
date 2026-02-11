@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/config/app_config.dart';
-import 'package:firebase_app_check/firebase_app_check.dart';
 import 'models/admin_user.dart';
 import 'models/admin_template.dart';
 import '../../orders/domain/entities/order.dart';
@@ -23,24 +22,10 @@ class AdminRepository {
     final token = await user.getIdToken();
     if (token == null) throw Exception('Failed to get ID token');
 
-    // Get App Check Token
-    String? appCheckToken;
-    try {
-      // forceRefresh: false is usually enough
-      final tokenResult = await FirebaseAppCheck.instance.getToken(false);
-      appCheckToken = tokenResult;
-    } catch (e) {
-      AppLogger.warning('Failed to get App Check token: $e');
-    }
-
     final headers = {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
     };
-
-    if (appCheckToken != null) {
-      headers['X-Firebase-AppCheck'] = appCheckToken;
-    }
 
     return headers;
   }
