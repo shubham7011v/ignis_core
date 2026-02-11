@@ -33,6 +33,9 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
 
     try {
       await repository.updateUserRole(user.id, isAdmin: makeAdmin);
+
+      if (!context.mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -46,6 +49,7 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
       // Parent should handle refresh.
       // For now, this just sends API call.
     } catch (e) {
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
       );
