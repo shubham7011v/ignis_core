@@ -79,6 +79,7 @@ func main() {
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(firebaseService)
 	adminMiddleware := middleware.NewAdminMiddleware(userRepo)
+	appCheckMiddleware := middleware.NewAppCheckMiddleware(firebaseService)
 
 	// Setup Gin router
 	router := gin.Default()
@@ -87,7 +88,7 @@ func main() {
 	router.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", cfg.AllowedOrigins)
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Firebase-AppCheck")
 
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
@@ -133,6 +134,7 @@ func main() {
 
 	// API routes
 	api := router.Group("/api")
+	api.Use(appCheckMiddleware.RequireAppCheck())
 	{
 		// Auth (protected)
 		auth := api.Group("/auth")

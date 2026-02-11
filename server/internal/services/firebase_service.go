@@ -6,6 +6,7 @@ import (
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go/v4"
+	"firebase.google.com/go/v4/appcheck"
 	"firebase.google.com/go/v4/auth"
 	"firebase.google.com/go/v4/messaging"
 	"google.golang.org/api/option"
@@ -13,6 +14,7 @@ import (
 
 type FirebaseService struct {
 	AuthClient      *auth.Client
+	AppCheckClient  *appcheck.Client
 	MessagingClient *messaging.Client
 	FirestoreClient *firestore.Client
 }
@@ -42,6 +44,11 @@ func NewFirebaseService(credentialsPath, credentialsJSON string) (*FirebaseServi
 		return nil, err
 	}
 
+	appCheckClient, err := app.AppCheck(ctx)
+	if err != nil {
+		log.Printf("WARNING: Failed to initialize Firebase App Check: %v", err)
+	}
+
 	messagingClient, err := app.Messaging(ctx)
 	if err != nil {
 		log.Printf("WARNING: Failed to initialize Firebase Messaging: %v", err)
@@ -56,6 +63,7 @@ func NewFirebaseService(credentialsPath, credentialsJSON string) (*FirebaseServi
 
 	return &FirebaseService{
 		AuthClient:      authClient,
+		AppCheckClient:  appCheckClient,
 		MessagingClient: messagingClient,
 		FirestoreClient: firestoreClient,
 	}, nil
@@ -73,4 +81,14 @@ func (s *FirebaseService) UpdateAppConfig(ctx context.Context, data map[string]i
 	}
 	_, err := s.FirestoreClient.Collection("config").Doc("app").Set(ctx, data, firestore.MergeAll)
 	return err
+}
+
+// VerifyAppCheckToken verifies a Firebase App Check token
+// VerifyAppCheckToken verifies a Firebase App Check token
+// VerifyAppCheckToken verifies a Firebase App Check token
+func (s *FirebaseService) VerifyAppCheckToken(ctx context.Context, token string) (*appcheck.DecodedAppCheckToken, error) {
+	if s.AppCheckClient == nil {
+		return nil, nil // Or return error if enforced
+	}
+	return s.AppCheckClient.VerifyToken(token)
 }

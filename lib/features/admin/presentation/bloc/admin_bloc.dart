@@ -140,7 +140,7 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     try {
       final results = await Future.wait([
         repository.getStats(),
-        orderRepository.getAllOrders(),
+        repository.getOrders(),
         repository.getUsers(),
         repository.getTemplates(),
       ]);
@@ -170,7 +170,7 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     try {
       final results = await Future.wait([
         repository.getStats(),
-        orderRepository.getAllOrders(),
+        repository.getOrders(),
         repository.getUsers(),
         repository.getTemplates(),
       ]);
@@ -197,7 +197,7 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     Emitter<AdminState> emit,
   ) async {
     try {
-      await orderRepository.updateOrderStatus(
+      await repository.updateOrderStatus(
         event.orderId,
         event.status,
         videoUrl: event.videoUrl,

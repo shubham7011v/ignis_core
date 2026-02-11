@@ -8,6 +8,11 @@ service cloud.firestore {
     
     match /orders/{orderId} {
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // Allow read/write if owner OR if admin (using custom claim or hardcoded list)
+      // Since custom claims aren't set yet, we rely on the backend enforcing admin actions via API.
+      // BUT for client-side direct access (if any), we need to be careful.
+      // For now, let's keep it restricted to owner for direct Firestore access,
+      // as the Admin Dashboard uses the API (/api/admin/orders), not direct Firestore.
       allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
 

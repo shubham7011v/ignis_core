@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../utils/app_logger.dart';
@@ -21,12 +22,27 @@ class UserRepository {
         return false;
       }
 
+      // Get App Check Token
+      String? appCheckToken;
+      try {
+        final tokenResult = await FirebaseAppCheck.instance.getToken(false);
+        appCheckToken = tokenResult;
+      } catch (e) {
+        AppLogger.warning('User: Failed to get App Check token: $e');
+      }
+
+      final headers = {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      };
+
+      if (appCheckToken != null) {
+        headers['X-Firebase-AppCheck'] = appCheckToken;
+      }
+
       final response = await http.post(
         Uri.parse(ApiConfig.authVerify),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
