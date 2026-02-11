@@ -23,7 +23,6 @@ import 'shared/components/error_boundary.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 import 'config/firebase_options_dev.dart' as dev;
