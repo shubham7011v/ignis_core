@@ -79,9 +79,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           : null;
                       final config = AppConfig.instance;
                       final bool isAdmin =
-                          user != null &&
-                          (config.isAdmin ||
-                              config.adminUids.contains(user.uid));
+                          authState is Authenticated &&
+                          (authState.isAdmin ||
+                              (user != null &&
+                                  config.adminUids.contains(user.uid)));
 
                       // Safety: clamp index if isAdmin status changed mid-session
                       final adjustedIndex = isAdmin

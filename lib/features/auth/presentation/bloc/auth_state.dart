@@ -15,15 +15,16 @@ class AuthLoading extends AuthState {}
 
 class Authenticated extends AuthState {
   final User user;
+  final bool isAdmin;
 
-  const Authenticated(this.user);
+  const Authenticated(this.user, {this.isAdmin = false});
 
-  Authenticated copyWith({User? user}) {
-    return Authenticated(user ?? this.user);
+  Authenticated copyWith({User? user, bool? isAdmin}) {
+    return Authenticated(user ?? this.user, isAdmin: isAdmin ?? this.isAdmin);
   }
 
   @override
-  List<Object?> get props => [user];
+  List<Object?> get props => [user, isAdmin];
 }
 
 class Unauthenticated extends AuthState {}

@@ -107,6 +107,7 @@ class AppConfig {
   bool maintenanceMode = false;
   String minAppVersion = '1.0.0';
   String? promoBannerUrl;
+  String? appCheckDebugToken;
 
   // Feature Flags (From Remote Config / Server Override)
   late bool enableVoiceChat;
@@ -410,6 +411,7 @@ class AppConfig {
       'HELP_CENTER_URL',
       'https://example.com/help',
     );
+    appCheckDebugToken = _safeGetEnv('FIREBASE_APP_CHECK_DEBUG_TOKEN');
 
     // Feature Flags
     bootStep = '4j. Loading Feature Flags';

@@ -149,12 +149,20 @@ Future<void> mainCommon({required String env, required String appName}) async {
         }
 
         // Setup real-time listener for live updates (Maintenance mode, feature flags)
-        di.sl.remoteConfigService.watchConfig().listen((updatedConfig) {
-          if (updatedConfig.isNotEmpty) {
-            config.updateFromMap(updatedConfig);
-            AppLogger.info('🚀 [REMOTE CONFIG] Real-time update received');
-          }
-        });
+        di.sl.remoteConfigService.watchConfig().listen(
+          (updatedConfig) {
+            if (updatedConfig.isNotEmpty) {
+              config.updateFromMap(updatedConfig);
+              AppLogger.info('🚀 [REMOTE CONFIG] Real-time update received');
+            }
+          },
+          onError: (e) {
+            AppLogger.error(
+              '🚀 [REMOTE CONFIG] Real-time listener error (probably Permissions/AppCheck)',
+              exception: e,
+            );
+          },
+        );
       } catch (e) {
         AppLogger.info(
           '🚀 [STARTUP] 5. Remote Config Sync Failed (continuing): $e',
@@ -166,6 +174,11 @@ Future<void> mainCommon({required String env, required String appName}) async {
       try {
         // Only run App Check if Firebase is initialized
         if (Firebase.apps.isNotEmpty) {
+          if (config.isDevelopment && config.appCheckDebugToken != null) {
+            AppLogger.info(
+              '🚀 [APP CHECK] Using Debug Token from Config: ${config.appCheckDebugToken}',
+            );
+          }
           await FirebaseAppCheck.instance
               .activate(
                 providerAndroid: config.isDevelopment
