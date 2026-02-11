@@ -4,6 +4,7 @@ class AdminUser {
   final String displayName;
   final String photoUrl;
   final bool isAdmin;
+  final bool isSuperAdmin;
   final DateTime createdAt;
   final DateTime lastLogin;
 
@@ -13,6 +14,7 @@ class AdminUser {
     required this.displayName,
     required this.photoUrl,
     required this.isAdmin,
+    required this.isSuperAdmin,
     required this.createdAt,
     required this.lastLogin,
   });
@@ -23,7 +25,8 @@ class AdminUser {
       email: json['email'] ?? '',
       displayName: json['display_name'] ?? 'No Name',
       photoUrl: json['photo_url'] ?? '',
-      isAdmin: json['is_admin'] ?? false,
+      isAdmin: json['isAdmin'] ?? false,
+      isSuperAdmin: json['isSuperAdmin'] ?? false,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : DateTime.now(),

@@ -38,3 +38,24 @@ func (m *AdminMiddleware) RequireAdmin() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+// RequireSuperAdmin checks if the user is a super admin
+func (m *AdminMiddleware) RequireSuperAdmin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		firebaseUID, exists := c.Get("firebaseUid")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
+
+		isSuperAdmin, err := m.userRepo.IsSuperAdmin(firebaseUID.(string))
+		if err != nil || !isSuperAdmin {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Super Admin access required"})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}

@@ -108,6 +108,7 @@ class AppConfig {
   String minAppVersion = '1.0.0';
   String? promoBannerUrl;
   String? appCheckDebugToken;
+  String? superAdminEmail;
 
   // Feature Flags (From Remote Config / Server Override)
   late bool enableVoiceChat;
@@ -412,6 +413,11 @@ class AppConfig {
       'https://example.com/help',
     );
     appCheckDebugToken = _safeGetEnv('FIREBASE_APP_CHECK_DEBUG_TOKEN');
+    superAdminEmail = _getStringConfig(
+      'super_admin_email',
+      'SUPER_ADMIN_EMAIL',
+      'shubhamsinh2009@gmail.com',
+    );
 
     // Feature Flags
     bootStep = '4j. Loading Feature Flags';

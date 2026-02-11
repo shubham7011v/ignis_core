@@ -20,6 +20,7 @@ type Config struct {
 	RenderOutputDir              string
 	GooglePlayPackageName        string
 	GoogleApplicationCredentials string
+	SuperAdminEmail              string
 }
 
 func Load() *Config {
@@ -40,6 +41,7 @@ func Load() *Config {
 		RenderOutputDir:              getEnv("RENDER_OUTPUT_DIR", "./storage/renders"),
 		GooglePlayPackageName:        getEnv("GOOGLE_PLAY_PACKAGE_NAME", "com.iamsorry.vites"),
 		GoogleApplicationCredentials: getEnv("GOOGLE_APPLICATION_CREDENTIALS", ""),
+		SuperAdminEmail:              getEnv("SUPER_ADMIN_EMAIL", ""),
 	}
 }
 

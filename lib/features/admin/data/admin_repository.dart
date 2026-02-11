@@ -224,4 +224,24 @@ class AdminRepository {
       throw Exception('Failed to broadcast: ${response.statusCode}');
     }
   }
+
+  // --- User Management ---
+
+  Future<void> updateUserRole(String userId, {required bool isAdmin}) async {
+    final headers = await _getAuthHeaders();
+    // Special endpoint for super admin
+    final url = '$_baseUrl/admin/users/$userId/role';
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: headers,
+      body: json.encode({'isAdmin': isAdmin}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        'Failed to update user role: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
 }

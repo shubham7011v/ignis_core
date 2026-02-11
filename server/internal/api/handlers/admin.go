@@ -263,3 +263,25 @@ func (h *AdminHandler) GetUsers(c *gin.Context) {
 		"users": users,
 	})
 }
+
+type UpdateUserRoleRequest struct {
+	IsAdmin bool `json:"isAdmin"`
+}
+
+// UpdateUserRole handles POST /api/admin/users/:id/role
+func (h *AdminHandler) UpdateUserRole(c *gin.Context) {
+	userID := c.Param("id")
+	var req UpdateUserRoleRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.userRepo.UpdateUserRole(userID, req.IsAdmin)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user role"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true})
+}

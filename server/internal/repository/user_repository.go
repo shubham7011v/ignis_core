@@ -7,11 +7,15 @@ import (
 )
 
 type UserRepository struct {
-	db *sql.DB
+	db              *sql.DB
+	superAdminEmail string
 }
 
-func NewUserRepository(db *sql.DB) *UserRepository {
-	return &UserRepository{db: db}
+func NewUserRepository(db *sql.DB, superAdminEmail string) *UserRepository {
+	return &UserRepository{
+		db:              db,
+		superAdminEmail: superAdminEmail,
+	}
 }
 
 // GetOrCreateUser syncs a user from Firebase to PostgreSQL
@@ -56,6 +60,7 @@ func (r *UserRepository) GetOrCreateUser(firebaseUID, email, displayName, photoU
 			return nil, err
 		}
 
+		user.IsSuperAdmin = (user.Email == r.superAdminEmail)
 		return &user, nil
 	}
 
@@ -70,6 +75,8 @@ func (r *UserRepository) GetOrCreateUser(firebaseUID, email, displayName, photoU
 	}
 
 	user.LastLogin = time.Now()
+	user.LastLogin = time.Now()
+	user.IsSuperAdmin = (user.Email == r.superAdminEmail)
 	return &user, nil
 }
 
@@ -81,6 +88,22 @@ func (r *UserRepository) IsAdmin(firebaseUID string) (bool, error) {
 		return false, err
 	}
 	return isAdmin, nil
+}
+
+// IsSuperAdmin checks if a user is a super admin based on email
+func (r *UserRepository) IsSuperAdmin(firebaseUID string) (bool, error) {
+	var email string
+	err := r.db.QueryRow("SELECT email FROM users WHERE firebase_uid = $1", firebaseUID).Scan(&email)
+	if err != nil {
+		return false, err
+	}
+	return email == r.superAdminEmail, nil
+}
+
+// UpdateUserRole updates the admin status of a user
+func (r *UserRepository) UpdateUserRole(userID string, isAdmin bool) error {
+	_, err := r.db.Exec("UPDATE users SET is_admin = $1 WHERE id = $2", isAdmin, userID)
+	return err
 }
 
 // UpdateFCMToken updates the FCM token for a user
@@ -142,6 +165,7 @@ func (r *UserRepository) GetAll(limit, offset int) ([]models.User, error) {
 		if err != nil {
 			return nil, err
 		}
+		u.IsSuperAdmin = (u.Email == r.superAdminEmail)
 		users = append(users, u)
 	}
 

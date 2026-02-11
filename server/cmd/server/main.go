@@ -47,7 +47,7 @@ func main() {
 	}
 
 	// Initialize repositories
-	userRepo := repository.NewUserRepository(database)
+	userRepo := repository.NewUserRepository(database, cfg.SuperAdminEmail)
 	templateRepo := repository.NewTemplateRepository(database)
 	shortsRepo := repository.NewShortsRepository(database)
 	orderRepo := repository.NewOrderRepository(database)
@@ -189,6 +189,13 @@ func main() {
 
 			// Users
 			admin.GET("/users", adminHandler.GetUsers)
+
+			// Super Admin Only
+			superAdmin := admin.Group("/users")
+			superAdmin.Use(adminMiddleware.RequireSuperAdmin())
+			{
+				superAdmin.POST("/:id/role", adminHandler.UpdateUserRole)
+			}
 
 			// Templates
 			admin.GET("/templates", adminHandler.GetTemplatesAdmin)
