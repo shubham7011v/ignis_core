@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/admin_repository.dart';
+import '../../data/models/admin_user.dart';
+import '../../data/models/admin_template.dart';
 import '../../../orders/domain/entities/order.dart';
 import '../../../orders/domain/repositories/order_repository.dart';
 import '../../../orders/domain/entities/order_status.dart';
@@ -15,19 +17,12 @@ class AdminLogin extends AdminEvent {}
 
 class LoadAdminData extends AdminEvent {}
 
-class CloseRoomEvent extends AdminEvent {
-  final String roomId;
-  CloseRoomEvent(this.roomId);
-}
-
 class BroadcastMessageEvent extends AdminEvent {
-  final String message;
-  BroadcastMessageEvent(this.message);
-}
-
-class BanUserEvent extends AdminEvent {
-  final String userId;
-  BanUserEvent(this.userId);
+  final String title;
+  final String body;
+  BroadcastMessageEvent(this.title, this.body);
+  @override
+  List<Object?> get props => [title, body];
 }
 
 class UpdateOrderStatusEvent extends AdminEvent {
@@ -39,6 +34,34 @@ class UpdateOrderStatusEvent extends AdminEvent {
 
   @override
   List<Object?> get props => [orderId, status, videoUrl];
+}
+
+class CreateTemplateEvent extends AdminEvent {
+  final AdminTemplate template;
+  CreateTemplateEvent(this.template);
+  @override
+  List<Object?> get props => [template];
+}
+
+class UpdateTemplateEvent extends AdminEvent {
+  final AdminTemplate template;
+  UpdateTemplateEvent(this.template);
+  @override
+  List<Object?> get props => [template];
+}
+
+class DeleteTemplateEvent extends AdminEvent {
+  final String templateId;
+  DeleteTemplateEvent(this.templateId);
+  @override
+  List<Object?> get props => [templateId];
+}
+
+class UpdateConfigEvent extends AdminEvent {
+  final Map<String, dynamic> config;
+  UpdateConfigEvent(this.config);
+  @override
+  List<Object?> get props => [config];
 }
 
 class AdminLogout extends AdminEvent {}
@@ -55,17 +78,33 @@ class AdminLoading extends AdminState {}
 
 class AdminAuthenticated extends AdminState {
   final Map<String, dynamic> stats;
-  final List<dynamic> rooms;
   final List<Order> orders;
+  final List<AdminUser> users;
+  final List<AdminTemplate> templates;
 
   AdminAuthenticated({
     required this.stats,
-    required this.rooms,
     required this.orders,
+    required this.users,
+    required this.templates,
   });
 
   @override
-  List<Object?> get props => [stats, rooms, orders];
+  List<Object?> get props => [stats, orders, users, templates];
+
+  AdminAuthenticated copyWith({
+    Map<String, dynamic>? stats,
+    List<Order>? orders,
+    List<AdminUser>? users,
+    List<AdminTemplate>? templates,
+  }) {
+    return AdminAuthenticated(
+      stats: stats ?? this.stats,
+      orders: orders ?? this.orders,
+      users: users ?? this.users,
+      templates: templates ?? this.templates,
+    );
+  }
 }
 
 class AdminError extends AdminState {
@@ -85,10 +124,12 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     : super(AdminInitial()) {
     on<AdminLogin>(_onLogin);
     on<LoadAdminData>(_onLoadData);
-    on<CloseRoomEvent>(_onCloseRoom);
     on<BroadcastMessageEvent>(_onBroadcast);
-    on<BanUserEvent>(_onBanUser);
+    on<UpdateConfigEvent>(_onUpdateConfig);
     on<UpdateOrderStatusEvent>(_onUpdateOrderStatus);
+    on<CreateTemplateEvent>(_onCreateTemplate);
+    on<UpdateTemplateEvent>(_onUpdateTemplate);
+    on<DeleteTemplateEvent>(_onDeleteTemplate);
     on<AdminLogout>((_, emit) {
       emit(AdminInitial());
     });
@@ -99,14 +140,23 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     try {
       final results = await Future.wait([
         repository.getStats(),
-        repository.getRooms(),
         orderRepository.getAllOrders(),
+        repository.getUsers(),
+        repository.getTemplates(),
       ]);
       final stats = results[0] as Map<String, dynamic>;
-      final rooms = results[1] as List<dynamic>;
-      final orders = results[2] as List<Order>;
+      final orders = results[1] as List<Order>;
+      final users = results[2] as List<AdminUser>;
+      final templates = results[3] as List<AdminTemplate>;
 
-      emit(AdminAuthenticated(stats: stats, rooms: rooms, orders: orders));
+      emit(
+        AdminAuthenticated(
+          stats: stats,
+          orders: orders,
+          users: users,
+          templates: templates,
+        ),
+      );
     } catch (e) {
       emit(AdminError("Authorization Failed. Error: $e"));
     }
@@ -120,14 +170,23 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     try {
       final results = await Future.wait([
         repository.getStats(),
-        repository.getRooms(),
         orderRepository.getAllOrders(),
+        repository.getUsers(),
+        repository.getTemplates(),
       ]);
       final stats = results[0] as Map<String, dynamic>;
-      final rooms = results[1] as List<dynamic>;
-      final orders = results[2] as List<Order>;
+      final orders = results[1] as List<Order>;
+      final users = results[2] as List<AdminUser>;
+      final templates = results[3] as List<AdminTemplate>;
 
-      emit(AdminAuthenticated(stats: stats, rooms: rooms, orders: orders));
+      emit(
+        AdminAuthenticated(
+          stats: stats,
+          orders: orders,
+          users: users,
+          templates: templates,
+        ),
+      );
     } catch (e) {
       emit(AdminError("Failed to refresh data: $e"));
     }
@@ -143,21 +202,9 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
         event.status,
         videoUrl: event.videoUrl,
       );
-      add(LoadAdminData()); // Refresh list
+      add(LoadAdminData());
     } catch (e) {
       emit(AdminError("Failed to update status: $e"));
-    }
-  }
-
-  Future<void> _onCloseRoom(
-    CloseRoomEvent event,
-    Emitter<AdminState> emit,
-  ) async {
-    try {
-      await repository.closeRoom(event.roomId);
-      add(LoadAdminData()); // Refresh list
-    } catch (e) {
-      emit(AdminError("Failed to close room: $e"));
     }
   }
 
@@ -166,21 +213,58 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     Emitter<AdminState> emit,
   ) async {
     try {
-      await repository.broadcastMessage(event.message);
-      // No state change needed, maybe a success notification later
+      await repository.broadcastMessage(event.title, event.body);
+      // Optional: Emit success message via side-effect or ephemeral state if needed
     } catch (e) {
       emit(AdminError("Broadcast failed: $e"));
     }
   }
 
-  Future<void> _onBanUser(BanUserEvent event, Emitter<AdminState> emit) async {
+  Future<void> _onUpdateConfig(
+    UpdateConfigEvent event,
+    Emitter<AdminState> emit,
+  ) async {
     try {
-      await repository.banUser(event.userId);
-      add(
-        LoadAdminData(),
-      ); // Refresh list to see if they are gone/status changes
+      await repository.updateConfig(event.config);
+      // No reload needed for config unless we display it back
     } catch (e) {
-      emit(AdminError("Ban failed: $e"));
+      emit(AdminError("Config update failed: $e"));
+    }
+  }
+
+  Future<void> _onCreateTemplate(
+    CreateTemplateEvent event,
+    Emitter<AdminState> emit,
+  ) async {
+    try {
+      await repository.createTemplate(event.template);
+      add(LoadAdminData());
+    } catch (e) {
+      emit(AdminError("Failed to create template: $e"));
+    }
+  }
+
+  Future<void> _onUpdateTemplate(
+    UpdateTemplateEvent event,
+    Emitter<AdminState> emit,
+  ) async {
+    try {
+      await repository.updateTemplate(event.template);
+      add(LoadAdminData());
+    } catch (e) {
+      emit(AdminError("Failed to update template: $e"));
+    }
+  }
+
+  Future<void> _onDeleteTemplate(
+    DeleteTemplateEvent event,
+    Emitter<AdminState> emit,
+  ) async {
+    try {
+      await repository.deleteTemplate(event.templateId);
+      add(LoadAdminData());
+    } catch (e) {
+      emit(AdminError("Failed to delete template: $e"));
     }
   }
 }

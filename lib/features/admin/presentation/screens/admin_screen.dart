@@ -7,6 +7,8 @@ import '../bloc/admin_bloc.dart';
 import '../widgets/admin_login_view.dart';
 import 'admin_dashboard_tab.dart';
 import 'admin_orders_tab.dart';
+import 'admin_users_tab.dart';
+import 'admin_templates_tab.dart';
 
 class AdminScreen extends StatelessWidget {
   const AdminScreen({super.key});
@@ -52,7 +54,7 @@ class _AdminViewState extends State<_AdminView> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 4,
       child: Scaffold(
         backgroundColor: Colors.black, // Matrix style
         appBar: AppBar(
@@ -63,9 +65,12 @@ class _AdminViewState extends State<_AdminView> {
             indicatorColor: Colors.greenAccent,
             labelColor: Colors.greenAccent,
             unselectedLabelColor: Colors.grey,
+            isScrollable: true,
             tabs: [
               Tab(icon: Icon(Icons.dashboard), text: 'DASHBOARD'),
               Tab(icon: Icon(Icons.list_alt), text: 'ORDERS'),
+              Tab(icon: Icon(Icons.people), text: 'USERS'),
+              Tab(icon: Icon(Icons.movie), text: 'TEMPLATES'),
             ],
           ),
           actions: [
@@ -110,6 +115,8 @@ class _AdminViewState extends State<_AdminView> {
                 children: [
                   AdminDashboardTab(state: state),
                   AdminOrdersTab(orders: state.orders),
+                  AdminUsersTab(users: state.users),
+                  AdminTemplatesTab(templates: state.templates),
                 ],
               );
             }

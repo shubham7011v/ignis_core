@@ -1,0 +1,84 @@
+import '../../../../features/templates/domain/models/template.dart';
+
+class AdminTemplate {
+  final String id;
+  final String title;
+  final String description;
+  final String thumbnailUrl;
+  final String videoUrl;
+  final String youtubeId;
+  final String category;
+  final List<String> tags;
+  final double price;
+  final int viewCount;
+  final bool isActive;
+  final String? overlayConfig; // JSON String
+
+  const AdminTemplate({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.thumbnailUrl,
+    required this.videoUrl,
+    required this.youtubeId,
+    required this.category,
+    required this.tags,
+    required this.price,
+    required this.viewCount,
+    required this.isActive,
+    this.overlayConfig,
+  });
+
+  factory AdminTemplate.fromJson(Map<String, dynamic> json) {
+    return AdminTemplate(
+      id: json['id'] ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      thumbnailUrl: json['thumbnailUrl'] ?? '',
+      videoUrl: json['videoUrl'] ?? '',
+      youtubeId: json['youtubeId'] ?? '',
+      category: json['category'] ?? '',
+      tags:
+          (json['tags'] as List<dynamic>?)?.map((e) => e.toString()).toList() ??
+          [],
+      price: ((json['priceCents'] as num?)?.toDouble() ?? 0) / 100.0,
+      viewCount: json['viewCount'] ?? 0,
+      isActive: json['isActive'] ?? false,
+      overlayConfig: json['overlayConfig']
+          ?.toString(), // Keep as raw JSON string for editing
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'thumbnailUrl': thumbnailUrl,
+      'videoUrl': videoUrl,
+      'youtubeId': youtubeId,
+      'category': category,
+      'tags': tags,
+      'priceCents': (price * 100).toInt(),
+      'isActive': isActive,
+      'overlayConfig':
+          overlayConfig, // string or map? Server expects map usually but let's send what we have
+      'placeholderColor': '0xFF000000', // Default
+    };
+  }
+
+  // Convert to regular Template for preview/compatibility if needed
+  Template toTemplate() {
+    return Template(
+      id: id,
+      title: title,
+      description: description,
+      thumbnailUrl: thumbnailUrl,
+      videoUrl: videoUrl,
+      category: category,
+      duration: "0:00", // Not tracked in new model?
+      cost: price,
+      youtubeId: youtubeId,
+    );
+  }
+}

@@ -73,7 +73,7 @@ func main() {
 	templatesHandler := handlers.NewTemplatesHandler(templateRepo)
 	shortsHandler := handlers.NewShortsHandler(shortsRepo)
 	ordersHandler := handlers.NewOrdersHandler(orderRepo, googlePlayService, cfg.RenderOutputDir)
-	adminHandler := handlers.NewAdminHandler(orderRepo, userRepo, notificationService)
+	adminHandler := handlers.NewAdminHandler(orderRepo, userRepo, templateRepo, firebaseService, notificationService)
 	sharingHandler := handlers.NewSharingHandler(sharingService, shortsRepo, templateRepo)
 
 	// Initialize middleware
@@ -175,6 +175,24 @@ func main() {
 		{
 			admin.GET("/orders", adminHandler.GetAllOrders)
 			admin.PUT("/orders/:id", adminHandler.UpdateOrder)
+
+			// Stats
+			admin.GET("/stats", adminHandler.GetStats)
+
+			// Config
+			admin.POST("/config", adminHandler.UpdateConfig)
+
+			// Broadcast
+			admin.POST("/broadcast", adminHandler.SendBroadcast)
+
+			// Users
+			admin.GET("/users", adminHandler.GetUsers)
+
+			// Templates
+			admin.GET("/templates", adminHandler.GetTemplatesAdmin)
+			admin.POST("/templates", adminHandler.CreateTemplate)
+			admin.PUT("/templates/:id", adminHandler.UpdateTemplate)
+			admin.DELETE("/templates/:id", adminHandler.DeleteTemplate)
 		}
 	}
 

@@ -166,3 +166,43 @@ func (r *OrderRepository) MarkAsDownloaded(id string) error {
 	_, err := r.db.Exec(query, time.Now(), id)
 	return err
 }
+
+// OrderStats holds aggregated order statistics
+type OrderStats struct {
+	TotalOrders     int `json:"totalOrders"`
+	PendingOrders   int `json:"pendingOrders"`
+	CompletedOrders int `json:"completedOrders"`
+	TotalRevenue    int `json:"totalRevenue"`
+}
+
+// GetStats returns aggregated order statistics
+func (r *OrderRepository) GetStats() (OrderStats, error) {
+	var stats OrderStats
+
+	// 1. Total Orders
+	err := r.db.QueryRow("SELECT COUNT(*) FROM orders").Scan(&stats.TotalOrders)
+	if err != nil {
+		return stats, err
+	}
+
+	// 2. Pending Orders
+	err = r.db.QueryRow("SELECT COUNT(*) FROM orders WHERE status = 'pending'").Scan(&stats.PendingOrders)
+	if err != nil {
+		return stats, err
+	}
+
+	// 3. Completed Orders
+	err = r.db.QueryRow("SELECT COUNT(*) FROM orders WHERE status = 'completed'").Scan(&stats.CompletedOrders)
+	if err != nil {
+		return stats, err
+	}
+
+	// 4. Total Revenue (sum of amount_cents for paid/completed orders)
+	// Using simple logic: if payment_status is 'paid' OR status is 'completed'
+	err = r.db.QueryRow("SELECT COALESCE(SUM(amount_cents), 0) FROM orders WHERE payment_status = 'paid' OR status = 'completed'").Scan(&stats.TotalRevenue)
+	if err != nil {
+		return stats, err
+	}
+
+	return stats, nil
+}

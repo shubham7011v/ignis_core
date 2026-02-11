@@ -91,3 +91,33 @@ func (s *NotificationService) SendMulticast(tokens []string, title, body string,
 	log.Printf("%d messages were sent successfully", br.SuccessCount)
 	return nil
 }
+
+// SendGlobalBroadcast sends a message to the "all_users" topic
+func (s *NotificationService) SendGlobalBroadcast(title, body string) error {
+	if s.firebaseService == nil || s.firebaseService.MessagingClient == nil {
+		return fmt.Errorf("messaging client not initialized")
+	}
+
+	// Topic to send to (client must subscribe to this topic)
+	topic := "all_users"
+
+	message := &messaging.Message{
+		Topic: topic,
+		Notification: &messaging.Notification{
+			Title: title,
+			Body:  body,
+		},
+		Data: map[string]string{
+			"type": "broadcast",
+		},
+	}
+
+	response, err := s.firebaseService.MessagingClient.Send(context.Background(), message)
+	if err != nil {
+		log.Printf("Error sending broadcast: %v", err)
+		return err
+	}
+
+	log.Printf("Successfully sent broadcast: %s", response)
+	return nil
+}

@@ -101,3 +101,49 @@ func (r *UserRepository) GetFCMToken(firebaseUID string) (string, error) {
 	}
 	return "", nil
 }
+
+// Count returns the total number of registered users
+func (r *UserRepository) Count() (int, error) {
+	var count int
+	err := r.db.QueryRow("SELECT COUNT(*) FROM users").Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+// GetAll returns a paginated list of users
+func (r *UserRepository) GetAll(limit, offset int) ([]models.User, error) {
+	query := `SELECT id, firebase_uid, email, display_name, photo_url, is_admin, created_at, last_login, COALESCE(fcm_token, '')
+	          FROM users
+	          ORDER BY created_at DESC
+	          LIMIT $1 OFFSET $2`
+
+	rows, err := r.db.Query(query, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []models.User
+	for rows.Next() {
+		var u models.User
+		err := rows.Scan(
+			&u.ID,
+			&u.FirebaseUID,
+			&u.Email,
+			&u.DisplayName,
+			&u.PhotoURL,
+			&u.IsAdmin,
+			&u.CreatedAt,
+			&u.LastLogin,
+			&u.FCMToken,
+		)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, u)
+	}
+
+	return users, nil
+}

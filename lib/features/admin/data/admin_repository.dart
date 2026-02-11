@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/config/app_config.dart';
+import 'models/admin_user.dart';
+import 'models/admin_template.dart';
 
 class AdminRepository {
   // Base URL from config
@@ -24,117 +26,122 @@ class AdminRepository {
     };
   }
 
-  Future<void> ping() async {
-    final url = '$_baseUrl/admin/ping';
-    AppLogger.info('🚀 [ADMIN] Pinging: $url');
-    final start = DateTime.now();
-    try {
-      final response = await http
-          .get(Uri.parse(url))
-          .timeout(const Duration(seconds: 5));
-      final duration = DateTime.now().difference(start).inMilliseconds;
-      AppLogger.info(
-        '🚀 [ADMIN] Ping Response (${duration}ms): ${response.statusCode}',
-      );
-      if (response.statusCode != 200) {
-        throw Exception('Ping failed: ${response.statusCode}');
-      }
-    } catch (e) {
-      AppLogger.error('🚀 [ADMIN] Ping Error', exception: e);
-      rethrow;
-    }
-  }
-
   Future<Map<String, dynamic>> getStats() async {
     final headers = await _getAuthHeaders();
     final url = '$_baseUrl/admin/stats';
     AppLogger.info('🚀 [ADMIN] Fetching Stats... ($url)');
-    final start = DateTime.now();
-    try {
-      final response = await http
-          .get(Uri.parse(url), headers: headers)
-          .timeout(const Duration(seconds: 20));
 
-      final duration = DateTime.now().difference(start).inMilliseconds;
-      AppLogger.info(
-        '🚀 [ADMIN] Stats Response (${duration}ms): ${response.statusCode}',
-      );
+    final response = await http.get(Uri.parse(url), headers: headers);
 
-      if (response.statusCode == 200) {
-        return json.decode(response.body) as Map<String, dynamic>;
-      } else {
-        AppLogger.error('🚀 [ADMIN] Stats Error Body: ${response.body}');
-        throw Exception('Failed to load stats: ${response.statusCode}');
-      }
-    } catch (e) {
-      AppLogger.error('🚀 [ADMIN] Stats Exception', exception: e);
-      rethrow;
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception('Failed to load stats: ${response.statusCode}');
     }
   }
 
-  Future<List<dynamic>> getRooms() async {
+  Future<List<AdminUser>> getUsers({int limit = 50, int offset = 0}) async {
     final headers = await _getAuthHeaders();
-    final url = '$_baseUrl/admin/rooms';
-    AppLogger.info('🚀 [ADMIN] Fetching Rooms... ($url)');
-    final start = DateTime.now();
-    try {
-      final response = await http
-          .get(Uri.parse(url), headers: headers)
-          .timeout(const Duration(seconds: 20));
+    final url =
+        '$_baseUrl/admin/users?limit=$limit&offset=$offset'; // Server support for query params needed
 
-      final duration = DateTime.now().difference(start).inMilliseconds;
-      AppLogger.info(
-        '🚀 [ADMIN] Rooms Response (${duration}ms): ${response.statusCode}',
-      );
+    final response = await http.get(Uri.parse(url), headers: headers);
 
-      if (response.statusCode == 200) {
-        return json.decode(response.body) as List<dynamic>;
-      } else {
-        AppLogger.error('🚀 [ADMIN] Rooms Error Body: ${response.body}');
-        throw Exception('Failed to load rooms: ${response.statusCode}');
-      }
-    } catch (e) {
-      AppLogger.error('🚀 [ADMIN] Rooms Exception', exception: e);
-      rethrow;
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final List<dynamic> usersJson = data['users'] ?? [];
+      return usersJson.map((json) => AdminUser.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load users: ${response.statusCode}');
     }
   }
 
-  Future<void> closeRoom(String roomId) async {
+  Future<List<AdminTemplate>> getTemplates() async {
     final headers = await _getAuthHeaders();
+    final url = '$_baseUrl/admin/templates';
+
+    final response = await http.get(Uri.parse(url), headers: headers);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final List<dynamic> templatesJson = data['templates'] ?? [];
+      return templatesJson.map((json) => AdminTemplate.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load templates: ${response.statusCode}');
+    }
+  }
+
+  Future<void> createTemplate(AdminTemplate template) async {
+    final headers = await _getAuthHeaders();
+    final url = '$_baseUrl/admin/templates';
+
     final response = await http.post(
-      Uri.parse('$_baseUrl/admin/rooms/close'),
+      Uri.parse(url),
       headers: headers,
-      body: json.encode({'roomId': roomId}),
+      body: json.encode(template.toJson()),
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception(
+        'Failed to create template: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  Future<void> updateTemplate(AdminTemplate template) async {
+    final headers = await _getAuthHeaders();
+    final url = '$_baseUrl/admin/templates/${template.id}';
+
+    final response = await http.put(
+      Uri.parse(url),
+      headers: headers,
+      body: json.encode(template.toJson()),
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to close room: ${response.statusCode}');
+      throw Exception('Failed to update template: ${response.statusCode}');
     }
   }
 
-  Future<void> broadcastMessage(String message) async {
+  Future<void> deleteTemplate(String id) async {
     final headers = await _getAuthHeaders();
+    final url = '$_baseUrl/admin/templates/$id';
+
+    final response = await http.delete(Uri.parse(url), headers: headers);
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete template: ${response.statusCode}');
+    }
+  }
+
+  Future<void> updateConfig(Map<String, dynamic> config) async {
+    final headers = await _getAuthHeaders();
+    final url = '$_baseUrl/admin/config';
     final response = await http.post(
-      Uri.parse('$_baseUrl/admin/broadcast'),
+      Uri.parse(url),
       headers: headers,
-      body: json.encode({'message': message}),
+      body: json.encode(config),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update config: ${response.statusCode}');
+    }
+  }
+
+  // --- Broadcast ---
+
+  Future<void> broadcastMessage(String title, String body) async {
+    final headers = await _getAuthHeaders();
+    final url = '$_baseUrl/admin/broadcast';
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: headers,
+      body: json.encode({'title': title, 'body': body}),
     );
 
     if (response.statusCode != 200) {
       throw Exception('Failed to broadcast: ${response.statusCode}');
-    }
-  }
-
-  Future<void> banUser(String userId) async {
-    final headers = await _getAuthHeaders();
-    final response = await http.post(
-      Uri.parse('$_baseUrl/admin/users/ban'),
-      headers: headers,
-      body: json.encode({'userId': userId}),
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('Failed to ban user: ${response.statusCode}');
     }
   }
 }

@@ -64,3 +64,70 @@ func (r *TemplateRepository) GetByID(id string) (*models.Template, error) {
 
 	return &t, nil
 }
+
+// Create adds a new template
+func (r *TemplateRepository) Create(t *models.Template) error {
+	query := `INSERT INTO templates (youtube_id, video_url, thumbnail_url, placeholder_color,
+	          title, description, price_cents, category, tags, overlay_config, is_active)
+	          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+	          RETURNING id, created_at, updated_at`
+
+	return r.db.QueryRow(
+		query,
+		t.YoutubeID, t.VideoURL, t.ThumbnailURL, t.PlaceholderColor,
+		t.Title, t.Description, t.PriceCents, t.Category, pq.StringArray(t.Tags),
+		t.OverlayConfig, t.IsActive,
+	).Scan(&t.ID, &t.CreatedAt, &t.UpdatedAt)
+}
+
+// Update modifies an existing template
+func (r *TemplateRepository) Update(t *models.Template) error {
+	query := `UPDATE templates SET youtube_id = $1, video_url = $2, thumbnail_url = $3, placeholder_color = $4,
+	          title = $5, description = $6, price_cents = $7, category = $8, tags = $9, overlay_config = $10,
+	          is_active = $11, updated_at = NOW()
+	          WHERE id = $12
+	          RETURNING updated_at`
+
+	return r.db.QueryRow(
+		query,
+		t.YoutubeID, t.VideoURL, t.ThumbnailURL, t.PlaceholderColor,
+		t.Title, t.Description, t.PriceCents, t.Category, pq.StringArray(t.Tags),
+		t.OverlayConfig, t.IsActive, t.ID,
+	).Scan(&t.UpdatedAt)
+}
+
+// SoftDelete marks a template as inactive
+func (r *TemplateRepository) SoftDelete(id string) error {
+	_, err := r.db.Exec("UPDATE templates SET is_active = false WHERE id = $1", id)
+	return err
+}
+
+// GetAllAdmin returns all templates (including inactive) for admin dashboard
+func (r *TemplateRepository) GetAllAdmin() ([]models.Template, error) {
+	query := `SELECT id, youtube_id, video_url, thumbnail_url, placeholder_color, view_count,
+	          title, description, price_cents, category, tags, overlay_config, is_active, created_at, updated_at
+	          FROM templates
+	          ORDER BY created_at DESC`
+
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var templates []models.Template
+	for rows.Next() {
+		var t models.Template
+		err := rows.Scan(
+			&t.ID, &t.YoutubeID, &t.VideoURL, &t.ThumbnailURL, &t.PlaceholderColor, &t.ViewCount,
+			&t.Title, &t.Description, &t.PriceCents, &t.Category, (*pq.StringArray)(&t.Tags),
+			&t.OverlayConfig, &t.IsActive, &t.CreatedAt, &t.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		templates = append(templates, t)
+	}
+
+	return templates, nil
+}
