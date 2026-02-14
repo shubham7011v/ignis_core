@@ -1,0 +1,8 @@
+dev.vites.iamsorry.in {
+    reverse_proxy ignis:8080
+}
+
+# Future Game Example:
+# game.iamsorry.in {
+#     reverse_proxy game-racer:8080
+# }
