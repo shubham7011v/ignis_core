@@ -1,78 +1,79 @@
 name: Deploy Ignis (Nexus Dev)
 
 on:
-    push:
-        tags:
-            - "ignis_dev_v*"
+  push:
+    tags:
+      - "ignis_dev_v*"
 
 jobs:
-    deploy:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout Code
-              uses: actions/checkout@v3
+  deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-            - name: Extract Version from Tag
-              run: echo "APP_VERSION=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+      - name: Extract Version from Tag
+        run: echo "APP_VERSION=${GITHUB_REF_NAME}" >> $GITHUB_ENV
 
-            - name: Copy Server Files to VPS
-              uses: appleboy/scp-action@master
-              with:
-                  host: ${{ secrets.NEXUS_HOST }}
-                  username: ${{ secrets.NEXUS_USER }}
-                  key: ${{ secrets.NEXUS_SSH_KEY }}
-                  source: "server/*"
-                  target: "/root/apps/ignis-dev"
-                  timeout: 30s
-                  command_timeout: 30m
+      - name: Copy Server Files to VPS
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.NEXUS_HOST }}
+          username: ${{ secrets.NEXUS_USER }}
+          key: ${{ secrets.NEXUS_SSH_KEY }}
+          source: "server/*"
+          target: "/root/apps/ignis-dev"
+          timeout: 30s
+          command_timeout: 30m
 
-            - name: Deploy and Verify
-              uses: appleboy/ssh-action@master
-              with:
-                  host: ${{ secrets.NEXUS_HOST }}
-                  username: ${{ secrets.NEXUS_USER }}
-                  key: ${{ secrets.NEXUS_SSH_KEY }}
-                  envs: APP_VERSION
-                  script: |
-                      # 1. Setup Directory
-                      mkdir -p /root/apps/ignis-dev
-                      cd /root/apps/ignis-dev/server
+      - name: Deploy and Verify
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.NEXUS_HOST }}
+          username: ${{ secrets.NEXUS_USER }}
+          key: ${{ secrets.NEXUS_SSH_KEY }}
+          envs: APP_VERSION
+          script: |
+            # 1. Setup Directory
+            mkdir -p /root/apps/ignis-dev
+            cd /root/apps/ignis-dev/server
 
-                      # 2. Inject Secrets & Version
-                      echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
-                      echo "FIREBASE_CREDENTIALS_JSON=/app/firebase_credentials.json" >> .env
-                      echo "VERSION=${APP_VERSION}" >> .env
+            # 2. Inject Secrets & Version
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
+            echo "FIREBASE_CREDENTIALS_JSON=/app/firebase_credentials.json" >> .env
+            echo "VERSION=${APP_VERSION}" >> .env
 
-                      # 3. Build and Launch
-                      export VERSION=${APP_VERSION}
-                      docker compose up -d --build
+            # 3. Build and Launch
+            export VERSION=${APP_VERSION}
+            docker compose up -d --build
 
-                      # 4. Wait for startup
-                      echo "⏳ Waiting for service to start..."
-                      sleep 15
+            # 4. Wait for startup
+            echo "⏳ Waiting for service to start..."
+            sleep 15
 
-                      # 5. Verify Health & Version
-                      # We check via the internal docker network name if possible, 
-                      # or just localhost if the port was exposed (but it's not exposed to host 8080, it's 'expose' only).
-                      # Actually, we can run curl inside the container to check itself, or check from host if we know port.
-                      # Let's check from host using the container IP or just check the gateway.
+            # 5. Verify Health & Version
+            # We check via the internal docker network name if possible, 
+            # or just localhost if the port was exposed (but it's not exposed to host 8080, it's 'expose' only).
+            # Actually, we can run curl inside the container to check itself, or check from host if we know port.
+            # Let's check from host using the container IP or just check the gateway.
 
-                      HEALTH=$(docker exec ignis-dev curl -s http://localhost:8080/health)
-                      if echo "$HEALTH" | grep -q "ok"; then
-                        echo "✅ Health Check Passed!"
-                      else
-                        echo "❌ Health Check Failed: $HEALTH"
-                        docker logs ignis-dev --tail 50
-                        exit 1
-                      fi
+            HEALTH=$(docker exec ignis-dev curl -s http://localhost:8080/health)
+            if echo "$HEALTH" | grep -q "ok"; then
+              echo "✅ Health Check Passed!"
+            else
+              echo "❌ Health Check Failed: $HEALTH"
+              docker logs ignis-dev --tail 50
+              exit 1
+            fi
 
-                      DEPLOYED_VERSION=$(docker exec ignis-dev curl -s http://localhost:8080/api/version | grep -o '"version":"[^"]*"' | cut -d'"' -f4)
-                      echo "Target Version: $APP_VERSION"
-                      echo "Deployed Version: $DEPLOYED_VERSION"
+            DEPLOYED_VERSION=$(docker exec ignis-dev curl -s http://localhost:8080/api/version | grep -o '"version":"[^"]*"' | cut -d'"' -f4)
+            echo "Target Version: $APP_VERSION"
+            echo "Deployed Version: $DEPLOYED_VERSION"
 
-                      if [ "$DEPLOYED_VERSION" == "$APP_VERSION" ]; then
-                        echo "✅ Version Verification Successful!"
-                      else
-                        echo "❌ Version Mismatch! Expected $APP_VERSION but got $DEPLOYED_VERSION"
-                        exit 1
-                      fi
+            if [ "$DEPLOYED_VERSION" == "$APP_VERSION" ]; then
+              echo "✅ Version Verification Successful!"
+            else
+              echo "❌ Version Mismatch! Expected $APP_VERSION but got $DEPLOYED_VERSION"
+              exit 1
+            fi

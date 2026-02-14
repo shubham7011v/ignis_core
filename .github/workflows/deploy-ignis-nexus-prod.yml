@@ -8,6 +8,7 @@ on:
 jobs:
     deploy:
         runs-on: ubuntu-latest
+        environment: prod
         steps:
             - name: Checkout Code
               uses: actions/checkout@v3
@@ -39,7 +40,7 @@ jobs:
                       cd /root/apps/ignis-prod/server
 
                       # 2. Inject Secrets & Version
-                      echo "DB_PASSWORD=${{ secrets.DB_PASSWORD_PROD }}" > .env
+                      echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
                       echo "FIREBASE_CREDENTIALS_JSON=/app/firebase_credentials.json" >> .env
                       echo "VERSION=${APP_VERSION}" >> .env
 
