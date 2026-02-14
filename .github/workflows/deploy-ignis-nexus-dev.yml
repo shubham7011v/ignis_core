@@ -23,6 +23,8 @@ jobs:
                   key: ${{ secrets.NEXUS_SSH_KEY }}
                   source: "server/*"
                   target: "/root/apps/ignis-dev"
+                  timeout: 30s
+                  command_timeout: 30m
 
             - name: Deploy and Verify
               uses: appleboy/ssh-action@master
