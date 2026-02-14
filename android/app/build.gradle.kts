@@ -62,7 +62,7 @@ android {
     productFlavors {
         create("dev") {
             dimension = "env"
-            applicationIdSuffix = ".dev"
+            applicationIdSuffix = ".development"
             versionNameSuffix = "-dev"
             resValue("string", "app_name", "Vites Dev")
         }

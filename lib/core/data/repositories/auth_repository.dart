@@ -12,7 +12,10 @@ class AuthRepository {
 
   FirebaseAuth get _firebaseAuth =>
       _firebaseAuthInstance ??= FirebaseAuth.instance;
-  GoogleSignIn get _googleSignIn => _googleSignInInstance ??= GoogleSignIn();
+  GoogleSignIn get _googleSignIn => _googleSignInInstance ??= GoogleSignIn(
+    serverClientId:
+        '970569243589-635mnnmti2qamk41t0d15e5lh18vo0sk.apps.googleusercontent.com',
+  );
 
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
 
