@@ -24,7 +24,11 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags "-X main.Ve
 # Run Stage
 FROM alpine:latest  
 
-RUN apk --no-cache add ca-certificates curl
+# Use a specific mirror if default fails, but usually updating ca-certificates first helps.
+# Combine update and add to ensure fresh index.
+RUN apk update && \
+    apk add --no-cache ca-certificates curl && \
+    rm -rf /var/cache/apk/*
 
 WORKDIR /root/
 
