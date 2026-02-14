@@ -43,7 +43,7 @@ jobs:
 
                       # 3. Build and Launch
                       export VERSION=${APP_VERSION}
-                      docker-compose up -d --build
+                      docker compose up -d --build
 
                       # 4. Wait for startup
                       echo "⏳ Waiting for service to start..."
