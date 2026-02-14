@@ -23,7 +23,7 @@ func (r *UserRepository) GetOrCreateUser(firebaseUID, email, displayName, photoU
 	var user models.User
 
 	// Try to get existing user
-	query := `SELECT id, firebase_uid, email, COALESCE(display_name, ''), COALESCE(photo_url, ''), is_admin, created_at, last_login, COALESCE(fcm_token, '')
+	query := `SELECT id, firebase_uid, email, COALESCE(display_name, ''), COALESCE(photo_url, ''), is_admin, created_at, COALESCE(last_login, created_at), COALESCE(fcm_token, '')
 	          FROM users WHERE firebase_uid = $1`
 
 	err := r.db.QueryRow(query, firebaseUID).Scan(
@@ -42,7 +42,7 @@ func (r *UserRepository) GetOrCreateUser(firebaseUID, email, displayName, photoU
 		// User doesn't exist, create new
 		insertQuery := `INSERT INTO users (firebase_uid, email, display_name, photo_url, last_login)
 		                VALUES ($1, $2, $3, $4, $5)
-		                RETURNING id, firebase_uid, email, COALESCE(display_name, ''), COALESCE(photo_url, ''), is_admin, created_at, last_login, '' as fcm_token`
+		                RETURNING id, firebase_uid, email, COALESCE(display_name, ''), COALESCE(photo_url, ''), is_admin, created_at, COALESCE(last_login, created_at), '' as fcm_token`
 
 		err = r.db.QueryRow(insertQuery, firebaseUID, email, displayName, photoURL, time.Now()).Scan(
 			&user.ID,
@@ -137,7 +137,7 @@ func (r *UserRepository) Count() (int, error) {
 
 // GetAll returns a paginated list of users
 func (r *UserRepository) GetAll(limit, offset int) ([]models.User, error) {
-	query := `SELECT id, firebase_uid, email, COALESCE(display_name, ''), COALESCE(photo_url, ''), is_admin, created_at, last_login, COALESCE(fcm_token, '')
+	query := `SELECT id, firebase_uid, email, COALESCE(display_name, ''), COALESCE(photo_url, ''), is_admin, created_at, COALESCE(last_login, created_at), COALESCE(fcm_token, '')
 	          FROM users
 	          ORDER BY created_at DESC
 	          LIMIT $1 OFFSET $2`
