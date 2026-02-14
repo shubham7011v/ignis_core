@@ -1,30 +1,30 @@
 version: '3.8'
 
 services:
-  ignis-dev:
+  ignis-prod:
     build:
       context: .
       args:
-        - VERSION=${VERSION:-dev}
-    container_name: ignis-dev
+        - VERSION=${VERSION:-prod}
+    container_name: ignis-prod
     restart: unless-stopped
     expose:
-      - "8080" # Expose to internal network only (Caddy routes to this)
+      - "8081" # Expose to internal network only (Caddy routes to this)
     environment:
-      - PORT=8080
+      - PORT=8081
       - GIN_MODE=release
-      - DB_HOST=nexus-db-dev
+      - DB_HOST=nexus-db-prod
       - DB_PORT=5432
       - DB_USER=vites_user
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=vites_db_dev
+      - DB_NAME=vites_db_prod
       - FIREBASE_CREDENTIALS_PATH=/app/firebase_credentials.json
-      - ALLOWED_ORIGINS=*
+      - ALLOWED_ORIGINS=https://vites.iamsorry.in
       - TEMPLATES_DIR=/app/storage/templates
       - RENDER_OUTPUT_DIR=/app/storage/renders
     volumes:
-      # Mount the Shared Secret from the VPS Host
-      - /root/nexus/secrets/firebase.json:/app/firebase_credentials.json:ro
+      # Mount the Prod Firebase Secret from the VPS Host
+      - /root/nexus/secrets/firebase_prod.json:/app/firebase_credentials.json:ro
       # Persist storage
       - ./storage:/app/storage
     networks:
@@ -32,11 +32,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.3'
-          memory: 512M
+          cpus: '1.0'
+          memory: 4096M
         reservations:
-          cpus: '0.1'
-          memory: 128M
+          cpus: '0.5'
+          memory: 1024M
 
 networks:
   nexus-net:
