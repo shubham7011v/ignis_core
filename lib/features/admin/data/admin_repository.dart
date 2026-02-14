@@ -32,7 +32,7 @@ class AdminRepository {
 
   Future<Map<String, dynamic>> getStats() async {
     final headers = await _getAuthHeaders();
-    final url = '$_baseUrl/admin/stats';
+    final url = '$_baseUrl/api/admin/stats';
     AppLogger.info('🚀 [ADMIN] Fetching Stats... ($url)');
 
     final response = await http.get(Uri.parse(url), headers: headers);
@@ -49,7 +49,7 @@ class AdminRepository {
 
   Future<List<Order>> getOrders() async {
     final headers = await _getAuthHeaders();
-    final url = '$_baseUrl/admin/orders';
+    final url = '$_baseUrl/api/admin/orders';
     AppLogger.info('🚀 [ADMIN] Fetching Orders... ($url)');
 
     final response = await http.get(Uri.parse(url), headers: headers);
@@ -60,7 +60,7 @@ class AdminRepository {
       // The backend usually wraps it. Let's assume standard API wrapping.
       List<dynamic> ordersJson;
       if (data is Map && data.containsKey('orders')) {
-        ordersJson = data['orders'];
+        ordersJson = data['orders'] ?? [];
       } else if (data is List) {
         ordersJson = data;
       } else {
@@ -85,7 +85,7 @@ class AdminRepository {
     String? videoUrl,
   }) async {
     final headers = await _getAuthHeaders();
-    final url = '$_baseUrl/admin/orders/$orderId';
+    final url = '$_baseUrl/api/admin/orders/$orderId';
     AppLogger.info('🚀 [ADMIN] Updating Order Status... ($url)');
 
     final body = {'status': status.name, 'videoUrl': videoUrl}
@@ -108,7 +108,7 @@ class AdminRepository {
   Future<List<AdminUser>> getUsers({int limit = 50, int offset = 0}) async {
     final headers = await _getAuthHeaders();
     final url =
-        '$_baseUrl/admin/users?limit=$limit&offset=$offset'; // Server support for query params needed
+        '$_baseUrl/api/admin/users?limit=$limit&offset=$offset'; // Server support for query params needed
 
     final response = await http.get(Uri.parse(url), headers: headers);
 
@@ -123,7 +123,7 @@ class AdminRepository {
 
   Future<List<AdminTemplate>> getTemplates() async {
     final headers = await _getAuthHeaders();
-    final url = '$_baseUrl/admin/templates';
+    final url = '$_baseUrl/api/admin/templates';
 
     final response = await http.get(Uri.parse(url), headers: headers);
 
@@ -138,7 +138,7 @@ class AdminRepository {
 
   Future<void> createTemplate(AdminTemplate template) async {
     final headers = await _getAuthHeaders();
-    final url = '$_baseUrl/admin/templates';
+    final url = '$_baseUrl/api/admin/templates';
 
     final response = await http.post(
       Uri.parse(url),
@@ -155,7 +155,7 @@ class AdminRepository {
 
   Future<void> updateTemplate(AdminTemplate template) async {
     final headers = await _getAuthHeaders();
-    final url = '$_baseUrl/admin/templates/${template.id}';
+    final url = '$_baseUrl/api/admin/templates/${template.id}';
 
     final response = await http.put(
       Uri.parse(url),
@@ -170,7 +170,7 @@ class AdminRepository {
 
   Future<void> deleteTemplate(String id) async {
     final headers = await _getAuthHeaders();
-    final url = '$_baseUrl/admin/templates/$id';
+    final url = '$_baseUrl/api/admin/templates/$id';
 
     final response = await http.delete(Uri.parse(url), headers: headers);
 
@@ -181,7 +181,7 @@ class AdminRepository {
 
   Future<void> updateConfig(Map<String, dynamic> config) async {
     final headers = await _getAuthHeaders();
-    final url = '$_baseUrl/admin/config';
+    final url = '$_baseUrl/api/admin/config';
     final response = await http.post(
       Uri.parse(url),
       headers: headers,
@@ -197,7 +197,7 @@ class AdminRepository {
 
   Future<void> broadcastMessage(String title, String body) async {
     final headers = await _getAuthHeaders();
-    final url = '$_baseUrl/admin/broadcast';
+    final url = '$_baseUrl/api/admin/broadcast';
 
     final response = await http.post(
       Uri.parse(url),
@@ -215,7 +215,7 @@ class AdminRepository {
   Future<void> updateUserRole(String userId, {required bool isAdmin}) async {
     final headers = await _getAuthHeaders();
     // Special endpoint for super admin
-    final url = '$_baseUrl/admin/users/$userId/role';
+    final url = '$_baseUrl/api/admin/users/$userId/role';
 
     final response = await http.post(
       Uri.parse(url),
