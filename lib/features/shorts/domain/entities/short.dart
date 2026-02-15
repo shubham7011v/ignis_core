@@ -77,7 +77,11 @@ class Short extends Equatable {
       id: json['id'] as String,
       title: json['title'] as String,
       category: json['category'] as String,
-      thumbnailUrl: json['thumbnailUrl'] as String?,
+      thumbnailUrl: (json['thumbnailUrl'] as String?)?.isNotEmpty == true
+          ? json['thumbnailUrl'] as String
+          : (json['youtubeId'] != null
+                ? 'https://img.youtube.com/vi/${json['youtubeId']}/maxresdefault.jpg'
+                : null),
       placeholderColor: _parseColor(json['placeholderColor'] as String?),
       templateId: json['id'] as String, // ID is the template ID
       isFavorite: json['isFavorited'] as bool? ?? false,

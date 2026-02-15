@@ -45,8 +45,8 @@ class _ShortsPlayerWidgetState extends State<ShortsPlayerWidget> {
     if (videoId != null && videoId.isNotEmpty) {
       _youtubeController = YoutubePlayerController(
         initialVideoId: videoId,
-        flags: const YoutubePlayerFlags(
-          autoPlay: false,
+        flags: YoutubePlayerFlags(
+          autoPlay: widget.shouldPlay,
           mute: false,
           loop: true,
           hideControls: true,

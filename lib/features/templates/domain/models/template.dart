@@ -42,7 +42,11 @@ class Template extends Equatable {
       id: json['id'] as String,
       title: json['title'] as String,
       description: json['description'] as String,
-      thumbnailUrl: json['thumbnailUrl'] as String,
+      thumbnailUrl: (json['thumbnailUrl'] as String?)?.isNotEmpty == true
+          ? json['thumbnailUrl'] as String
+          : (json['youtubeId'] != null
+                ? 'https://img.youtube.com/vi/${json['youtubeId']}/maxresdefault.jpg'
+                : ''),
       category: json['category'] as String,
       duration: json['duration'] as String,
       cost: priceCents / 100.0,

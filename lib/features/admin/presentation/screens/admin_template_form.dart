@@ -102,7 +102,7 @@ class _AdminTemplateFormState extends State<AdminTemplateForm> {
           children: [
             _buildTextField("Title", _titleController),
             _buildTextField("Description", _descController, maxLines: 3),
-            _buildTextField("Thumbnail URL", _thumbController),
+            _buildTextField("Thumbnail URL (Optional)", _thumbController),
             _buildTextField("YouTube ID", _youtubeIdController),
             _buildTextField("Category (e.g. Wedding)", _categoryController),
             _buildTextField(

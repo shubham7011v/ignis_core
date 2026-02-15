@@ -32,7 +32,11 @@ class AdminTemplate {
       id: json['id'] ?? '',
       title: json['title'] ?? '',
       description: json['description'] ?? '',
-      thumbnailUrl: json['thumbnailUrl'] ?? '',
+      thumbnailUrl: (json['thumbnailUrl'] as String?)?.isNotEmpty == true
+          ? json['thumbnailUrl'] as String
+          : (json['youtubeId'] != null
+                ? 'https://img.youtube.com/vi/${json['youtubeId']}/maxresdefault.jpg'
+                : ''),
       youtubeId: json['youtubeId'] ?? '',
       category: json['category'] ?? '',
       tags:
