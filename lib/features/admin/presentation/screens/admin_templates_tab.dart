@@ -96,7 +96,6 @@ class AdminTemplatesTab extends StatelessWidget {
                                 thumbnailUrl: template.thumbnailUrl,
                                 youtubeId: template.youtubeId,
                                 category: template.category,
-                                tags: template.tags,
                                 price: template.price,
                                 viewCount: template.viewCount,
                                 isActive: true,

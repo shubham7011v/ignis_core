@@ -14,11 +14,10 @@ type Template struct {
 	ViewCount        int    `json:"viewCount" db:"view_count"`
 
 	// Product fields (for template browsing)
-	Title       string   `json:"title" db:"title"`
-	Description string   `json:"description" db:"description"`
-	PriceCents  int      `json:"priceCents" db:"price_cents"`
-	Category    string   `json:"category" db:"category"`
-	Tags        []string `json:"tags" db:"tags"`
+	Title       string `json:"title" db:"title"`
+	Description string `json:"description" db:"description"`
+	PriceCents  int    `json:"priceCents" db:"price_cents"`
+	Category    string `json:"category" db:"category"`
 
 	// Overlay Configuration for automated rendering
 	OverlayConfig []byte `json:"overlayConfig" db:"overlay_config"` // JSON data

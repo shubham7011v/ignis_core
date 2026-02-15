@@ -7,7 +7,6 @@ class AdminTemplate {
   final String thumbnailUrl;
   final String youtubeId;
   final String category;
-  final List<String> tags;
   final double price;
   final int viewCount;
   final bool isActive;
@@ -20,7 +19,6 @@ class AdminTemplate {
     required this.thumbnailUrl,
     required this.youtubeId,
     required this.category,
-    required this.tags,
     required this.price,
     required this.viewCount,
     required this.isActive,
@@ -39,9 +37,6 @@ class AdminTemplate {
                 : ''),
       youtubeId: json['youtubeId'] ?? '',
       category: json['category'] ?? '',
-      tags:
-          (json['tags'] as List<dynamic>?)?.map((e) => e.toString()).toList() ??
-          [],
       price: ((json['priceCents'] as num?)?.toDouble() ?? 0) / 100.0,
       viewCount: json['viewCount'] ?? 0,
       isActive: json['isActive'] ?? false,
@@ -58,7 +53,6 @@ class AdminTemplate {
       'thumbnailUrl': thumbnailUrl,
       'youtubeId': youtubeId,
       'category': category,
-      'tags': tags,
       'priceCents': (price * 100).toInt(),
       'isActive': isActive,
       'overlayConfig':

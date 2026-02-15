@@ -18,9 +18,11 @@ class _AdminTemplateFormState extends State<AdminTemplateForm> {
   late TextEditingController _descController;
   late TextEditingController _thumbController;
   late TextEditingController _youtubeIdController;
-  late TextEditingController _categoryController;
   late TextEditingController _priceController;
-  late TextEditingController _tagsController;
+
+  String _selectedCategory = 'Traditional';
+  final List<String> _categories = ['Traditional', 'Modern', 'Minimal'];
+
   bool _isActive = true;
 
   @override
@@ -31,11 +33,17 @@ class _AdminTemplateFormState extends State<AdminTemplateForm> {
     _descController = TextEditingController(text: t?.description ?? '');
     _thumbController = TextEditingController(text: t?.thumbnailUrl ?? '');
     _youtubeIdController = TextEditingController(text: t?.youtubeId ?? '');
-    _categoryController = TextEditingController(text: t?.category ?? '');
     _priceController = TextEditingController(
       text: t?.price.toString() ?? '0.0',
     );
-    _tagsController = TextEditingController(text: t?.tags.join(', ') ?? '');
+
+    // Set initial category if valid, otherwise default
+    if (t?.category.isNotEmpty == true && _categories.contains(t!.category)) {
+      _selectedCategory = t.category;
+    } else {
+      _selectedCategory = _categories.first;
+    }
+
     _isActive = t?.isActive ?? true;
   }
 
@@ -45,31 +53,21 @@ class _AdminTemplateFormState extends State<AdminTemplateForm> {
     _descController.dispose();
     _thumbController.dispose();
     _youtubeIdController.dispose();
-    _categoryController.dispose();
     _priceController.dispose();
-    _tagsController.dispose();
     super.dispose();
   }
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
-      final tags = _tagsController.text
-          .split(',')
-          .map((e) => e.trim())
-          .where((e) => e.isNotEmpty)
-          .toList();
       final price = double.tryParse(_priceController.text) ?? 0.0;
 
       final newTemplate = AdminTemplate(
-        id:
-            widget.template?.id ??
-            '', // ID handled by server for create, or keep existing for update
+        id: widget.template?.id ?? '',
         title: _titleController.text,
         description: _descController.text,
         thumbnailUrl: _thumbController.text,
         youtubeId: _youtubeIdController.text,
-        category: _categoryController.text,
-        tags: tags,
+        category: _selectedCategory,
         price: price,
         viewCount: widget.template?.viewCount ?? 0,
         isActive: _isActive,
@@ -104,13 +102,38 @@ class _AdminTemplateFormState extends State<AdminTemplateForm> {
             _buildTextField("Description", _descController, maxLines: 3),
             _buildTextField("Thumbnail URL (Optional)", _thumbController),
             _buildTextField("YouTube ID", _youtubeIdController),
-            _buildTextField("Category (e.g. Wedding)", _categoryController),
+
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: DropdownButtonFormField<String>(
+                initialValue: _selectedCategory,
+                dropdownColor: Colors.grey[900],
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: "Category",
+                  labelStyle: TextStyle(color: Colors.grey),
+                  border: OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white24),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.greenAccent),
+                  ),
+                ),
+                items: _categories.map((cat) {
+                  return DropdownMenuItem(value: cat, child: Text(cat));
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) setState(() => _selectedCategory = val);
+                },
+              ),
+            ),
+
             _buildTextField(
               "Price (₹)",
               _priceController,
               keyboardType: TextInputType.number,
             ),
-            _buildTextField("Tags (comma separated)", _tagsController),
 
             SwitchListTile(
               title: const Text(
