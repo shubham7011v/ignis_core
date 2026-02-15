@@ -94,7 +94,6 @@ class AdminTemplatesTab extends StatelessWidget {
                                 title: template.title,
                                 description: template.description,
                                 thumbnailUrl: template.thumbnailUrl,
-                                videoUrl: template.videoUrl,
                                 youtubeId: template.youtubeId,
                                 category: template.category,
                                 tags: template.tags,
@@ -115,6 +114,7 @@ class AdminTemplatesTab extends StatelessWidget {
               },
             ),
       floatingActionButton: FloatingActionButton(
+        heroTag: "admin_add_template_btn",
         backgroundColor: Colors.greenAccent,
         child: const Icon(Icons.add, color: Colors.black),
         onPressed: () {

@@ -24,7 +24,8 @@ class ShortsScreen extends StatefulWidget {
 
 class _ShortsScreenState extends State<ShortsScreen> {
   final PageController _pageController = PageController();
-  late final VideoControllerManager _videoManager;
+  // late final VideoControllerManager _videoManager; // Removed
+  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -49,9 +50,11 @@ class _ShortsScreenState extends State<ShortsScreen> {
     }
 
     // 4. Dispose metrics (sliding window)
-    _videoManager.disposeMetrics(index);
+    // _videoManager.disposeMetrics(index); // Removed manager
 
-    setState(() {}); // Rebuild to show updated players
+    setState(() {
+      _currentIndex = index;
+    }); // Rebuild to show updated players
   }
 
   void _preload(int index, Short short) {
@@ -175,11 +178,7 @@ class _ShortsScreenState extends State<ShortsScreen> {
       fit: StackFit.expand,
       children: [
         // 1. Video Player or Placeholder
-        ShortsPlayerWidget(
-          short: short,
-          controller: _videoManager.getController(index),
-          isInitialized: _videoManager.isInitialized(index),
-        ),
+        ShortsPlayerWidget(short: short, shouldPlay: index == _currentIndex),
 
         // 2. Play Icon (if not playing/initialized)
         if (!_videoManager.isInitialized(index))

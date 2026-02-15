@@ -5,7 +5,6 @@ class AdminTemplate {
   final String title;
   final String description;
   final String thumbnailUrl;
-  final String videoUrl;
   final String youtubeId;
   final String category;
   final List<String> tags;
@@ -19,7 +18,6 @@ class AdminTemplate {
     required this.title,
     required this.description,
     required this.thumbnailUrl,
-    required this.videoUrl,
     required this.youtubeId,
     required this.category,
     required this.tags,
@@ -35,7 +33,6 @@ class AdminTemplate {
       title: json['title'] ?? '',
       description: json['description'] ?? '',
       thumbnailUrl: json['thumbnailUrl'] ?? '',
-      videoUrl: json['videoUrl'] ?? '',
       youtubeId: json['youtubeId'] ?? '',
       category: json['category'] ?? '',
       tags:
@@ -55,7 +52,6 @@ class AdminTemplate {
       'title': title,
       'description': description,
       'thumbnailUrl': thumbnailUrl,
-      'videoUrl': videoUrl,
       'youtubeId': youtubeId,
       'category': category,
       'tags': tags,
@@ -74,7 +70,6 @@ class AdminTemplate {
       title: title,
       description: description,
       thumbnailUrl: thumbnailUrl,
-      videoUrl: videoUrl,
       category: category,
       duration: "0:00", // Not tracked in new model?
       cost: price,

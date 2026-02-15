@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../../domain/entities/short.dart';
 
 class ShortsPlayerWidget extends StatefulWidget {
   final Short short;
-  final VideoPlayerController? controller;
-  final bool isInitialized;
+  final bool shouldPlay;
 
   const ShortsPlayerWidget({
     super.key,
     required this.short,
-    this.controller,
-    this.isInitialized = false,
+    this.shouldPlay = false,
   });
 
   @override
@@ -21,20 +19,75 @@ class ShortsPlayerWidget extends StatefulWidget {
 class _ShortsPlayerWidgetState extends State<ShortsPlayerWidget> {
   bool _isPlaying = true;
   bool _showControls = false;
+  YoutubePlayerController? _youtubeController;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeYoutubePlayer();
+  }
+
+  @override
+  void didUpdateWidget(ShortsPlayerWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.shouldPlay != oldWidget.shouldPlay) {
+      if (widget.shouldPlay) {
+        _play();
+      } else {
+        _pause();
+      }
+    }
+  }
+
+  void _initializeYoutubePlayer() {
+    String? videoId = widget.short.youtubeId;
+
+    if (videoId != null && videoId.isNotEmpty) {
+      _youtubeController = YoutubePlayerController(
+        initialVideoId: videoId,
+        flags: const YoutubePlayerFlags(
+          autoPlay: false,
+          mute: false,
+          loop: true,
+          hideControls: true,
+          forceHD: true,
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _youtubeController?.dispose();
+    super.dispose();
+  }
+
+  void _play() {
+    if (_youtubeController != null) {
+      _youtubeController!.play();
+      if (mounted) setState(() => _isPlaying = true);
+    }
+  }
+
+  void _pause() {
+    if (_youtubeController != null) {
+      _youtubeController!.pause();
+      if (mounted) setState(() => _isPlaying = false);
+    }
+  }
 
   void _togglePlay() {
-    if (widget.controller == null || !widget.isInitialized) return;
+    if (_youtubeController == null) return;
 
     setState(() {
-      if (widget.controller!.value.isPlaying) {
-        widget.controller!.pause();
+      if (_youtubeController!.value.isPlaying) {
+        _youtubeController!.pause();
         _isPlaying = false;
-        _showControls = true; // Always show controls when paused
+        _showControls = true;
       } else {
-        widget.controller!.play();
+        _youtubeController!.play();
         _isPlaying = true;
         _showControls = true;
-        // Hide controls after delay
         Future.delayed(const Duration(milliseconds: 1500), () {
           if (mounted && _isPlaying) {
             setState(() => _showControls = false);
@@ -46,45 +99,47 @@ class _ShortsPlayerWidgetState extends State<ShortsPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.controller != null && widget.isInitialized) {
-      return GestureDetector(
-        onTap: _togglePlay,
-        child: Stack(
-          alignment: Alignment.center,
-          fit: StackFit.expand,
-          children: [
-            // Video Layer
-            SizedBox.expand(
-              child: FittedBox(
-                fit: BoxFit.cover,
-                child: SizedBox(
-                  width: widget.controller!.value.size.width,
-                  height: widget.controller!.value.size.height,
-                  child: VideoPlayer(widget.controller!),
-                ),
-              ),
-            ),
-
-            // Play/Pause Overlay
-            if (_showControls || !_isPlaying)
-              Container(
-                color: Colors.black26,
-                child: Center(
-                  child: Icon(
-                    _isPlaying
-                        ? Icons.pause_circle_filled
-                        : Icons.play_circle_filled,
-                    size: 72,
-                    color: Colors.white.withValues(alpha: 0.8),
-                  ),
-                ),
-              ),
-          ],
+    // 1. YouTube Player
+    if (_youtubeController != null) {
+      return YoutubePlayerBuilder(
+        player: YoutubePlayer(
+          controller: _youtubeController!,
+          showVideoProgressIndicator: true,
+          progressIndicatorColor: Colors.red,
+          progressColors: const ProgressBarColors(
+            playedColor: Colors.red,
+            handleColor: Colors.redAccent,
+          ),
         ),
+        builder: (context, player) {
+          return GestureDetector(
+            onTap: _togglePlay,
+            child: Stack(
+              alignment: Alignment.center,
+              fit: StackFit.expand,
+              children: [
+                player,
+                if (_showControls || !_isPlaying)
+                  Container(
+                    color: Colors.black26,
+                    child: Center(
+                      child: Icon(
+                        _isPlaying
+                            ? Icons.pause_circle_filled
+                            : Icons.play_circle_filled,
+                        size: 72,
+                        color: Colors.white.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
       );
     }
 
-    // Placeholder / Thumbnail
+    // Placeholder / Thumbnail (Fallback)
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -96,30 +151,16 @@ class _ShortsPlayerWidgetState extends State<ShortsPlayerWidget> {
             errorBuilder: (_, _, _) =>
                 Container(color: Color(widget.short.placeholderColor)),
           ),
-        if (widget.short.videoUrl == null || widget.short.videoUrl!.isEmpty)
-          const Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.broken_image_outlined,
-                  color: Colors.white,
-                  size: 48,
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'Video Unavailable',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ],
-            ),
-          )
-        else
-          const Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-            ),
+        const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.videocam_off_outlined, color: Colors.white, size: 48),
+              SizedBox(height: 8),
+              Text('Invalid YouTube ID', style: TextStyle(color: Colors.white)),
+            ],
           ),
+        ),
       ],
     );
   }

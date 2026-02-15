@@ -17,7 +17,6 @@ class _AdminTemplateFormState extends State<AdminTemplateForm> {
   late TextEditingController _titleController;
   late TextEditingController _descController;
   late TextEditingController _thumbController;
-  late TextEditingController _videoController;
   late TextEditingController _youtubeIdController;
   late TextEditingController _categoryController;
   late TextEditingController _priceController;
@@ -31,7 +30,6 @@ class _AdminTemplateFormState extends State<AdminTemplateForm> {
     _titleController = TextEditingController(text: t?.title ?? '');
     _descController = TextEditingController(text: t?.description ?? '');
     _thumbController = TextEditingController(text: t?.thumbnailUrl ?? '');
-    _videoController = TextEditingController(text: t?.videoUrl ?? '');
     _youtubeIdController = TextEditingController(text: t?.youtubeId ?? '');
     _categoryController = TextEditingController(text: t?.category ?? '');
     _priceController = TextEditingController(
@@ -46,7 +44,6 @@ class _AdminTemplateFormState extends State<AdminTemplateForm> {
     _titleController.dispose();
     _descController.dispose();
     _thumbController.dispose();
-    _videoController.dispose();
     _youtubeIdController.dispose();
     _categoryController.dispose();
     _priceController.dispose();
@@ -70,7 +67,6 @@ class _AdminTemplateFormState extends State<AdminTemplateForm> {
         title: _titleController.text,
         description: _descController.text,
         thumbnailUrl: _thumbController.text,
-        videoUrl: _videoController.text,
         youtubeId: _youtubeIdController.text,
         category: _categoryController.text,
         tags: tags,
@@ -107,7 +103,6 @@ class _AdminTemplateFormState extends State<AdminTemplateForm> {
             _buildTextField("Title", _titleController),
             _buildTextField("Description", _descController, maxLines: 3),
             _buildTextField("Thumbnail URL", _thumbController),
-            _buildTextField("Video URL", _videoController),
             _buildTextField("YouTube ID", _youtubeIdController),
             _buildTextField("Category (e.g. Wedding)", _categoryController),
             _buildTextField(

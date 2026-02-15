@@ -5,7 +5,6 @@ class Template extends Equatable {
   final String title;
   final String description;
   final String thumbnailUrl;
-  final String videoUrl;
   final String category;
   final String duration;
   final double cost;

@@ -17,7 +17,7 @@ func NewShortsRepository(db *sql.DB) *ShortsRepository {
 
 // GetRandomShorts returns random templates for the shorts feed
 func (r *ShortsRepository) GetRandomShorts(userID string, limit int) ([]models.Template, error) {
-	query := `SELECT t.id, t.youtube_id, t.video_url, t.thumbnail_url, t.placeholder_color,
+	query := `SELECT t.id, t.youtube_id, t.thumbnail_url, t.placeholder_color,
 	          t.view_count, t.title, t.description, t.price_cents, t.category, t.tags,
 	          t.is_active, t.created_at, t.updated_at,
 	          EXISTS(SELECT 1 FROM user_favorites WHERE user_id = $1 AND template_id = t.id) as is_favorited
@@ -36,7 +36,7 @@ func (r *ShortsRepository) GetRandomShorts(userID string, limit int) ([]models.T
 	for rows.Next() {
 		var t models.Template
 		err := rows.Scan(
-			&t.ID, &t.YoutubeID, &t.VideoURL, &t.ThumbnailURL, &t.PlaceholderColor,
+			&t.ID, &t.YoutubeID, &t.ThumbnailURL, &t.PlaceholderColor,
 			&t.ViewCount, &t.Title, &t.Description, &t.PriceCents, &t.Category, (*pq.StringArray)(&t.Tags),
 			&t.IsActive, &t.CreatedAt, &t.UpdatedAt, &t.IsFavorited,
 		)
@@ -51,7 +51,7 @@ func (r *ShortsRepository) GetRandomShorts(userID string, limit int) ([]models.T
 
 // GetFavorites returns user's favorited templates
 func (r *ShortsRepository) GetFavorites(userID string) ([]models.Template, error) {
-	query := `SELECT t.id, t.youtube_id, t.video_url, t.thumbnail_url, t.placeholder_color,
+	query := `SELECT t.id, t.youtube_id, t.thumbnail_url, t.placeholder_color,
 	          t.view_count, t.title, t.description, t.price_cents, t.category, t.tags,
 	          t.is_active, t.created_at, t.updated_at, true as is_favorited
 	          FROM templates t
@@ -69,7 +69,7 @@ func (r *ShortsRepository) GetFavorites(userID string) ([]models.Template, error
 	for rows.Next() {
 		var t models.Template
 		err := rows.Scan(
-			&t.ID, &t.YoutubeID, &t.VideoURL, &t.ThumbnailURL, &t.PlaceholderColor,
+			&t.ID, &t.YoutubeID, &t.ThumbnailURL, &t.PlaceholderColor,
 			&t.ViewCount, &t.Title, &t.Description, &t.PriceCents, &t.Category, (*pq.StringArray)(&t.Tags),
 			&t.IsActive, &t.CreatedAt, &t.UpdatedAt, &t.IsFavorited,
 		)

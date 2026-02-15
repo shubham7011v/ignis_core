@@ -6,7 +6,6 @@ class Short extends Equatable {
   final String id;
   final String title;
   final String category;
-  final String? videoUrl;
   final String? thumbnailUrl;
   final int placeholderColor;
   final bool isFavorite;
@@ -20,7 +19,6 @@ class Short extends Equatable {
     required this.id,
     required this.title,
     required this.category,
-    this.videoUrl,
     this.thumbnailUrl,
     required this.placeholderColor,
     this.templateId,
@@ -35,7 +33,6 @@ class Short extends Equatable {
     String? id,
     String? title,
     String? category,
-    String? videoUrl,
     String? thumbnailUrl,
     int? placeholderColor,
     String? templateId,
@@ -49,7 +46,6 @@ class Short extends Equatable {
       id: id ?? this.id,
       title: title ?? this.title,
       category: category ?? this.category,
-      videoUrl: videoUrl ?? this.videoUrl,
       thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
       placeholderColor: placeholderColor ?? this.placeholderColor,
       templateId: templateId ?? this.templateId,
@@ -66,7 +62,6 @@ class Short extends Equatable {
     id,
     title,
     category,
-    videoUrl,
     thumbnailUrl,
     placeholderColor,
     templateId,
@@ -82,7 +77,6 @@ class Short extends Equatable {
       id: json['id'] as String,
       title: json['title'] as String,
       category: json['category'] as String,
-      videoUrl: json['videoUrl'] as String?,
       thumbnailUrl: json['thumbnailUrl'] as String?,
       placeholderColor: _parseColor(json['placeholderColor'] as String?),
       templateId: json['id'] as String, // ID is the template ID
@@ -101,7 +95,6 @@ class Short extends Equatable {
       title: title,
       description: description ?? '',
       thumbnailUrl: thumbnailUrl ?? '',
-      videoUrl: videoUrl ?? '',
       category: category,
       duration: duration ?? '0:30',
       cost: cost,
