@@ -8,9 +8,7 @@ import '../bloc/shorts_state.dart';
 import '../widgets/shorts_action_bar.dart';
 import '../widgets/shorts_info_sheet.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
-import '../managers/video_controller_manager.dart';
 import '../widgets/shorts_player_widget.dart';
-import '../../../../core/di/service_locator.dart';
 import '../../../invitation_creator/presentation/bloc/invitation_bloc.dart';
 import '../../../invitation_creator/presentation/bloc/invitation_event.dart';
 import '../../../templates/domain/models/template.dart';
@@ -24,45 +22,18 @@ class ShortsScreen extends StatefulWidget {
 
 class _ShortsScreenState extends State<ShortsScreen> {
   final PageController _pageController = PageController();
-  // late final VideoControllerManager _videoManager; // Removed
   int _currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _videoManager = VideoControllerManager(sl.shortsVideoService);
     context.read<ShortsBloc>().add(const LoadShorts());
   }
 
-  void _onPageChanged(int index, List<Short> shorts) {
-    // 1. Play current
-    _videoManager.play(index);
-
-    // 2. Pause previous/next (to save resources)
-    if (index > 0) _videoManager.pause(index - 1);
-
-    // 3. Preload next 2 videos
-    if (index + 1 < shorts.length) {
-      _preload(index + 1, shorts[index + 1]);
-    }
-    if (index + 2 < shorts.length) {
-      _preload(index + 2, shorts[index + 2]);
-    }
-
-    // 4. Dispose metrics (sliding window)
-    // _videoManager.disposeMetrics(index); // Removed manager
-
+  void _onPageChanged(int index) {
     setState(() {
       _currentIndex = index;
-    }); // Rebuild to show updated players
-  }
-
-  void _preload(int index, Short short) {
-    if (short.videoUrl != null) {
-      _videoManager.preload(index, short.videoUrl!).then((_) {
-        if (mounted) setState(() {});
-      });
-    }
+    });
   }
 
   void _showTemplateInfo(BuildContext context, Short short) {
@@ -77,23 +48,7 @@ class _ShortsScreenState extends State<ShortsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: BlocConsumer<ShortsBloc, ShortsState>(
-        listener: (context, state) {
-          if (state is ShortsLoaded && state.shortsWithFavorites.isNotEmpty) {
-            // Preload first video immediately
-            final firstShort = state.shortsWithFavorites[0];
-            if (firstShort.videoUrl != null) {
-              _videoManager.preload(0, firstShort.videoUrl!).then((_) {
-                _videoManager.play(0);
-                if (mounted) setState(() {});
-              });
-            }
-            // Preload second video, but don't play it
-            if (state.shortsWithFavorites.length > 1) {
-              _preload(1, state.shortsWithFavorites[1]);
-            }
-          }
-        },
+      body: BlocBuilder<ShortsBloc, ShortsState>(
         builder: (context, state) {
           if (state is ShortsLoading || state is ShortsInitial) {
             return const Center(
@@ -159,7 +114,7 @@ class _ShortsScreenState extends State<ShortsScreen> {
               scrollDirection: Axis.vertical,
               controller: _pageController,
               itemCount: shorts.length,
-              onPageChanged: (index) => _onPageChanged(index, shorts),
+              onPageChanged: _onPageChanged,
               itemBuilder: (context, index) {
                 final short = shorts[index];
                 return _buildShortCard(context, index, short);
@@ -177,20 +132,10 @@ class _ShortsScreenState extends State<ShortsScreen> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // 1. Video Player or Placeholder
+        // 1. Video Player (YouTube)
         ShortsPlayerWidget(short: short, shouldPlay: index == _currentIndex),
 
-        // 2. Play Icon (if not playing/initialized)
-        if (!_videoManager.isInitialized(index))
-          Center(
-            child: Icon(
-              Icons.play_circle_outline,
-              size: 80,
-              color: Colors.white.withValues(alpha: 0.5),
-            ),
-          ),
-
-        // 3. Gradient Overlay for Text Visibility
+        // 2. Gradient Overlay for Text Visibility
         Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -202,7 +147,7 @@ class _ShortsScreenState extends State<ShortsScreen> {
           ),
         ),
 
-        // 4. Right Side Actions (Discovery-Focused)
+        // 3. Right Side Actions
         Positioned(
           right: 12,
           top: MediaQuery.of(context).padding.top + 12,
@@ -236,20 +181,17 @@ class _ShortsScreenState extends State<ShortsScreen> {
             },
             onInfoTap: () => _showTemplateInfo(context, short),
             onCtaTap: () {
-              // Map Short to Template for consistency (since they share ID)
-              // Ideally we'd map fields, but for now ID and Title are enough to fetch full details
               context.read<InvitationBloc>().add(
                 TemplateSelected(
                   Template(
                     id: short.id,
                     title: short.title,
                     thumbnailUrl: short.thumbnailUrl ?? '',
-                    cost: 499.0, // Default cost
+                    cost: short.cost,
                     category: short.category,
-                    videoUrl: short.videoUrl ?? '',
-                    duration: '0:30', // Default duration
-                    youtubeId: '',
-                    description: 'Wedding Invitation',
+                    duration: short.duration ?? '0:30',
+                    youtubeId: short.youtubeId,
+                    description: short.description ?? 'Wedding Invitation',
                   ),
                 ),
               );
@@ -258,7 +200,7 @@ class _ShortsScreenState extends State<ShortsScreen> {
           ),
         ),
 
-        // 5. Bottom Template Info
+        // 4. Bottom Template Info
         Positioned(
           left: 16,
           bottom: 24,
@@ -306,7 +248,6 @@ class _ShortsScreenState extends State<ShortsScreen> {
   @override
   void dispose() {
     _pageController.dispose();
-    _videoManager.disposeAll();
     super.dispose();
   }
 }
