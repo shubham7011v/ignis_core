@@ -51,6 +51,8 @@ jobs:
             # 2. Inject Secrets & Version
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
             echo "FIREBASE_CREDENTIALS_JSON=/app/firebase_credentials.json" >> .env
+            echo "GOOGLE_SHEETS_ID=${{ secrets.GOOGLE_SHEETS_ID }}" >> .env
+            echo "GOOGLE_APPLICATION_CREDENTIALS=/app/google-sheets-key.json" >> .env
             echo "VERSION=${APP_VERSION}" >> .env
 
             # 3. Build and Launch
