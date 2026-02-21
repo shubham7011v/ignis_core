@@ -63,6 +63,8 @@ veil-prod-*.json
 firebase-service-account-dev.json
 firebase-service-account-prod.json
 server/firebase-adminsdk.json
+my-downloaded-key.json
+google-sheets-key.json
 
 # Generated Firebase Options (contain API keys)
 lib/config/firebase_options_dev.dart
