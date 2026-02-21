@@ -16,6 +16,15 @@ jobs:
       - name: Extract Version from Tag
         run: echo "APP_VERSION=${GITHUB_REF_NAME}" >> $GITHUB_ENV
 
+      - name: Clean Server Directory
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.NEXUS_HOST }}
+          username: ${{ secrets.NEXUS_USER }}
+          key: ${{ secrets.NEXUS_SSH_KEY }}
+          script: |
+            rm -rf /root/apps/ignis-dev/server
+
       - name: Copy Server Files to VPS
         uses: appleboy/scp-action@master
         with:

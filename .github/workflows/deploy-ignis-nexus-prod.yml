@@ -1,75 +1,84 @@
 name: Deploy Ignis (Nexus Prod)
 
 on:
-    push:
-        tags:
-            - "ignis_prod_v*"
+  push:
+    tags:
+      - "ignis_prod_v*"
 
 jobs:
-    deploy:
-        runs-on: ubuntu-latest
-        environment: prod
-        steps:
-            - name: Checkout Code
-              uses: actions/checkout@v3
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-            - name: Extract Version from Tag
-              run: echo "APP_VERSION=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+      - name: Extract Version from Tag
+        run: echo "APP_VERSION=${GITHUB_REF_NAME}" >> $GITHUB_ENV
 
-            - name: Copy Server Files to VPS
-              uses: appleboy/scp-action@master
-              with:
-                  host: ${{ secrets.NEXUS_HOST }}
-                  username: ${{ secrets.NEXUS_USER }}
-                  key: ${{ secrets.NEXUS_SSH_KEY }}
-                  source: "server/*"
-                  target: "/root/apps/ignis-prod"
-                  timeout: 30s
-                  command_timeout: 30m
+      - name: Clean Server Directory
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.NEXUS_HOST }}
+          username: ${{ secrets.NEXUS_USER }}
+          key: ${{ secrets.NEXUS_SSH_KEY }}
+          script: |
+            rm -rf /root/apps/ignis-prod/server
 
-            - name: Deploy and Verify
-              uses: appleboy/ssh-action@master
-              with:
-                  host: ${{ secrets.NEXUS_HOST }}
-                  username: ${{ secrets.NEXUS_USER }}
-                  key: ${{ secrets.NEXUS_SSH_KEY }}
-                  envs: APP_VERSION
-                  script: |
-                      # 1. Setup Directory
-                      mkdir -p /root/apps/ignis-prod
-                      cd /root/apps/ignis-prod/server
+      - name: Copy Server Files to VPS
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.NEXUS_HOST }}
+          username: ${{ secrets.NEXUS_USER }}
+          key: ${{ secrets.NEXUS_SSH_KEY }}
+          source: "server/*"
+          target: "/root/apps/ignis-prod"
+          timeout: 30s
+          command_timeout: 30m
 
-                      # 2. Inject Secrets & Version
-                      echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
-                      echo "FIREBASE_CREDENTIALS_JSON=/app/firebase_credentials.json" >> .env
-                      echo "VERSION=${APP_VERSION}" >> .env
+      - name: Deploy and Verify
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.NEXUS_HOST }}
+          username: ${{ secrets.NEXUS_USER }}
+          key: ${{ secrets.NEXUS_SSH_KEY }}
+          envs: APP_VERSION
+          script: |
+            # 1. Setup Directory
+            mkdir -p /root/apps/ignis-prod
+            cd /root/apps/ignis-prod/server
 
-                      # 3. Build and Launch (using prod compose file)
-                      export VERSION=${APP_VERSION}
-                      docker compose -f docker-compose.prod.yml up -d --build
+            # 2. Inject Secrets & Version
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
+            echo "FIREBASE_CREDENTIALS_JSON=/app/firebase_credentials.json" >> .env
+            echo "VERSION=${APP_VERSION}" >> .env
 
-                      # 4. Wait for startup
-                      echo "⏳ Waiting for service to start..."
-                      sleep 20
+            # 3. Build and Launch (using prod compose file)
+            export VERSION=${APP_VERSION}
+            docker compose -f docker-compose.prod.yml up -d --build
 
-                      # 5. Verify Health & Version
-                      HEALTH=$(docker exec ignis-prod curl -s http://localhost:8081/health)
-                      if echo "$HEALTH" | grep -q "ok"; then
-                        echo "✅ Health Check Passed!"
-                      else
-                        echo "❌ Health Check Failed: $HEALTH"
-                        docker logs ignis-prod --tail 50
-                        exit 1
-                      fi
+            # 4. Wait for startup
+            echo "⏳ Waiting for service to start..."
+            sleep 20
 
-                      DEPLOYED_VERSION=$(docker exec ignis-prod curl -s http://localhost:8081/api/version | grep -o '"version":"[^"]*"' | cut -d'"' -f4)
-                      echo "Target Version: $APP_VERSION"
-                      echo "Deployed Version: $DEPLOYED_VERSION"
+            # 5. Verify Health & Version
+            HEALTH=$(docker exec ignis-prod curl -s http://localhost:8081/health)
+            if echo "$HEALTH" | grep -q "ok"; then
+              echo "✅ Health Check Passed!"
+            else
+              echo "❌ Health Check Failed: $HEALTH"
+              docker logs ignis-prod --tail 50
+              exit 1
+            fi
 
-                      if [ "$DEPLOYED_VERSION" == "$APP_VERSION" ]; then
-                        echo "✅ Version Verification Successful!"
-                        echo "🎉 PRODUCTION DEPLOYMENT COMPLETE!"
-                      else
-                        echo "❌ Version Mismatch! Expected $APP_VERSION but got $DEPLOYED_VERSION"
-                        exit 1
-                      fi
+            DEPLOYED_VERSION=$(docker exec ignis-prod curl -s http://localhost:8081/api/version | grep -o '"version":"[^"]*"' | cut -d'"' -f4)
+            echo "Target Version: $APP_VERSION"
+            echo "Deployed Version: $DEPLOYED_VERSION"
+
+            if [ "$DEPLOYED_VERSION" == "$APP_VERSION" ]; then
+              echo "✅ Version Verification Successful!"
+              echo "🎉 PRODUCTION DEPLOYMENT COMPLETE!"
+            else
+              echo "❌ Version Mismatch! Expected $APP_VERSION but got $DEPLOYED_VERSION"
+              exit 1
+            fi
