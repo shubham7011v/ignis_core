@@ -10,7 +10,6 @@ import '../../features/invitation_creator/domain/repositories/invitation_reposit
 import '../../features/invitation_creator/data/repositories/invitation_repository_impl.dart';
 import '../../features/invitation_creator/presentation/bloc/invitation_bloc.dart';
 import '../../features/creations/presentation/bloc/creations_bloc.dart';
-import '../../features/admin/data/admin_repository.dart';
 import '../../features/templates/presentation/bloc/templates_bloc.dart';
 import '../../features/templates/domain/repositories/templates_repository.dart';
 import '../../features/templates/data/repositories/templates_repository_impl.dart';
@@ -45,7 +44,6 @@ class ServiceLocator {
   late final InvitationRepository invitationRepository;
   late final YouTubeRepository youtubeRepository;
   late final NotificationService notificationService;
-  late final AdminRepository adminRepository;
   late final TemplatesRepository templatesRepository;
   late final TemplateDownloadService templateDownloadService;
   late final BillingRepository billingRepository;
@@ -83,7 +81,6 @@ class ServiceLocator {
     onboardingRepository = OnboardingRepository(prefs);
     sessionRepository = SessionRepositoryImpl();
     profileRepository = ProfileRepository();
-    adminRepository = AdminRepository();
     // v1.0 MVP: Only local repositories
     invitationRepository = InvitationRepositoryImpl();
     templatesRepository = TemplatesRepositoryImpl();

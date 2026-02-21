@@ -2,6 +2,9 @@ package main
 
 import (
 	"log"
+	"net/http"
+	"os"
+	"time"
 
 	"context"
 	"ignis_server/db"
@@ -10,7 +13,6 @@ import (
 	"ignis_server/internal/repository"
 	"ignis_server/internal/services"
 	"ignis_server/pkg/config"
-	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,6 +23,10 @@ var Version = "dev"
 func main() {
 	// Load configuration
 	cfg := config.Load()
+
+	// Initialize background context
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	// Initialize database
 	database, err := db.InitDB(cfg.GetDBConnectionString())
@@ -47,10 +53,48 @@ func main() {
 	}
 
 	// Initialize repositories
-	userRepo := repository.NewUserRepository(database, cfg.SuperAdminEmail)
+	userRepo := repository.NewUserRepository(database)
 	templateRepo := repository.NewTemplateRepository(database)
 	shortsRepo := repository.NewShortsRepository(database)
 	orderRepo := repository.NewOrderRepository(database)
+
+	// Initialize notification service
+	notificationService := services.NewNotificationService(firebaseService)
+
+	// Initialize Google Sheets Service (needs notificationService for broadcast tab)
+	sheetsService, err := services.NewGoogleSheetsService(context.Background(), cfg.GoogleSheetsID, cfg.GoogleApplicationCredentials, orderRepo, templateRepo, userRepo, notificationService)
+	if err != nil {
+		log.Printf("WARNING: Google Sheets Sync not initialized: %v", err)
+	} else {
+		// Do an initial sync on startup
+		go func() {
+			time.Sleep(5 * time.Second) // Wait for DB connections to settle
+			if err := sheetsService.SyncToSheets(context.Background()); err != nil {
+				log.Printf("Initial Sheets sync error: %v", err)
+			}
+		}()
+
+		// Start background sync ticker (every 15 minutes)
+		go func() {
+			ticker := time.NewTicker(15 * time.Minute)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case <-ticker.C:
+					log.Println("Starting background Google Sheets sync...")
+					if err := sheetsService.UpdateFromSheets(ctx); err != nil {
+						log.Printf("Background Sync From Sheets error: %v", err)
+					}
+					if err := sheetsService.SyncToSheets(ctx); err != nil {
+						log.Printf("Background Sync To Sheets error: %v", err)
+					}
+					log.Println("Background Google Sheets sync completed")
+				}
+			}
+		}()
+	}
 
 	// Initialize rendering & automated fulfillment
 	renderService := services.NewRenderService(cfg.TemplatesDir, cfg.RenderOutputDir)
@@ -61,24 +105,17 @@ func main() {
 	os.MkdirAll(cfg.RenderOutputDir, 0755)
 
 	// Start automated order worker in background
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 	go orderWorker.Start(ctx)
-
-	// Initialize notification service
-	notificationService := services.NewNotificationService(firebaseService)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(userRepo)
 	templatesHandler := handlers.NewTemplatesHandler(templateRepo)
 	shortsHandler := handlers.NewShortsHandler(shortsRepo)
 	ordersHandler := handlers.NewOrdersHandler(orderRepo, googlePlayService, cfg.RenderOutputDir)
-	adminHandler := handlers.NewAdminHandler(orderRepo, userRepo, templateRepo, firebaseService, notificationService)
 	sharingHandler := handlers.NewSharingHandler(sharingService, shortsRepo, templateRepo)
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(firebaseService)
-	adminMiddleware := middleware.NewAdminMiddleware(userRepo)
 
 	// Setup Gin router
 	router := gin.Default()
@@ -168,38 +205,29 @@ func main() {
 			orders.GET("/download/:filename", ordersHandler.DownloadVideo)
 		}
 
-		// Admin (protected + admin only)
-		admin := api.Group("/admin")
-		admin.Use(authMiddleware.RequireAuth())
-		admin.Use(adminMiddleware.RequireAdmin())
+		// System Sync (protected by secret token)
+		system := api.Group("/system")
 		{
-			admin.GET("/orders", adminHandler.GetAllOrders)
-			admin.PUT("/orders/:id", adminHandler.UpdateOrder)
+			system.POST("/sync", func(c *gin.Context) {
+				token := c.Query("token")
+				if token != cfg.SyncSecretToken {
+					c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+					return
+				}
 
-			// Stats
-			admin.GET("/stats", adminHandler.GetStats)
+				if sheetsService == nil {
+					c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Sheets service not initialized"})
+					return
+				}
 
-			// Config
-			admin.POST("/config", adminHandler.UpdateConfig)
+				// Manual sync
+				go func() {
+					_ = sheetsService.UpdateFromSheets(context.Background())
+					_ = sheetsService.SyncToSheets(context.Background())
+				}()
 
-			// Broadcast
-			admin.POST("/broadcast", adminHandler.SendBroadcast)
-
-			// Users
-			admin.GET("/users", adminHandler.GetUsers)
-
-			// Super Admin Only
-			superAdmin := admin.Group("/users")
-			superAdmin.Use(adminMiddleware.RequireSuperAdmin())
-			{
-				superAdmin.POST("/:id/role", adminHandler.UpdateUserRole)
-			}
-
-			// Templates
-			admin.GET("/templates", adminHandler.GetTemplatesAdmin)
-			admin.POST("/templates", adminHandler.CreateTemplate)
-			admin.PUT("/templates/:id", adminHandler.UpdateTemplate)
-			admin.DELETE("/templates/:id", adminHandler.DeleteTemplate)
+				c.JSON(http.StatusOK, gin.H{"message": "Sync triggered"})
+			})
 		}
 	}
 

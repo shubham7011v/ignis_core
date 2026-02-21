@@ -13,7 +13,6 @@ import '../../features/templates/presentation/bloc/templates_event.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/creations/presentation/screens/creations_gallery_screen.dart';
 import '../../features/creations/presentation/bloc/creations_event.dart';
-import '../../features/admin/presentation/screens/admin_screen.dart';
 import '../../features/templates/presentation/screens/search_screen.dart';
 import '../../features/templates/presentation/screens/saved_templates_screen.dart';
 
@@ -30,12 +29,10 @@ class AppRouter {
   static const String styleSelection = '/style_selection';
   static const String detailsForm = '/details_form';
   static const String preview = '/preview';
-  static const String admin = '/admin';
   static const String savedTemplates = '/saved_templates';
 
   static Map<String, WidgetBuilder> get routes => {
     splash: (context) => const SplashScreen(),
-    admin: (context) => const AdminScreen(),
     intro: (context) => const IntroScreen(initialPage: 0),
     celebration: (context) => const CelebrationEntryScreen(),
     home: (context) => const HomeScreen(),

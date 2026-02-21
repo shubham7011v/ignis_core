@@ -144,9 +144,9 @@ class _ShortsPlayerWidgetState extends State<ShortsPlayerWidget> {
       fit: StackFit.expand,
       children: [
         Container(color: Color(widget.short.placeholderColor)),
-        if (widget.short.thumbnailUrl != null)
+        if (widget.short.thumbnailUrl.isNotEmpty)
           Image.network(
-            widget.short.thumbnailUrl!,
+            widget.short.thumbnailUrl,
             fit: BoxFit.cover,
             errorBuilder: (_, _, _) =>
                 Container(color: Color(widget.short.placeholderColor)),

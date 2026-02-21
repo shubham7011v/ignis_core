@@ -15,8 +15,6 @@ import '../../../../features/templates/presentation/bloc/templates_event.dart';
 import '../../../../features/creations/presentation/screens/creations_gallery_screen.dart';
 import '../../../../features/creations/presentation/bloc/creations_event.dart';
 import '../../../../features/shorts/presentation/bloc/shorts_event.dart';
-import '../../../../features/admin/presentation/screens/admin_screen.dart';
-import '../../../../core/config/app_config.dart';
 import '../../../auth/auth.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -77,17 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       final user = (authState is Authenticated)
                           ? authState.user
                           : null;
-                      final config = AppConfig.instance;
-                      final bool isAdmin =
-                          authState is Authenticated &&
-                          (authState.isAdmin ||
-                              (user != null &&
-                                  config.adminUids.contains(user.uid)));
-
-                      // Safety: clamp index if isAdmin status changed mid-session
-                      final adjustedIndex = isAdmin
-                          ? selectedIndex
-                          : selectedIndex.clamp(0, 3);
+                      final adjustedIndex = selectedIndex.clamp(0, 3);
 
                       return PopScope(
                         canPop: adjustedIndex == 0,
@@ -124,7 +112,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                   SettingsScreen(
                                     onBack: () => _goHome(context),
                                   ),
-                                  if (isAdmin) const AdminScreen(),
                                 ],
                               ),
                             ),
@@ -132,7 +119,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           bottomNavigationBar: HomeBottomNavBar(
                             selectedIndex: adjustedIndex,
                             palette: palette,
-                            showAdmin: isAdmin,
                           ),
                         ),
                       );

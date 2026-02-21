@@ -186,7 +186,6 @@ class _ShortsScreenState extends State<ShortsScreen> {
                   Template(
                     id: short.id,
                     title: short.title,
-                    thumbnailUrl: short.thumbnailUrl ?? '',
                     cost: short.cost,
                     category: short.category,
                     duration: short.duration ?? '0:30',

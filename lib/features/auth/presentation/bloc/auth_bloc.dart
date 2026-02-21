@@ -41,8 +41,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     final user = _authRepository.currentUser;
     if (user != null) {
-      final isAdmin = await _userRepository.syncUser(user);
-      emit(Authenticated(user, isAdmin: isAdmin));
+      await _userRepository.syncUser(user);
+      emit(Authenticated(user));
     } else {
       emit(Unauthenticated());
     }
@@ -57,8 +57,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await _authRepository.signInWithGoogle();
       final user = _authRepository.currentUser;
       if (user != null) {
-        final isAdmin = await _userRepository.syncUser(user);
-        emit(Authenticated(user, isAdmin: isAdmin));
+        await _userRepository.syncUser(user);
+        emit(Authenticated(user));
       } else {
         emit(Unauthenticated());
       }
@@ -99,8 +99,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final currentUser = _authRepository.currentUser;
     if (currentUser != null) {
       // Ensure data is synced, then confirm authentication
-      final isAdmin = await _userRepository.syncUser(currentUser);
-      emit(Authenticated(currentUser, isAdmin: isAdmin));
+      await _userRepository.syncUser(currentUser);
+      emit(Authenticated(currentUser));
       return;
     }
 
@@ -108,8 +108,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final userCredential = await _authRepository.signInSilently();
       if (userCredential?.user != null) {
-        final isAdmin = await _userRepository.syncUser(userCredential!.user!);
-        emit(Authenticated(userCredential.user!, isAdmin: isAdmin));
+        await _userRepository.syncUser(userCredential!.user!);
+        emit(Authenticated(userCredential.user!));
       } else {
         emit(Unauthenticated());
       }

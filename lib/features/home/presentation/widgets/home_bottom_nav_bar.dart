@@ -6,13 +6,11 @@ import '../bloc/home_bloc.dart';
 class HomeBottomNavBar extends StatelessWidget {
   final int selectedIndex;
   final AppColorPalette palette;
-  final bool showAdmin;
 
   const HomeBottomNavBar({
     super.key,
     required this.selectedIndex,
     required this.palette,
-    this.showAdmin = false,
   });
 
   @override
@@ -49,12 +47,6 @@ class HomeBottomNavBar extends StatelessWidget {
           activeIcon: Icon(Icons.person_rounded),
           label: 'Account',
         ),
-        if (showAdmin)
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.admin_panel_settings_outlined),
-            activeIcon: Icon(Icons.admin_panel_settings),
-            label: 'Admin',
-          ),
       ],
     );
   }

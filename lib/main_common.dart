@@ -114,11 +114,6 @@ Future<void> mainCommon({required String env, required String appName}) async {
         throw 'Firebase Initialization Failed: $e';
       }
 
-      // Fully load base config from .env/environment
-      _bootStep = '3. Loading Base Config';
-      config.load();
-      AppLogger.info('🚀 [STARTUP] 3. Base Config loaded');
-
       // Initialize Service Locator (depends on Firebase and AppConfig)
       _bootStep = '4. Setting up Service Locator';
       await di.sl.setup();

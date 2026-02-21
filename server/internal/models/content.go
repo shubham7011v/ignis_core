@@ -9,7 +9,6 @@ type Template struct {
 
 	// Video fields (for Shorts feed)
 	YoutubeID        string `json:"youtubeId" db:"youtube_id"`
-	ThumbnailURL     string `json:"thumbnailUrl" db:"thumbnail_url"`
 	PlaceholderColor string `json:"placeholderColor" db:"placeholder_color"`
 	ViewCount        int    `json:"viewCount" db:"view_count"`
 
@@ -47,4 +46,6 @@ type Order struct {
 	DeliveredAt   *time.Time `json:"deliveredAt" db:"delivered_at"`
 	DownloadedAt  *time.Time `json:"downloadedAt" db:"downloaded_at"`
 	AdminNotes    *string    `json:"adminNotes" db:"admin_notes"`
+	PhotosLink    *string    `json:"photosLink" db:"photos_link"`
+	EventDetails  []byte     `json:"eventDetails" db:"event_details"` // Raw JSONB
 }

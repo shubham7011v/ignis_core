@@ -4,7 +4,6 @@ class Template extends Equatable {
   final String id;
   final String title;
   final String description;
-  final String thumbnailUrl;
   final String category;
   final String duration;
   final double cost;
@@ -14,19 +13,21 @@ class Template extends Equatable {
     required this.id,
     required this.title,
     required this.description,
-    required this.thumbnailUrl,
     required this.category,
     required this.duration,
     this.cost = 0.0,
     this.youtubeId,
   });
 
+  String get thumbnailUrl => youtubeId != null
+      ? 'https://img.youtube.com/vi/$youtubeId/maxresdefault.jpg'
+      : '';
+
   @override
   List<Object?> get props => [
     id,
     title,
     description,
-    thumbnailUrl,
     category,
     duration,
     cost,
@@ -42,11 +43,6 @@ class Template extends Equatable {
       id: json['id'] as String,
       title: json['title'] as String,
       description: json['description'] as String,
-      thumbnailUrl: (json['thumbnailUrl'] as String?)?.isNotEmpty == true
-          ? json['thumbnailUrl'] as String
-          : (json['youtubeId'] != null
-                ? 'https://img.youtube.com/vi/${json['youtubeId']}/maxresdefault.jpg'
-                : ''),
       category: json['category'] as String,
       duration: json['duration'] as String,
       cost: priceCents / 100.0,
@@ -59,7 +55,6 @@ class Template extends Equatable {
       'id': id,
       'title': title,
       'description': description,
-      'thumbnailUrl': thumbnailUrl,
       'category': category,
       'duration': duration,
       'priceCents': (cost * 100).toInt(),

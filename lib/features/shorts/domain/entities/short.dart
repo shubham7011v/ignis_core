@@ -6,7 +6,6 @@ class Short extends Equatable {
   final String id;
   final String title;
   final String category;
-  final String? thumbnailUrl;
   final int placeholderColor;
   final bool isFavorite;
   final String? templateId;
@@ -19,7 +18,6 @@ class Short extends Equatable {
     required this.id,
     required this.title,
     required this.category,
-    this.thumbnailUrl,
     required this.placeholderColor,
     this.templateId,
     this.isFavorite = false,
@@ -29,11 +27,14 @@ class Short extends Equatable {
     this.youtubeId,
   });
 
+  String get thumbnailUrl => youtubeId != null
+      ? 'https://img.youtube.com/vi/$youtubeId/maxresdefault.jpg'
+      : '';
+
   Short copyWith({
     String? id,
     String? title,
     String? category,
-    String? thumbnailUrl,
     int? placeholderColor,
     String? templateId,
     bool? isFavorite,
@@ -46,7 +47,6 @@ class Short extends Equatable {
       id: id ?? this.id,
       title: title ?? this.title,
       category: category ?? this.category,
-      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
       placeholderColor: placeholderColor ?? this.placeholderColor,
       templateId: templateId ?? this.templateId,
       isFavorite: isFavorite ?? this.isFavorite,
@@ -62,7 +62,6 @@ class Short extends Equatable {
     id,
     title,
     category,
-    thumbnailUrl,
     placeholderColor,
     templateId,
     isFavorite,
@@ -77,11 +76,6 @@ class Short extends Equatable {
       id: json['id'] as String,
       title: json['title'] as String,
       category: json['category'] as String,
-      thumbnailUrl: (json['thumbnailUrl'] as String?)?.isNotEmpty == true
-          ? json['thumbnailUrl'] as String
-          : (json['youtubeId'] != null
-                ? 'https://img.youtube.com/vi/${json['youtubeId']}/maxresdefault.jpg'
-                : null),
       placeholderColor: _parseColor(json['placeholderColor'] as String?),
       templateId: json['id'] as String, // ID is the template ID
       isFavorite: json['isFavorited'] as bool? ?? false,
@@ -98,7 +92,6 @@ class Short extends Equatable {
       id: id,
       title: title,
       description: description ?? '',
-      thumbnailUrl: thumbnailUrl ?? '',
       category: category,
       duration: duration ?? '0:30',
       cost: cost,

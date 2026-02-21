@@ -8,8 +8,6 @@ type User struct {
 	Email       string    `json:"email" db:"email"`
 	DisplayName string    `json:"displayName" db:"display_name"`
 	PhotoURL    string    `json:"photoUrl" db:"photo_url"`
-	IsAdmin     bool      `json:"isAdmin" db:"is_admin"`
-	IsSuperAdmin bool     `json:"isSuperAdmin"` // Dynamic field, not stored in DB
 	CreatedAt   time.Time `json:"createdAt" db:"created_at"`
 	LastLogin   time.Time `json:"lastLogin" db:"last_login"`
 	FCMToken    string    `json:"fcmToken" db:"fcm_token"`

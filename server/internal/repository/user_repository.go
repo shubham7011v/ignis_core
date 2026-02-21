@@ -7,14 +7,13 @@ import (
 )
 
 type UserRepository struct {
-	db              *sql.DB
-	superAdminEmail string
+	db *sql.DB
 }
 
-func NewUserRepository(db *sql.DB, superAdminEmail string) *UserRepository {
+// NewUserRepository creates a new user repository
+func NewUserRepository(db *sql.DB) *UserRepository {
 	return &UserRepository{
-		db:              db,
-		superAdminEmail: superAdminEmail,
+		db: db,
 	}
 }
 
@@ -23,7 +22,7 @@ func (r *UserRepository) GetOrCreateUser(firebaseUID, email, displayName, photoU
 	var user models.User
 
 	// Try to get existing user
-	query := `SELECT id, firebase_uid, email, COALESCE(display_name, ''), COALESCE(photo_url, ''), is_admin, created_at, COALESCE(last_login, created_at), COALESCE(fcm_token, '')
+	query := `SELECT id, firebase_uid, email, COALESCE(display_name, ''), COALESCE(photo_url, ''), created_at, COALESCE(last_login, created_at), COALESCE(fcm_token, '')
 	          FROM users WHERE firebase_uid = $1`
 
 	err := r.db.QueryRow(query, firebaseUID).Scan(
@@ -32,7 +31,6 @@ func (r *UserRepository) GetOrCreateUser(firebaseUID, email, displayName, photoU
 		&user.Email,
 		&user.DisplayName,
 		&user.PhotoURL,
-		&user.IsAdmin,
 		&user.CreatedAt,
 		&user.LastLogin,
 		&user.FCMToken,
@@ -42,7 +40,7 @@ func (r *UserRepository) GetOrCreateUser(firebaseUID, email, displayName, photoU
 		// User doesn't exist, create new
 		insertQuery := `INSERT INTO users (firebase_uid, email, display_name, photo_url, last_login)
 		                VALUES ($1, $2, $3, $4, $5)
-		                RETURNING id, firebase_uid, email, COALESCE(display_name, ''), COALESCE(photo_url, ''), is_admin, created_at, COALESCE(last_login, created_at), '' as fcm_token`
+		                RETURNING id, firebase_uid, email, COALESCE(display_name, ''), COALESCE(photo_url, ''), created_at, COALESCE(last_login, created_at), '' as fcm_token`
 
 		err = r.db.QueryRow(insertQuery, firebaseUID, email, displayName, photoURL, time.Now()).Scan(
 			&user.ID,
@@ -50,7 +48,6 @@ func (r *UserRepository) GetOrCreateUser(firebaseUID, email, displayName, photoU
 			&user.Email,
 			&user.DisplayName,
 			&user.PhotoURL,
-			&user.IsAdmin,
 			&user.CreatedAt,
 			&user.LastLogin,
 			&user.FCMToken,
@@ -60,7 +57,6 @@ func (r *UserRepository) GetOrCreateUser(firebaseUID, email, displayName, photoU
 			return nil, err
 		}
 
-		user.IsSuperAdmin = (user.Email == r.superAdminEmail)
 		return &user, nil
 	}
 
@@ -75,35 +71,7 @@ func (r *UserRepository) GetOrCreateUser(firebaseUID, email, displayName, photoU
 	}
 
 	user.LastLogin = time.Now()
-	user.LastLogin = time.Now()
-	user.IsSuperAdmin = (user.Email == r.superAdminEmail)
 	return &user, nil
-}
-
-// IsAdmin checks if a user is an admin
-func (r *UserRepository) IsAdmin(firebaseUID string) (bool, error) {
-	var isAdmin bool
-	err := r.db.QueryRow("SELECT is_admin FROM users WHERE firebase_uid = $1", firebaseUID).Scan(&isAdmin)
-	if err != nil {
-		return false, err
-	}
-	return isAdmin, nil
-}
-
-// IsSuperAdmin checks if a user is a super admin based on email
-func (r *UserRepository) IsSuperAdmin(firebaseUID string) (bool, error) {
-	var email string
-	err := r.db.QueryRow("SELECT email FROM users WHERE firebase_uid = $1", firebaseUID).Scan(&email)
-	if err != nil {
-		return false, err
-	}
-	return email == r.superAdminEmail, nil
-}
-
-// UpdateUserRole updates the admin status of a user
-func (r *UserRepository) UpdateUserRole(userID string, isAdmin bool) error {
-	_, err := r.db.Exec("UPDATE users SET is_admin = $1 WHERE id = $2", isAdmin, userID)
-	return err
 }
 
 // UpdateFCMToken updates the FCM token for a user
@@ -137,7 +105,7 @@ func (r *UserRepository) Count() (int, error) {
 
 // GetAll returns a paginated list of users
 func (r *UserRepository) GetAll(limit, offset int) ([]models.User, error) {
-	query := `SELECT id, firebase_uid, email, COALESCE(display_name, ''), COALESCE(photo_url, ''), is_admin, created_at, COALESCE(last_login, created_at), COALESCE(fcm_token, '')
+	query := `SELECT id, firebase_uid, email, COALESCE(display_name, ''), COALESCE(photo_url, ''), created_at, COALESCE(last_login, created_at), COALESCE(fcm_token, '')
 	          FROM users
 	          ORDER BY created_at DESC
 	          LIMIT $1 OFFSET $2`
@@ -157,7 +125,6 @@ func (r *UserRepository) GetAll(limit, offset int) ([]models.User, error) {
 			&u.Email,
 			&u.DisplayName,
 			&u.PhotoURL,
-			&u.IsAdmin,
 			&u.CreatedAt,
 			&u.LastLogin,
 			&u.FCMToken,
@@ -165,7 +132,6 @@ func (r *UserRepository) GetAll(limit, offset int) ([]models.User, error) {
 		if err != nil {
 			return nil, err
 		}
-		u.IsSuperAdmin = (u.Email == r.superAdminEmail)
 		users = append(users, u)
 	}
 

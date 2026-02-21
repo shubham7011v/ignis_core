@@ -4,40 +4,27 @@ import 'app_config.dart';
 class FeatureFlags {
   static AppConfig get _config => AppConfig.instance;
 
-  /// Voice Chat Feature
-  static bool get enableVoiceChat => _config.enableVoiceChat;
+  /// Maintenance Mode
+  static bool get isMaintenanceMode => _config.maintenanceMode;
 
-  /// Daily Challenges
-  static bool get enableDailyChallenges => _config.enableDailyChallenges;
+  /// Development Mode
+  static bool get isDevelopment => _config.isDevelopment;
 
-  /// Tournament Mode
-  static bool get enableTournaments => _config.enableTournaments;
+  /// Production Mode
+  static bool get isProduction => _config.isProduction;
 
-  /// Admin Dashboard
-  static bool get enableAdminDashboard => _config.enableAdminDashboard;
-
-  /// Private Rooms
-  static bool get enablePrivateRooms => _config.enablePrivateRooms;
-
-  /// Friends Match (Online via Server)
-  static bool get enableFriendsMatch => _config.enableFriendsMatch;
-
-  /// Friends Match (Offline/Local/Hotspot)
-  static bool get enableFriendsMatchOffline =>
-      _config.enableFriendsMatchOffline;
-
-  /// Bot Players
-  static bool get enableBotPlayers => _config.enableBotPlayers;
-
-  /// Inner Circle (Social/Friends)
-  static bool get enableInnerCircle => _config.enableInnerCircle;
-
-  /// Global Rankings (Leaderboard)
-  static bool get enableGlobalRankings => _config.enableGlobalRankings;
-
-  /// Elite Deck Collection
-  static bool get enableEliteDecks => _config.enableEliteDecks;
-
-  /// Session Chat & Emoji
-  static bool get enableSessionChat => _config.enableSessionChat;
+  // Most other flags (VoiceChat, Tournaments, etc.) are currently disabled
+  // or hardcoded to false as the app focus is purely on Wedding Invitations.
+  static const bool enableVoiceChat = false;
+  static const bool enableDailyChallenges = false;
+  static const bool enableTournaments = false;
+  static const bool enableAdminDashboard = false;
+  static const bool enablePrivateRooms = false;
+  static const bool enableFriendsMatch = false;
+  static const bool enableFriendsMatchOffline = false;
+  static const bool enableBotPlayers = false;
+  static const bool enableInnerCircle = false;
+  static const bool enableGlobalRankings = false;
+  static const bool enableEliteDecks = false;
+  static const bool enableSessionChat = false;
 }

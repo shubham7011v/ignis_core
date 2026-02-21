@@ -20,6 +20,8 @@ type Config struct {
 	RenderOutputDir              string
 	GooglePlayPackageName        string
 	GoogleApplicationCredentials string
+	GoogleSheetsID               string
+	SyncSecretToken              string
 	SuperAdminEmail              string
 }
 
@@ -41,6 +43,8 @@ func Load() *Config {
 		RenderOutputDir:              getEnv("RENDER_OUTPUT_DIR", "./storage/renders"),
 		GooglePlayPackageName:        getEnv("GOOGLE_PLAY_PACKAGE_NAME", "com.iamsorry.vites"),
 		GoogleApplicationCredentials: getEnv("GOOGLE_APPLICATION_CREDENTIALS", ""),
+		GoogleSheetsID:               getEnv("GOOGLE_SHEETS_ID", ""),
+		SyncSecretToken:              getEnv("SYNC_SECRET_TOKEN", "vites_sync_secret_2026"),
 		SuperAdminEmail:              getEnv("SUPER_ADMIN_EMAIL", ""),
 	}
 }
