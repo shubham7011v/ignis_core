@@ -2,10 +2,12 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"ignis_server/internal/models"
 	"ignis_server/internal/repository"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -29,10 +31,11 @@ type GoogleSheetsService struct {
 	orderRepo           *repository.OrderRepository
 	templateRepo        *repository.TemplateRepository
 	userRepo            *repository.UserRepository
+	firebaseService     *FirebaseService
 	notificationService *NotificationService
 }
 
-func NewGoogleSheetsService(ctx context.Context, spreadsheetID, credentialsPath string, orderRepo *repository.OrderRepository, templateRepo *repository.TemplateRepository, userRepo *repository.UserRepository, notificationService *NotificationService) (*GoogleSheetsService, error) {
+func NewGoogleSheetsService(ctx context.Context, spreadsheetID, credentialsPath string, orderRepo *repository.OrderRepository, templateRepo *repository.TemplateRepository, userRepo *repository.UserRepository, firebaseService *FirebaseService, notificationService *NotificationService) (*GoogleSheetsService, error) {
 	if spreadsheetID == "" {
 		return nil, fmt.Errorf("GOOGLE_SHEETS_ID is not set")
 	}
@@ -51,6 +54,7 @@ func NewGoogleSheetsService(ctx context.Context, spreadsheetID, credentialsPath 
 		orderRepo:           orderRepo,
 		templateRepo:        templateRepo,
 		userRepo:            userRepo,
+		firebaseService:     firebaseService,
 		notificationService: notificationService,
 	}, nil
 }
@@ -80,37 +84,11 @@ func (s *GoogleSheetsService) SyncToSheets(ctx context.Context) error {
 }
 
 func (s *GoogleSheetsService) syncDashboard() error {
-	stats, err := s.orderRepo.GetStats()
-	if err != nil {
-		return err
-	}
-	userCount, err := s.userRepo.Count()
-	if err != nil {
-		return err
-	}
-
-	values := [][]interface{}{
-		{"📊 Ignis Admin Dashboard", "", "Last updated: " + time.Now().Format("2006-01-02 15:04:05")},
-		{""},
-		{"Metric", "Value", ""},
-		{"Total Users", userCount, ""},
-		{"Total Orders", stats.TotalOrders, ""},
-		{"Pending Orders", stats.PendingOrders, "⚠️ Needs attention"},
-		{"Completed Orders", stats.CompletedOrders, ""},
-		{"Total Revenue (Cents)", stats.TotalRevenue, fmt.Sprintf("= ~₹%.2f", float64(stats.TotalRevenue)/100.0)},
-		{""},
-		{"⚙️ APP CONFIGURATION", "", ""},
-		{"Maintenance Mode", "FALSE", "Set to TRUE to block app access"},
-		{"Min App Version", "1.0.0", "Format: 1.2.3"},
-		{"Promo Banner URL", "", "Public image URL"},
-		{""},
-		{"📋 HOW TO USE THIS SHEET", "", ""},
-		{"[Orders] tab", "Update Video URL + Status to deliver", ""},
-		{"[Templates] tab", "Add row (no ID) to create, edit to update", ""},
-		{"[Users] tab", "View customer emails and join dates", ""},
-		{"[Broadcast] tab", "Add a row with Title+Body to send a notification", ""},
-	}
-	return s.updateSheet(tabDashboard+"!A1", values)
+	// Our setup tool built a beautiful Dashboard with live formulas.
+	// We only need to update the "Last Updated" timestamp at Dashboard!A2.
+	timestamp := "Last synced by the server: " + time.Now().Format("2006-01-02 15:04:05")
+	values := [][]interface{}{{timestamp}}
+	return s.updateSheet(tabDashboard+"!A2", values)
 }
 
 func (s *GoogleSheetsService) syncOrdersToSheet() error {
@@ -118,33 +96,57 @@ func (s *GoogleSheetsService) syncOrdersToSheet() error {
 	if err != nil {
 		return err
 	}
-	// Columns: A=Order ID, B=Template ID, C=Status, D=Bride, E=Groom, F=Wedding Date, G=Events, H=Venue, I=Photos, J=Custom Prompt, K=Video Link, L=Amount, M=Ordered At
-	values := [][]interface{}{
-		{"Order ID", "Template ID", "Status", "Bride Name", "Groom Name", "Wedding Date", "Event Details", "Venue Details", "Photos Uploaded", "Custom Prompt", "Final Video Link", "Amount (₹)", "Ordered At"},
+
+	if len(orders) == 0 {
+		return nil
 	}
-	for i, o := range orders {
+
+	var values [][]interface{}
+	for _, o := range orders {
 		videoURL := ""
 		if o.VideoURL != nil {
 			videoURL = *o.VideoURL
 		}
-		photosLink := ""
-		if o.PhotosLink != nil {
-			photosLink = *o.PhotosLink
+		photosCell := ""
+		if o.PhotosLink != nil && *o.PhotosLink != "" {
+			// Build a clickable HYPERLINK formula pointing to firebase storage folder
+			fbURL := fmt.Sprintf("https://console.firebase.google.com/project/iamsorry-dev/storage/iamsorry-dev.appspot.com/files/orders/%s", *o.PhotosLink)
+			photosCell = fmt.Sprintf(`=HYPERLINK("%s","📸 VIEW PHOTOS")`, fbURL)
 		}
 
-		// Row index for formula (starting at row 2)
-		rowNum := i + 2
-		// Formula: SUBSTITUTE(Master!K[row], "[NAME]", D[row])
-		customPrompt := fmt.Sprintf(`=IFERROR(SUBSTITUTE(VLOOKUP(B%d, Templates!A:L, 12, FALSE), "[NAME]", D%d), "")`, rowNum, rowNum)
+		// Clickable Venue link (Google Maps)
+		venueCell := o.Venue
+		if o.Venue != "" {
+			venueCell = fmt.Sprintf(`=HYPERLINK("https://www.google.com/maps/search/?api=1&query=%s","%s")`, o.Venue, o.Venue)
+		}
+
+		// Human-readable Event Details
+		detailsStr := ""
+		if len(o.EventDetails) > 0 {
+			// Try to parse as JSON map
+			var details map[string]interface{}
+			if err := json.Unmarshal(o.EventDetails, &details); err == nil {
+				var parts []string
+				for k, v := range details {
+					parts = append(parts, fmt.Sprintf("%s: %v", k, v))
+				}
+				detailsStr = strings.Join(parts, " | ")
+			} else {
+				detailsStr = string(o.EventDetails)
+			}
+		}
 
 		values = append(values, []interface{}{
-			o.ID, o.TemplateID, o.Status, o.BrideName, o.GroomName,
-			o.WeddingDate.Format("2006-01-02"), string(o.EventDetails), o.Venue,
-			photosLink, customPrompt, videoURL,
-			fmt.Sprintf("%.2f", float64(o.AmountCents)/100.0), o.CreatedAt.Format("2006-01-02 15:04"),
+			o.ID, o.Status, o.TemplateID, o.BrideName, o.GroomName,
+			o.WeddingDate.Format("02-01-2006"), venueCell, detailsStr,
+			photosCell, o.InputMethod, videoURL,
+			fmt.Sprintf("%.2f", float64(o.AmountCents)/100.0), o.CreatedAt.Format("02-01-2006 15:04"),
 		})
 	}
-	return s.updateSheet(tabOrders+"!A1", values)
+
+	// Clear existing data (A2:M) before sync (shifted for InputMethod)
+	_ = s.clearSheet(tabOrders + "!A2:M")
+	return s.updateSheet(tabOrders+"!A2", values)
 }
 
 func (s *GoogleSheetsService) syncTemplatesToSheet() error {
@@ -152,21 +154,22 @@ func (s *GoogleSheetsService) syncTemplatesToSheet() error {
 	if err != nil {
 		return err
 	}
-	// Layout: Template ID, Title, Category, Description, Tags, Price, YT ID, Thumbnail, Active, Sequence, Timing, Master Prompt
-	values := [][]interface{}{
-		{"Template ID", "Title", "Category", "Description", "Tags (Manual)", "Price (₹)", "YT Shorts ID", "Thumbnail URL", "Is Active", "Scene Sequence", "Timing Key", "Master Prompt"},
+
+	if len(templates) == 0 {
+		return nil
 	}
+
+	var values [][]interface{}
 	for _, t := range templates {
-		thumbnailURL := fmt.Sprintf("https://img.youtube.com/vi/%s/maxresdefault.jpg", t.YoutubeID)
 		values = append(values, []interface{}{
 			t.ID, t.Title, t.Category, t.Description,
 			"", // Tags manual
 			fmt.Sprintf("%.2f", float64(t.PriceCents)/100.0),
-			t.YoutubeID, thumbnailURL, t.IsActive,
-			"", "", "", // Sequence, Timing, Prompt manual
+			t.YoutubeID, t.IsActive,
 		})
 	}
-	return s.updateSheet(tabTemplates+"!A1", values)
+	_ = s.clearSheet(tabTemplates + "!A2:H")
+	return s.updateSheet(tabTemplates+"!A2", values)
 }
 
 func (s *GoogleSheetsService) syncUsersToSheet() error {
@@ -174,9 +177,12 @@ func (s *GoogleSheetsService) syncUsersToSheet() error {
 	if err != nil {
 		return err
 	}
-	values := [][]interface{}{
-		{"User ID", "Firebase UID", "Email", "Display Name", "Joined At", "Last Login"},
+
+	if len(users) == 0 {
+		return nil
 	}
+
+	var values [][]interface{}
 	for _, u := range users {
 		values = append(values, []interface{}{
 			u.ID, u.FirebaseUID, u.Email, u.DisplayName,
@@ -184,7 +190,13 @@ func (s *GoogleSheetsService) syncUsersToSheet() error {
 			u.LastLogin.Format("2006-01-02 15:04"),
 		})
 	}
-	return s.updateSheet(tabUsers+"!A1", values)
+	_ = s.clearSheet(tabUsers + "!A2:F")
+	return s.updateSheet(tabUsers+"!A2", values)
+}
+
+func (s *GoogleSheetsService) clearSheet(rangeStr string) error {
+	_, err := s.srv.Spreadsheets.Values.Clear(s.spreadsheetID, rangeStr, &sheets.ClearValuesRequest{}).Do()
+	return err
 }
 
 // ========================================================================
@@ -249,23 +261,51 @@ func (s *GoogleSheetsService) updateOrdersFromSheet() error {
 			continue
 		}
 
-		status := safeGet(row, 2)    // Status is now Col C (index 2)
-		videoURL := safeGet(row, 10) // Video Link is now Col K (index 10)
+		status := safeGet(row, 1)   // Status is Col B (index 1)
+		videoURL := safeGet(row, 9) // Video Link is Col J (index 9 - shifted from K/10)
 
-		// Admin notes column is gone in new layout, or we can use generic empty if needed
-		adminNotes := ""
+		if status == "" {
+			continue
+		}
 
-		err := s.orderRepo.UpdateStatus(orderID, status, &videoURL, &adminNotes)
+		err := s.orderRepo.UpdateStatus(orderID, models.OrderStatus(status), &videoURL, nil)
 		if err != nil {
 			log.Printf("[Sheets] Failed to update order %s: %v", orderID, err)
+			continue
+		}
+
+		// Automated Cleanup: Delete photos from Firebase if COMPLETED
+		if models.OrderStatus(status) == models.OrderStatusCompleted {
+			go s.cleanupOrderPhotos(orderID)
 		}
 	}
 	return nil
 }
 
+func (s *GoogleSheetsService) cleanupOrderPhotos(orderID string) {
+	if s.firebaseService == nil {
+		return
+	}
+	log.Printf("[Cleanup] Deleting photos for completed order: %s", orderID)
+
+	// Determine bucket name (can be moved to config)
+	bucketName := os.Getenv("FIREBASE_STORAGE_BUCKET")
+	if bucketName == "" {
+		bucketName = "iamsorry-dev.appspot.com" // Default for your project
+	}
+
+	folderPath := fmt.Sprintf("orders/%s/", orderID)
+	err := s.firebaseService.DeleteOrderPhotos(context.Background(), bucketName, folderPath)
+	if err != nil {
+		log.Printf("[Cleanup] Error deleting photos for order %s: %v", orderID, err)
+	} else {
+		log.Printf("[Cleanup] Successfully deleted photos for order %s", orderID)
+	}
+}
+
 func (s *GoogleSheetsService) updateTemplatesFromSheet() error {
-	// Columns: A=ID, B=YoutubeID, C=Title, D=Description, E=Price(₹), F=Category, G=Active
-	resp, err := s.srv.Spreadsheets.Values.Get(s.spreadsheetID, tabTemplates+"!A2:G").Do()
+	// Columns: A=ID, B=Title, C=Category, D=Description, E=Tags, F=Price(₹), G=YT ID, H=Active
+	resp, err := s.srv.Spreadsheets.Values.Get(s.spreadsheetID, tabTemplates+"!A2:H").Do()
 	if err != nil {
 		return fmt.Errorf("unable to read Templates sheet: %v", err)
 	}
@@ -278,10 +318,10 @@ func (s *GoogleSheetsService) updateTemplatesFromSheet() error {
 		title := safeGet(row, 1)
 		category := safeGet(row, 2)
 		description := safeGet(row, 3)
-		// Tags is 4
+		// Tags is index 4
 		priceStr := safeGet(row, 5)
 		youtubeID := safeGet(row, 6)
-		isActiveStr := safeGet(row, 8)
+		isActiveStr := safeGet(row, 7)
 
 		if title == "" || youtubeID == "" {
 			continue
@@ -298,15 +338,20 @@ func (s *GoogleSheetsService) updateTemplatesFromSheet() error {
 			Title:       title,
 			Description: description,
 			PriceCents:  priceCents,
-			Category:    category,
+			Category:    models.TemplateCategory(category),
 			IsActive:    isActive,
 		}
 
 		var err error
 		if id == "" {
-			// NEW template
+			// NEW template: Repo will generate ID on Create
 			log.Printf("[Sheets] Creating new template from row %d: %s", rowIdx+2, title)
 			err = s.templateRepo.Create(template)
+			if err == nil {
+				// Write the newly generated ID back to Sheets so it doesn't duplicate next time
+				idRange := fmt.Sprintf("%s!A%d", tabTemplates, rowIdx+2)
+				_ = s.updateSheet(idRange, [][]interface{}{{template.ID}})
+			}
 		} else {
 			// UPDATE existing
 			err = s.templateRepo.Update(template)
@@ -333,9 +378,9 @@ func (s *GoogleSheetsService) processBroadcastTab(_ context.Context) error {
 		if len(row) < 2 {
 			continue
 		}
-		status := safeGet(row, 2)
-		if strings.HasPrefix(status, "SENT") {
-			continue // Already sent
+		status := strings.ToUpper(safeGet(row, 2))
+		if status != "SEND" {
+			continue // Only send if explicitly marked as SEND
 		}
 
 		title := safeGet(row, 0)

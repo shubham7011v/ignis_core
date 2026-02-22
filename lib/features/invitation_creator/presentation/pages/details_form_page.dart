@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
+import 'package:uuid/uuid.dart';
 import '../../../../core/theme/colors.dart';
 import '../bloc/invitation_bloc.dart';
 import '../bloc/invitation_event.dart';
@@ -19,6 +23,11 @@ class _DetailsFormPageState extends State<DetailsFormPage> {
   late TextEditingController _groomNameController;
   late TextEditingController _venueController;
   DateTime? _selectedDate;
+  final List<XFile> _selectedImages = [];
+  bool _isUploading = false;
+  final ImagePicker _picker = ImagePicker();
+  InvitationInputType _inputType = InvitationInputType.manual;
+  final List<Map<String, String>> _events = [];
 
   @override
   void initState() {
@@ -30,6 +39,8 @@ class _DetailsFormPageState extends State<DetailsFormPage> {
     _selectedDate = state.details.brideName.isEmpty
         ? null
         : state.details.weddingDate;
+    _inputType = state.details.inputType;
+    _events.addAll(state.details.events);
   }
 
   @override
@@ -145,7 +156,11 @@ class _DetailsFormPageState extends State<DetailsFormPage> {
                         ),
                         const SizedBox(height: 32),
 
-                        // Form Fields
+                        // Input Mode Toggle
+                        _buildInputModeToggle(palette),
+                        const SizedBox(height: 32),
+
+                        // Common Fields
                         _buildLabel(
                           palette,
                           'Bride\'s Name',
@@ -180,6 +195,41 @@ class _DetailsFormPageState extends State<DetailsFormPage> {
                           _venueController,
                           'Ex: The Palace, Udaipur',
                         ),
+                        const SizedBox(height: 32),
+
+                        if (_inputType == InvitationInputType.manual) ...[
+                          _buildLabel(
+                            palette,
+                            'Event Program (Order of Events)',
+                            Icons.auto_stories,
+                          ),
+                          _buildEventProgramBuilder(palette),
+                          const SizedBox(height: 32),
+                        ],
+
+                        // Photo Gallery Section
+                        _buildLabel(
+                          palette,
+                          _inputType == InvitationInputType.card
+                              ? 'Upload Wedding Card Images'
+                              : 'Wedding Photos (Optional)',
+                          _inputType == InvitationInputType.card
+                              ? Icons.upload_file
+                              : Icons.collections,
+                        ),
+                        if (_inputType == InvitationInputType.card)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Text(
+                              'Please upload photos of both sides of your wedding card. Our designers will transcribe the details.',
+                              style: TextStyle(
+                                color: palette.textSecondary,
+                                fontSize: 13,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                        _buildPhotoGallery(palette),
 
                         const SizedBox(height: 32),
 
@@ -199,6 +249,134 @@ class _DetailsFormPageState extends State<DetailsFormPage> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildInputModeToggle(AppColorPalette palette) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.divider),
+      ),
+      child: SegmentedButton<InvitationInputType>(
+        segments: const [
+          ButtonSegment(
+            value: InvitationInputType.manual,
+            label: Text('Manual Form'),
+            icon: Icon(Icons.edit_note),
+          ),
+          ButtonSegment(
+            value: InvitationInputType.card,
+            label: Text('Card Upload'),
+            icon: Icon(Icons.style),
+          ),
+        ],
+        selected: {_inputType},
+        onSelectionChanged: (Set<InvitationInputType> newSelection) {
+          setState(() {
+            _inputType = newSelection.first;
+          });
+        },
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+            if (states.contains(WidgetState.selected)) {
+              return palette.accent.withValues(alpha: 0.1);
+            }
+            return Colors.transparent;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+            if (states.contains(WidgetState.selected)) {
+              return palette.accent;
+            }
+            return palette.textSecondary;
+          }),
+          side: const WidgetStatePropertyAll(BorderSide.none),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+        showSelectedIcon: false,
+      ),
+    );
+  }
+
+  Widget _buildEventProgramBuilder(AppColorPalette palette) {
+    return Column(
+      children: [
+        ...List.generate(_events.length, (index) {
+          final event = _events[index];
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: palette.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: palette.divider),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: TextFormField(
+                    initialValue: event['title'],
+                    onChanged: (val) => event['title'] = val,
+                    style: TextStyle(color: palette.textPrimary, fontSize: 14),
+                    decoration: const InputDecoration(
+                      hintText: 'Event (e.g. Sangeet)',
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  height: 24,
+                  color: palette.divider,
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: TextFormField(
+                    initialValue: event['time'],
+                    onChanged: (val) => event['time'] = val,
+                    style: TextStyle(color: palette.textPrimary, fontSize: 14),
+                    decoration: const InputDecoration(
+                      hintText: 'Time (e.g. 7 PM)',
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.remove_circle_outline,
+                    color: Colors.redAccent,
+                    size: 20,
+                  ),
+                  onPressed: () => setState(() => _events.removeAt(index)),
+                ),
+              ],
+            ),
+          );
+        }),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () {
+            setState(() {
+              _events.add({'title': '', 'time': ''});
+            });
+          },
+          icon: const Icon(Icons.add, size: 18),
+          label: const Text('Add Event Item'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: palette.accent,
+            side: BorderSide(color: palette.accent),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -338,26 +516,44 @@ class _DetailsFormPageState extends State<DetailsFormPage> {
         width: double.infinity,
         height: 56,
         child: ElevatedButton(
-          onPressed: () {
-            if (_formKey.currentState!.validate() && _selectedDate != null) {
-              final details = WeddingDetails(
-                brideName: _brideNameController.text.trim(),
-                groomName: _groomNameController.text.trim(),
-                weddingDate: _selectedDate!,
-                venue: _venueController.text.trim(),
-              );
+          onPressed: _isUploading
+              ? null
+              : () async {
+                  if (_formKey.currentState!.validate() &&
+                      _selectedDate != null) {
+                    setState(() => _isUploading = true);
 
-              context.read<InvitationBloc>().add(DetailsUpdated(details));
-              Navigator.pushNamed(context, '/preview');
-            } else if (_selectedDate == null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Please select a wedding date'),
-                  backgroundColor: palette.error,
-                ),
-              );
-            }
-          },
+                    String? photosLink;
+                    if (_selectedImages.isNotEmpty) {
+                      photosLink = await _uploadImages();
+                    }
+
+                    final details = WeddingDetails(
+                      brideName: _brideNameController.text.trim(),
+                      groomName: _groomNameController.text.trim(),
+                      weddingDate: _selectedDate!,
+                      venue: _venueController.text.trim(),
+                      photosLink: photosLink,
+                      inputType: _inputType,
+                      events: _events,
+                    );
+
+                    if (context.mounted) {
+                      context.read<InvitationBloc>().add(
+                        DetailsUpdated(details),
+                      );
+                      setState(() => _isUploading = false);
+                      Navigator.pushNamed(context, '/preview');
+                    }
+                  } else if (_selectedDate == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Please select a wedding date'),
+                        backgroundColor: palette.error,
+                      ),
+                    );
+                  }
+                },
           style: ElevatedButton.styleFrom(
             backgroundColor: palette.primary,
             foregroundColor: Colors.white,
@@ -367,23 +563,146 @@ class _DetailsFormPageState extends State<DetailsFormPage> {
               borderRadius: BorderRadius.circular(28),
             ),
           ),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Review Preview',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Inter',
+          child: _isUploading
+              ? const SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Review Preview',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Icon(Icons.arrow_forward),
+                  ],
                 ),
-              ),
-              SizedBox(width: 8),
-              Icon(Icons.arrow_forward),
-            ],
-          ),
         ),
       ),
     );
+  }
+
+  Widget _buildPhotoGallery(AppColorPalette palette) {
+    return Container(
+      height: 120,
+      margin: const EdgeInsets.only(top: 8),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _selectedImages.length + 1,
+        itemBuilder: (context, index) {
+          if (index == _selectedImages.length) {
+            return _buildAddPhotoButton(palette);
+          }
+          return _buildPhotoThumbnail(palette, index);
+        },
+      ),
+    );
+  }
+
+  Widget _buildAddPhotoButton(AppColorPalette palette) {
+    if (_selectedImages.length >= 5) return const SizedBox.shrink();
+
+    return GestureDetector(
+      onTap: _pickImages,
+      child: Container(
+        width: 100,
+        height: 100,
+        margin: const EdgeInsets.only(right: 12),
+        decoration: BoxDecoration(
+          color: palette.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: palette.divider, style: BorderStyle.solid),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.add_a_photo_outlined, color: palette.accent, size: 32),
+            const SizedBox(height: 8),
+            Text(
+              'Add Photo',
+              style: TextStyle(color: palette.textTertiary, fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPhotoThumbnail(AppColorPalette palette, int index) {
+    return Stack(
+      children: [
+        Container(
+          width: 100,
+          height: 100,
+          margin: const EdgeInsets.only(right: 12, top: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            image: DecorationImage(
+              image: FileImage(File(_selectedImages[index].path)),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        Positioned(
+          right: 2,
+          top: 0,
+          child: GestureDetector(
+            onTap: () => setState(() => _selectedImages.removeAt(index)),
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, color: Colors.white, size: 14),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _pickImages() async {
+    final List<XFile> images = await _picker.pickMultiImage();
+    if (images.isNotEmpty) {
+      setState(() {
+        _selectedImages.addAll(images);
+        if (_selectedImages.length > 5) {
+          _selectedImages.removeRange(5, _selectedImages.length);
+        }
+      });
+    }
+  }
+
+  Future<String?> _uploadImages() async {
+    try {
+      final String sessionId = const Uuid().v4();
+      final storageRef = FirebaseStorage.instance.ref();
+
+      // We will upload to a folder and return the folder path
+      // The backend will use this path to show the photos
+      for (int i = 0; i < _selectedImages.length; i++) {
+        final file = File(_selectedImages[i].path);
+        final photoRef = storageRef.child("orders/$sessionId/photo_$i.jpg");
+        await photoRef.putFile(file);
+      }
+
+      // Return a professional-looking Firebase Console link or just the folder path
+      // For now, we'll return the sessionId which the backend uses to build the path.
+      return sessionId;
+    } catch (e) {
+      debugPrint("Upload failed: $e");
+      return null;
+    }
   }
 }

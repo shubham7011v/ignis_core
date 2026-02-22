@@ -260,7 +260,7 @@ class _TemplateCardState extends State<TemplateCard> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          widget.template.category,
+                          widget.template.category.displayName,
                           style: GoogleFonts.inter(
                             color: Colors.white60,
                             fontSize: 12,

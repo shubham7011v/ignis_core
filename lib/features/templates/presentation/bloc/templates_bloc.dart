@@ -68,7 +68,7 @@ class TemplatesBloc extends Bloc<TemplatesEvent, TemplatesState> {
       final filtered = allTemplates.where((t) {
         final query = event.query.toLowerCase();
         return t.title.toLowerCase().contains(query) ||
-            t.category.toLowerCase().contains(query);
+            t.category.displayName.toLowerCase().contains(query);
       }).toList();
 
       emit(TemplatesLoaded(templates: filtered));

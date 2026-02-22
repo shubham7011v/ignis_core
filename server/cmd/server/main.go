@@ -62,7 +62,7 @@ func main() {
 	notificationService := services.NewNotificationService(firebaseService)
 
 	// Initialize Google Sheets Service (needs notificationService for broadcast tab)
-	sheetsService, err := services.NewGoogleSheetsService(context.Background(), cfg.GoogleSheetsID, cfg.GoogleApplicationCredentials, orderRepo, templateRepo, userRepo, notificationService)
+	sheetsService, err := services.NewGoogleSheetsService(context.Background(), cfg.GoogleSheetsID, cfg.GoogleApplicationCredentials, orderRepo, templateRepo, userRepo, firebaseService, notificationService)
 	if err != nil {
 		log.Printf("WARNING: Google Sheets Sync not initialized: %v", err)
 	} else {

@@ -143,7 +143,7 @@ class _TemplatePoster extends StatelessWidget {
               ),
             ),
             Text(
-              template.category,
+              template.category.displayName,
               style: GoogleFonts.inter(color: Colors.white38, fontSize: 10),
             ),
           ],

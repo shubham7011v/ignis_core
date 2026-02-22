@@ -13,10 +13,10 @@ type Template struct {
 	ViewCount        int    `json:"viewCount" db:"view_count"`
 
 	// Product fields (for template browsing)
-	Title       string `json:"title" db:"title"`
-	Description string `json:"description" db:"description"`
-	PriceCents  int    `json:"priceCents" db:"price_cents"`
-	Category    string `json:"category" db:"category"`
+	Title       string           `json:"title" db:"title"`
+	Description string           `json:"description" db:"description"`
+	PriceCents  int              `json:"priceCents" db:"price_cents"`
+	Category    TemplateCategory `json:"category" db:"category"`
 
 	// Overlay Configuration for automated rendering
 	OverlayConfig []byte `json:"overlayConfig" db:"overlay_config"` // JSON data
@@ -29,23 +29,24 @@ type Template struct {
 }
 
 type Order struct {
-	ID            string     `json:"id" db:"id"`
-	UserID        string     `json:"userId" db:"user_id"`
-	TemplateID    string     `json:"templateId" db:"template_id"`
-	BrideName     string     `json:"brideName" db:"bride_name"`
-	GroomName     string     `json:"groomName" db:"groom_name"`
-	WeddingDate   time.Time  `json:"weddingDate" db:"wedding_date"`
-	Venue         string     `json:"venue" db:"venue"`
-	CustomMessage string     `json:"customMessage" db:"custom_message"`
-	Status        string     `json:"status" db:"status"`
-	VideoURL      *string    `json:"videoUrl" db:"video_url"`
-	PaymentStatus string     `json:"paymentStatus" db:"payment_status"`
-	AmountCents   int        `json:"amountCents" db:"amount_cents"`
-	TransactionID string     `json:"transactionId" db:"transaction_id"`
-	CreatedAt     time.Time  `json:"createdAt" db:"created_at"`
-	DeliveredAt   *time.Time `json:"deliveredAt" db:"delivered_at"`
-	DownloadedAt  *time.Time `json:"downloadedAt" db:"downloaded_at"`
-	AdminNotes    *string    `json:"adminNotes" db:"admin_notes"`
-	PhotosLink    *string    `json:"photosLink" db:"photos_link"`
-	EventDetails  []byte     `json:"eventDetails" db:"event_details"` // Raw JSONB
+	ID            string        `json:"id" db:"id"`
+	UserID        string        `json:"userId" db:"user_id"`
+	TemplateID    string        `json:"templateId" db:"template_id"`
+	BrideName     string        `json:"brideName" db:"bride_name"`
+	GroomName     string        `json:"groomName" db:"groom_name"`
+	WeddingDate   time.Time     `json:"weddingDate" db:"wedding_date"`
+	Venue         string        `json:"venue" db:"venue"`
+	CustomMessage string        `json:"customMessage" db:"custom_message"`
+	Status        OrderStatus   `json:"status" db:"status"`
+	VideoURL      *string       `json:"videoUrl" db:"video_url"`
+	PaymentStatus PaymentStatus `json:"paymentStatus" db:"payment_status"`
+	AmountCents   int           `json:"amountCents" db:"amount_cents"`
+	TransactionID string        `json:"transactionId" db:"transaction_id"`
+	CreatedAt     time.Time     `json:"createdAt" db:"created_at"`
+	DeliveredAt   *time.Time    `json:"deliveredAt" db:"delivered_at"`
+	DownloadedAt  *time.Time    `json:"downloadedAt" db:"downloaded_at"`
+	AdminNotes    *string       `json:"adminNotes" db:"admin_notes"`
+	PhotosLink    *string       `json:"photosLink" db:"photos_link"`
+	InputMethod   InputMethod   `json:"inputMethod" db:"input_method"`
+	EventDetails  []byte        `json:"eventDetails" db:"event_details"` // Raw JSONB
 }

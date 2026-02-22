@@ -229,7 +229,7 @@ class _ShortsScreenState extends State<ShortsScreen> {
                   ),
                 ),
                 child: Text(
-                  short.category,
+                  short.category.displayName,
                   style: GoogleFonts.inter(
                     color: Colors.white,
                     fontSize: 12,
