@@ -47,7 +47,7 @@ class ShortsInfoSheet extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            short.category.displayName,
+            short.category,
             style: GoogleFonts.inter(
               color: IgnisTheme.goldAccent,
               fontSize: 14,

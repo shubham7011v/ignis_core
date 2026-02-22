@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"ignis_server/internal/models"
 	"ignis_server/internal/repository"
@@ -109,43 +108,25 @@ func (s *GoogleSheetsService) syncOrdersToSheet() error {
 		}
 		photosCell := ""
 		if o.PhotosLink != nil && *o.PhotosLink != "" {
-			// Build a clickable HYPERLINK formula pointing to firebase storage folder
+			// Support multiple photos by clarify link leads to folder
 			fbURL := fmt.Sprintf("https://console.firebase.google.com/project/iamsorry-dev/storage/iamsorry-dev.appspot.com/files/orders/%s", *o.PhotosLink)
-			photosCell = fmt.Sprintf(`=HYPERLINK("%s","📸 VIEW PHOTOS")`, fbURL)
+			photosCell = fmt.Sprintf(`=HYPERLINK("%s","📸 VIEW ASSETS")`, fbURL)
 		}
 
-		// Clickable Venue link (Google Maps)
-		venueCell := o.Venue
-		if o.Venue != "" {
-			venueCell = fmt.Sprintf(`=HYPERLINK("https://www.google.com/maps/search/?api=1&query=%s","%s")`, o.Venue, o.Venue)
-		}
-
-		// Human-readable Event Details
-		detailsStr := ""
-		if len(o.EventDetails) > 0 {
-			// Try to parse as JSON map
-			var details map[string]interface{}
-			if err := json.Unmarshal(o.EventDetails, &details); err == nil {
-				var parts []string
-				for k, v := range details {
-					parts = append(parts, fmt.Sprintf("%s: %v", k, v))
-				}
-				detailsStr = strings.Join(parts, " | ")
-			} else {
-				detailsStr = string(o.EventDetails)
-			}
+		dueStr := "TBD"
+		if o.DueAt != nil {
+			dueStr = o.DueAt.Format("02-01 15:04")
 		}
 
 		values = append(values, []interface{}{
-			o.ID, o.Status, o.TemplateID, o.BrideName, o.GroomName,
-			o.WeddingDate.Format("02-01-2006"), venueCell, detailsStr,
-			photosCell, o.InputMethod, videoURL,
+			o.ID, o.Status, o.TemplateID, dueStr,
+			photosCell, videoURL,
 			fmt.Sprintf("%.2f", float64(o.AmountCents)/100.0), o.CreatedAt.Format("02-01-2006 15:04"),
 		})
 	}
 
-	// Clear existing data (A2:M) before sync (shifted for InputMethod)
-	_ = s.clearSheet(tabOrders + "!A2:M")
+	// Clear existing data (A2:H) before sync
+	_ = s.clearSheet(tabOrders + "!A2:H")
 	return s.updateSheet(tabOrders+"!A2", values)
 }
 
@@ -268,14 +249,14 @@ func (s *GoogleSheetsService) updateOrdersFromSheet() error {
 			continue
 		}
 
-		err := s.orderRepo.UpdateStatus(orderID, models.OrderStatus(status), &videoURL, nil)
+		err := s.orderRepo.UpdateStatus(orderID, status, &videoURL, nil)
 		if err != nil {
 			log.Printf("[Sheets] Failed to update order %s: %v", orderID, err)
 			continue
 		}
 
 		// Automated Cleanup: Delete photos from Firebase if COMPLETED
-		if models.OrderStatus(status) == models.OrderStatusCompleted {
+		if status == "COMPLETED" {
 			go s.cleanupOrderPhotos(orderID)
 		}
 	}
@@ -338,7 +319,7 @@ func (s *GoogleSheetsService) updateTemplatesFromSheet() error {
 			Title:       title,
 			Description: description,
 			PriceCents:  priceCents,
-			Category:    models.TemplateCategory(category),
+			Category:    category,
 			IsActive:    isActive,
 		}
 

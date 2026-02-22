@@ -1,25 +1,23 @@
 import 'package:equatable/equatable.dart';
 
-enum InvitationInputType { manual, card }
-
 class WeddingDetails extends Equatable {
   final String brideName;
   final String groomName;
-  final DateTime weddingDate;
+  final DateTime? weddingDate;
   final String venue;
   final String? customMessage;
   final String? photosLink;
-  final InvitationInputType inputType;
+  final String inputType; // 'manual' or 'card'
   final List<Map<String, String>> events;
 
   const WeddingDetails({
-    required this.brideName,
-    required this.groomName,
-    required this.weddingDate,
-    required this.venue,
+    this.brideName = '',
+    this.groomName = '',
+    this.weddingDate,
+    this.venue = '',
     this.customMessage,
     this.photosLink,
-    this.inputType = InvitationInputType.manual,
+    this.inputType = 'card', // Default to card for the new flow
     this.events = const [],
   });
 
@@ -42,7 +40,7 @@ class WeddingDetails extends Equatable {
     String? venue,
     String? customMessage,
     String? photosLink,
-    InvitationInputType? inputType,
+    String? inputType,
     List<Map<String, String>>? events,
   }) {
     return WeddingDetails(

@@ -118,7 +118,7 @@ class InvitationBloc extends Bloc<InvitationEvent, InvitationState> {
       name: event.template.title,
       thumbnailUrl: event.template.thumbnailUrl,
       videoTemplateId: event.template.youtubeId ?? '',
-      categories: [event.template.category.toServerString()],
+      categories: [event.template.category],
     );
     emit(state.copyWith(selectedStyle: style));
   }

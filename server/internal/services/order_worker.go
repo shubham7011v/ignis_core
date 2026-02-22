@@ -59,7 +59,7 @@ func (w *OrderWorker) Start(ctx context.Context) {
 }
 
 func (w *OrderWorker) processPendingOrders() {
-	orders, err := w.orderRepo.GetByStatus(models.OrderStatusPending)
+	orders, err := w.orderRepo.GetByStatus("pending")
 	if err != nil {
 		log.Printf("Worker error: failed to fetch pending orders: %v", err)
 		return
@@ -81,7 +81,7 @@ func (w *OrderWorker) processOrder(order models.Order) {
 	}
 
 	// 2. Mark as processing
-	err = w.orderRepo.UpdateStatus(order.ID, models.OrderStatusProcessing, nil, nil)
+	err = w.orderRepo.UpdateStatus(order.ID, "processing", nil, nil)
 	if err != nil {
 		log.Printf("[Worker] Error: failed to update status to processing for order %s: %v", order.ID, err)
 		return
@@ -101,7 +101,7 @@ func (w *OrderWorker) processOrder(order models.Order) {
 	videoURL := "/api/orders/download/" + filepath.Base(outputPath)
 
 	adminNote := "Automated rendering successful (Available for 1 week)"
-	err = w.orderRepo.UpdateStatus(order.ID, models.OrderStatusCompleted, &videoURL, &adminNote)
+	err = w.orderRepo.UpdateStatus(order.ID, "completed", &videoURL, &adminNote)
 	if err != nil {
 		log.Printf("[Worker] Error: failed to finalize order %s: %v", order.ID, err)
 	} else {
@@ -149,7 +149,7 @@ func (w *OrderWorker) CleanupOldRenders() {
 }
 
 func (w *OrderWorker) handleFailure(orderID, message string) {
-	status := models.OrderStatusCancelled // or add a Failed status if preferred
+	status := "failed"
 	w.orderRepo.UpdateStatus(orderID, status, nil, &message)
 }
 

@@ -192,7 +192,7 @@ class _HeroSlide extends StatelessWidget {
                     const SizedBox(width: 12),
                   ],
                   Text(
-                    template.category.displayName,
+                    template.category,
                     style: GoogleFonts.inter(
                       color: Colors.white70,
                       fontSize: 12,

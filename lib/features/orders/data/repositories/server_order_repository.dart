@@ -35,7 +35,7 @@ class ServerOrderRepository implements OrderRepository {
         'templateId': order.styleId,
         'brideName': order.details.brideName,
         'groomName': order.details.groomName,
-        'weddingDate': order.details.weddingDate.toIso8601String().split(
+        'weddingDate': order.details.weddingDate?.toIso8601String().split(
           'T',
         )[0],
         'venue': order.details.venue,

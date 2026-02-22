@@ -111,7 +111,7 @@ func main() {
 	authHandler := handlers.NewAuthHandler(userRepo)
 	templatesHandler := handlers.NewTemplatesHandler(templateRepo)
 	shortsHandler := handlers.NewShortsHandler(shortsRepo)
-	ordersHandler := handlers.NewOrdersHandler(orderRepo, googlePlayService, cfg.RenderOutputDir)
+	ordersHandler := handlers.NewOrdersHandler(orderRepo, templateRepo, googlePlayService, cfg.RenderOutputDir)
 	sharingHandler := handlers.NewSharingHandler(sharingService, shortsRepo, templateRepo)
 
 	// Initialize middleware

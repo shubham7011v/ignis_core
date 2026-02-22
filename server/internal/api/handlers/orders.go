@@ -15,13 +15,15 @@ import (
 
 type OrdersHandler struct {
 	orderRepo       *repository.OrderRepository
+	templateRepo    *repository.TemplateRepository
 	googlePlay      *services.GooglePlayService
 	renderOutputDir string
 }
 
-func NewOrdersHandler(orderRepo *repository.OrderRepository, googlePlay *services.GooglePlayService, renderOutputDir string) *OrdersHandler {
+func NewOrdersHandler(orderRepo *repository.OrderRepository, templateRepo *repository.TemplateRepository, googlePlay *services.GooglePlayService, renderOutputDir string) *OrdersHandler {
 	return &OrdersHandler{
 		orderRepo:       orderRepo,
+		templateRepo:    templateRepo,
 		googlePlay:      googlePlay,
 		renderOutputDir: renderOutputDir,
 	}
@@ -100,6 +102,14 @@ func (h *OrdersHandler) CreateOrder(c *gin.Context) {
 		transactionID = "mock_" + time.Now().String()
 	}
 
+	// Fetch template to get delivery time SLA
+	template, err := h.templateRepo.GetByID(req.TemplateID)
+	var dueAt *time.Time
+	if err == nil && template != nil {
+		d := time.Now().Add(time.Duration(template.DeliveryTimeDays) * 24 * time.Hour)
+		dueAt = &d
+	}
+
 	order := &models.Order{
 		UserID:        firebaseUID.(string),
 		TemplateID:    req.TemplateID,
@@ -112,6 +122,7 @@ func (h *OrdersHandler) CreateOrder(c *gin.Context) {
 		PaymentStatus: "paid",
 		AmountCents:   req.AmountCents,
 		TransactionID: transactionID,
+		DueAt:         dueAt,
 	}
 
 	createdOrder, err := h.orderRepo.Create(order)

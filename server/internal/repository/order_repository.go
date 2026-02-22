@@ -17,15 +17,15 @@ func NewOrderRepository(db *sql.DB) *OrderRepository {
 // Create creates a new order
 func (r *OrderRepository) Create(order *models.Order) (*models.Order, error) {
 	query := `INSERT INTO orders (user_id, template_id, bride_name, groom_name, wedding_date,
-	          venue, custom_message, status, payment_status, amount_cents, transaction_id, photos_link, input_method, event_details)
-	          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+	          venue, custom_message, status, payment_status, amount_cents, transaction_id, photos_link, input_method, event_details, due_at)
+	          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
 	          RETURNING id, created_at`
 
 	err := r.db.QueryRow(
 		query,
 		order.UserID, order.TemplateID, order.BrideName, order.GroomName, order.WeddingDate,
 		order.Venue, order.CustomMessage, order.Status, order.PaymentStatus,
-		order.AmountCents, order.TransactionID, order.PhotosLink, order.InputMethod, order.EventDetails,
+		order.AmountCents, order.TransactionID, order.PhotosLink, order.InputMethod, order.EventDetails, order.DueAt,
 	).Scan(&order.ID, &order.CreatedAt)
 
 	if err != nil {
@@ -43,7 +43,7 @@ func scanOrder(row interface {
 		&o.ID, &o.UserID, &o.TemplateID, &o.BrideName, &o.GroomName, &o.WeddingDate,
 		&o.Venue, &o.CustomMessage, &o.Status, &o.VideoURL, &o.PaymentStatus,
 		&o.AmountCents, &o.TransactionID, &o.CreatedAt, &o.DeliveredAt, &o.DownloadedAt, &o.AdminNotes,
-		&o.PhotosLink, &o.InputMethod, &o.EventDetails,
+		&o.DueAt, &o.PhotosLink, &o.InputMethod, &o.EventDetails,
 	)
 }
 
@@ -51,7 +51,7 @@ func scanOrder(row interface {
 func (r *OrderRepository) GetByUser(userID string) ([]models.Order, error) {
 	query := `SELECT id, user_id, template_id, bride_name, groom_name, wedding_date,
 	          venue, custom_message, status, video_url, payment_status, amount_cents,
-	          transaction_id, created_at, delivered_at, downloaded_at, admin_notes, photos_link, input_method, event_details
+	          transaction_id, created_at, delivered_at, downloaded_at, admin_notes, due_at, photos_link, input_method, event_details
 	          FROM orders WHERE user_id = $1
 	          ORDER BY created_at DESC`
 
@@ -77,7 +77,7 @@ func (r *OrderRepository) GetByUser(userID string) ([]models.Order, error) {
 func (r *OrderRepository) GetByID(id string) (*models.Order, error) {
 	query := `SELECT id, user_id, template_id, bride_name, groom_name, wedding_date,
 	          venue, custom_message, status, video_url, payment_status, amount_cents,
-	          transaction_id, created_at, delivered_at, downloaded_at, admin_notes, photos_link, input_method, event_details
+	          transaction_id, created_at, delivered_at, downloaded_at, admin_notes, due_at, photos_link, input_method, event_details
 	          FROM orders WHERE id = $1`
 
 	var o models.Order
@@ -89,7 +89,7 @@ func (r *OrderRepository) GetByID(id string) (*models.Order, error) {
 }
 
 // UpdateStatus updates order status and optional video URL (for admin fulfillment)
-func (r *OrderRepository) UpdateStatus(id string, status models.OrderStatus, videoURL *string, adminNotes *string) error {
+func (r *OrderRepository) UpdateStatus(id, status string, videoURL *string, adminNotes *string) error {
 	query := `UPDATE orders SET status = $1, video_url = $2, admin_notes = $3, 
 	          delivered_at = CASE WHEN $1 = 'completed' THEN $4 ELSE delivered_at END
 	          WHERE id = $5`
@@ -103,7 +103,7 @@ func (r *OrderRepository) UpdateStatus(id string, status models.OrderStatus, vid
 func (r *OrderRepository) GetAll() ([]models.Order, error) {
 	query := `SELECT id, user_id, template_id, bride_name, groom_name, wedding_date,
 	          venue, custom_message, status, video_url, payment_status, amount_cents,
-	          transaction_id, created_at, delivered_at, downloaded_at, admin_notes, photos_link, input_method, event_details
+	          transaction_id, created_at, delivered_at, downloaded_at, admin_notes, due_at, photos_link, input_method, event_details
 	          FROM orders
 	          ORDER BY created_at DESC`
 
@@ -126,10 +126,10 @@ func (r *OrderRepository) GetAll() ([]models.Order, error) {
 }
 
 // GetByStatus returns all orders with a specific status
-func (r *OrderRepository) GetByStatus(status models.OrderStatus) ([]models.Order, error) {
+func (r *OrderRepository) GetByStatus(status string) ([]models.Order, error) {
 	query := `SELECT id, user_id, template_id, bride_name, groom_name, wedding_date,
 	          venue, custom_message, status, video_url, payment_status, amount_cents,
-	          transaction_id, created_at, delivered_at, downloaded_at, admin_notes, photos_link, input_method, event_details
+	          transaction_id, created_at, delivered_at, downloaded_at, admin_notes, due_at, photos_link, input_method, event_details
 	          FROM orders WHERE status = $1
 	          ORDER BY created_at ASC`
 

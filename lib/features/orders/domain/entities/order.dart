@@ -65,7 +65,7 @@ class Order extends Equatable {
       'styleId': styleId,
       'brideName': details.brideName,
       'groomName': details.groomName,
-      'weddingDate': details.weddingDate.toIso8601String(),
+      'weddingDate': details.weddingDate?.toIso8601String(),
       'venue': details.venue,
       'customMessage': details.customMessage,
       'status': status.name,
@@ -86,8 +86,9 @@ class Order extends Equatable {
       details: WeddingDetails(
         brideName: map['brideName'] ?? '',
         groomName: map['groomName'] ?? '',
-        weddingDate:
-            DateTime.tryParse(map['weddingDate'] ?? '') ?? DateTime.now(),
+        weddingDate: map['weddingDate'] != null
+            ? DateTime.tryParse(map['weddingDate'])
+            : null,
         venue: map['venue'] ?? '',
         customMessage: map['customMessage'],
       ),

@@ -1,12 +1,11 @@
 import 'package:equatable/equatable.dart';
 import '../../../templates/domain/models/template.dart';
-import '../../../../core/enums/template_enums.dart';
 
 /// Domain entity representing a short-form video template
 class Short extends Equatable {
   final String id;
   final String title;
-  final TemplateCategory category;
+  final String category;
   final int placeholderColor;
   final bool isFavorite;
   final String? templateId;
@@ -35,7 +34,7 @@ class Short extends Equatable {
   Short copyWith({
     String? id,
     String? title,
-    TemplateCategory? category,
+    String? category,
     int? placeholderColor,
     String? templateId,
     bool? isFavorite,
@@ -76,9 +75,7 @@ class Short extends Equatable {
     return Short(
       id: json['id'] as String,
       title: json['title'] as String,
-      category: TemplateCategory.fromString(
-        json['category'] as String? ?? 'Modern',
-      ),
+      category: json['category'] as String,
       placeholderColor: _parseColor(json['placeholderColor'] as String?),
       templateId: json['id'] as String, // ID is the template ID
       isFavorite: json['isFavorited'] as bool? ?? false,

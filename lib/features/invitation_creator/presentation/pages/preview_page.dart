@@ -39,7 +39,7 @@ class _PreviewPageState extends State<PreviewPage> {
               ? null
               : AppBar(
                   title: Text(
-                    'Review Order',
+                    'Final Review',
                     style: TextStyle(
                       color: palette.textPrimary,
                       fontFamily: 'Cinzel',
@@ -74,9 +74,7 @@ class _PreviewPageState extends State<PreviewPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(
-              Color(0xFFFFD700),
-            ), // Gold
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFFD700)),
           ),
           const SizedBox(height: 32),
           Text(
@@ -93,7 +91,7 @@ class _PreviewPageState extends State<PreviewPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Text(
-              'Securely transmitting your details to our studio...',
+              'Securely transmitting your snapshots to our studio...',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: palette.textSecondary,
@@ -115,7 +113,6 @@ class _PreviewPageState extends State<PreviewPage> {
 
     return Column(
       children: [
-        // Progress Bar (Step 3 of 3 -> 100%)
         LinearProgressIndicator(
           value: 1.0,
           backgroundColor: palette.surfaceLight,
@@ -148,55 +145,20 @@ class _PreviewPageState extends State<PreviewPage> {
                     fontFamily: 'Cinzel',
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
 
-                // Style Summary Card
                 _buildSectionHeader(palette, 'Selected Style'),
                 const SizedBox(height: 12),
                 _buildStyleSummary(palette, state),
 
                 const SizedBox(height: 32),
 
-                // Details Summary Card
-                _buildSectionHeader(palette, 'Wedding Details'),
+                _buildSectionHeader(palette, 'Uploaded Information'),
                 const SizedBox(height: 12),
-                _buildDetailsSummary(palette, state),
+                _buildPhotosSummary(palette, state),
 
                 const SizedBox(height: 32),
-                _buildSectionHeader(palette, 'Order Summary'),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: palette.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: palette.divider),
-                  ),
-                  child: Column(
-                    children: [
-                      _buildDetailRow(
-                        palette,
-                        'Service',
-                        'Manual Video Creation',
-                        Icons.video_camera_back,
-                      ),
-                      const Divider(),
-                      _buildDetailRow(
-                        palette,
-                        'Delivery',
-                        '2-3 Business Days',
-                        Icons.watch_later_outlined,
-                      ),
-                      const Divider(),
-                      _buildDetailRow(
-                        palette,
-                        'Price',
-                        'FREE (Introductory Offer)',
-                        Icons.monetization_on,
-                      ),
-                    ],
-                  ),
-                ),
+                _buildStatusInfo(palette),
 
                 const SizedBox(height: 40),
               ],
@@ -204,115 +166,11 @@ class _PreviewPageState extends State<PreviewPage> {
           ),
         ),
 
-        // Action Buttons
         _buildActionButtons(palette, context, state),
       ],
     );
   }
 
-  Widget _buildSuccessState(AppColorPalette palette, InvitationState state) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      color: palette.background,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.check_circle,
-              color: Colors.green,
-              size: 80,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Order Placed Successfully!',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: palette.textPrimary,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Cinzel',
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Order ID: #${state.orderId?.substring(0, 8) ?? "N/A"}',
-            style: TextStyle(
-              color: palette.textTertiary,
-              fontFamily: 'Inter',
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Our team has started crafting your masterpiece. We will notify you once it is ready (approx. 2-3 days).',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: palette.textSecondary,
-              fontSize: 16,
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 48),
-
-          SizedBox(
-            width: double.infinity,
-            height: 56,
-            child: ElevatedButton(
-              onPressed: () =>
-                  Navigator.popUntil(context, (route) => route.isFirst),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: palette.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28),
-                ),
-              ),
-              child: const Text(
-                'Return to Home',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(AppColorPalette palette, String title) {
-    return Row(
-      children: [
-        Container(
-          width: 4,
-          height: 16,
-          decoration: BoxDecoration(
-            color: palette.accent,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          title.toUpperCase(),
-          style: TextStyle(
-            color: palette.textPrimary,
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-            letterSpacing: 1.1,
-            fontFamily: 'Inter',
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ... (Keep existing _buildStyleSummary, _buildDetailsSummary, _buildDetailRow methods) ...
   Widget _buildStyleSummary(AppColorPalette palette, InvitationState state) {
     final style = state.selectedStyle;
     if (style == null) return const SizedBox.shrink();
@@ -370,13 +228,75 @@ class _PreviewPageState extends State<PreviewPage> {
     );
   }
 
-  Widget _buildDetailsSummary(AppColorPalette palette, InvitationState state) {
-    final details = state.details;
-    final dateStr =
-        "${details.weddingDate.day} / ${details.weddingDate.month} / ${details.weddingDate.year}";
-
+  Widget _buildPhotosSummary(AppColorPalette palette, InvitationState state) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.photo_library_outlined,
+                color: palette.accent,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Digital Memory Vault',
+                style: TextStyle(
+                  color: palette.textPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Your wedding details and couple photos have been securely attached to this order.',
+            style: TextStyle(
+              color: palette.textSecondary,
+              fontSize: 13,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: palette.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.auto_fix_high, color: palette.accent, size: 18),
+                const SizedBox(width: 12),
+                Text(
+                  'Studio will transcribe manually',
+                  style: TextStyle(
+                    color: palette.accent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusInfo(AppColorPalette palette) {
+    return Container(
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: palette.surface,
         borderRadius: BorderRadius.circular(16),
@@ -386,14 +306,17 @@ class _PreviewPageState extends State<PreviewPage> {
         children: [
           _buildDetailRow(
             palette,
-            'Couple',
-            '${details.brideName} & ${details.groomName}',
-            Icons.favorite,
+            'Service',
+            'Professional Studio Crafting',
+            Icons.video_camera_back,
           ),
-          const Divider(height: 32),
-          _buildDetailRow(palette, 'Date', dateStr, Icons.calendar_today),
-          const Divider(height: 32),
-          _buildDetailRow(palette, 'Venue', details.venue, Icons.location_on),
+          const Divider(),
+          _buildDetailRow(
+            palette,
+            'Price',
+            'FREE (Introductory Offer)',
+            Icons.monetization_on,
+          ),
         ],
       ),
     );
@@ -407,14 +330,7 @@ class _PreviewPageState extends State<PreviewPage> {
   ) {
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: palette.accent.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, size: 20, color: palette.accent),
-        ),
+        Icon(icon, size: 20, color: palette.accent),
         const SizedBox(width: 16),
         Expanded(
           child: Column(
@@ -422,23 +338,42 @@ class _PreviewPageState extends State<PreviewPage> {
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  color: palette.textTertiary,
-                  fontSize: 12,
-                  fontFamily: 'Inter',
-                ),
+                style: TextStyle(color: palette.textTertiary, fontSize: 11),
               ),
-              const SizedBox(height: 2),
               Text(
                 value,
                 style: TextStyle(
                   color: palette.textPrimary,
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  fontFamily: 'Inter',
                 ),
               ),
             ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(AppColorPalette palette, String title) {
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 16,
+          decoration: BoxDecoration(
+            color: palette.accent,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title.toUpperCase(),
+          style: TextStyle(
+            color: palette.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+            letterSpacing: 1.1,
           ),
         ),
       ],
@@ -473,17 +408,15 @@ class _PreviewPageState extends State<PreviewPage> {
                   );
                   return;
                 }
-
                 context.read<InvitationBloc>().add(PlaceOrderRequested(userId));
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: palette.primary,
                 foregroundColor: Colors.white,
-                elevation: 8,
-                shadowColor: palette.primary.withValues(alpha: 0.4),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(28),
                 ),
+                elevation: 8,
               ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -491,12 +424,8 @@ class _PreviewPageState extends State<PreviewPage> {
                   Icon(Icons.check_circle_outline),
                   SizedBox(width: 12),
                   Text(
-                    'Place Order',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Inter',
-                    ),
+                    'Place My Order',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -504,11 +433,70 @@ class _PreviewPageState extends State<PreviewPage> {
           ),
           const SizedBox(height: 12),
           Text(
-            'We will manually craft your video with care',
+            'No payment required. Studio will notify you once ready.',
+            style: TextStyle(color: palette.textTertiary, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSuccessState(AppColorPalette palette, InvitationState state) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      color: palette.background,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.check_circle, color: Colors.green, size: 80),
+          const SizedBox(height: 24),
+          Text(
+            'Submission Received!',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: palette.textPrimary,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Cinzel',
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Order ID: #${state.orderId?.substring(0, 8) ?? "N/A"}',
             style: TextStyle(
               color: palette.textTertiary,
-              fontSize: 12,
-              fontFamily: 'Inter',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Our experts have received your snapshots. We will notify you when your cinematic video is ready.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: palette.textSecondary,
+              fontSize: 16,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 48),
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: () =>
+                  Navigator.popUntil(context, (route) => route.isFirst),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: palette.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28),
+                ),
+              ),
+              child: const Text(
+                'Return Home',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
             ),
           ),
         ],

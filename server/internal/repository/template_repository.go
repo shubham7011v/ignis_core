@@ -16,7 +16,7 @@ func NewTemplateRepository(db *sql.DB) *TemplateRepository {
 // GetAll returns all active templates
 func (r *TemplateRepository) GetAll() ([]models.Template, error) {
 	query := `SELECT id, youtube_id, placeholder_color, view_count,
-	          title, description, price_cents, category, overlay_config, is_active, created_at, updated_at
+	          title, description, price_cents, category, delivery_time_days, overlay_config, is_active, created_at, updated_at
 	          FROM templates WHERE is_active = true
 	          ORDER BY created_at DESC`
 
@@ -31,7 +31,7 @@ func (r *TemplateRepository) GetAll() ([]models.Template, error) {
 		var t models.Template
 		err := rows.Scan(
 			&t.ID, &t.YoutubeID, &t.PlaceholderColor, &t.ViewCount,
-			&t.Title, &t.Description, &t.PriceCents, &t.Category,
+			&t.Title, &t.Description, &t.PriceCents, &t.Category, &t.DeliveryTimeDays,
 			&t.OverlayConfig, &t.IsActive, &t.CreatedAt, &t.UpdatedAt,
 		)
 		if err != nil {
@@ -46,13 +46,13 @@ func (r *TemplateRepository) GetAll() ([]models.Template, error) {
 // GetByID returns a single template by ID
 func (r *TemplateRepository) GetByID(id string) (*models.Template, error) {
 	query := `SELECT id, youtube_id, placeholder_color, view_count,
-              title, description, price_cents, category, overlay_config, is_active, created_at, updated_at
+              title, description, price_cents, category, delivery_time_days, overlay_config, is_active, created_at, updated_at
               FROM templates WHERE id = $1`
 
 	var t models.Template
 	err := r.db.QueryRow(query, id).Scan(
 		&t.ID, &t.YoutubeID, &t.PlaceholderColor, &t.ViewCount,
-		&t.Title, &t.Description, &t.PriceCents, &t.Category,
+		&t.Title, &t.Description, &t.PriceCents, &t.Category, &t.DeliveryTimeDays,
 		&t.OverlayConfig, &t.IsActive, &t.CreatedAt, &t.UpdatedAt,
 	)
 
@@ -66,14 +66,14 @@ func (r *TemplateRepository) GetByID(id string) (*models.Template, error) {
 // Create adds a new template
 func (r *TemplateRepository) Create(t *models.Template) error {
 	query := `INSERT INTO templates (youtube_id, placeholder_color,
-	          title, description, price_cents, category, overlay_config, is_active)
-	          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	          title, description, price_cents, category, delivery_time_days, overlay_config, is_active)
+	          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 	          RETURNING id, created_at, updated_at`
 
 	return r.db.QueryRow(
 		query,
 		t.YoutubeID, t.PlaceholderColor,
-		t.Title, t.Description, t.PriceCents, t.Category,
+		t.Title, t.Description, t.PriceCents, t.Category, t.DeliveryTimeDays,
 		t.OverlayConfig, t.IsActive,
 	).Scan(&t.ID, &t.CreatedAt, &t.UpdatedAt)
 }
@@ -81,15 +81,15 @@ func (r *TemplateRepository) Create(t *models.Template) error {
 // Update modifies an existing template
 func (r *TemplateRepository) Update(t *models.Template) error {
 	query := `UPDATE templates SET youtube_id = $1, placeholder_color = $2,
-	          title = $3, description = $4, price_cents = $5, category = $6, overlay_config = $7,
-	          is_active = $8, updated_at = NOW()
-	          WHERE id = $9
+	          title = $3, description = $4, price_cents = $5, category = $6, 
+	          delivery_time_days = $7, overlay_config = $8, is_active = $9, updated_at = NOW()
+	          WHERE id = $10
 	          RETURNING updated_at`
 
 	return r.db.QueryRow(
 		query,
 		t.YoutubeID, t.PlaceholderColor,
-		t.Title, t.Description, t.PriceCents, t.Category,
+		t.Title, t.Description, t.PriceCents, t.Category, t.DeliveryTimeDays,
 		t.OverlayConfig, t.IsActive, t.ID,
 	).Scan(&t.UpdatedAt)
 }
@@ -103,7 +103,7 @@ func (r *TemplateRepository) SoftDelete(id string) error {
 // GetAllAdmin returns all templates (including inactive) for admin dashboard
 func (r *TemplateRepository) GetAllAdmin() ([]models.Template, error) {
 	query := `SELECT id, youtube_id, placeholder_color, view_count,
-	          title, description, price_cents, category, overlay_config, is_active, created_at, updated_at
+	          title, description, price_cents, category, delivery_time_days, overlay_config, is_active, created_at, updated_at
 	          FROM templates
 	          ORDER BY created_at DESC`
 
@@ -118,7 +118,7 @@ func (r *TemplateRepository) GetAllAdmin() ([]models.Template, error) {
 		var t models.Template
 		err := rows.Scan(
 			&t.ID, &t.YoutubeID, &t.PlaceholderColor, &t.ViewCount,
-			&t.Title, &t.Description, &t.PriceCents, &t.Category,
+			&t.Title, &t.Description, &t.PriceCents, &t.Category, &t.DeliveryTimeDays,
 			&t.OverlayConfig, &t.IsActive, &t.CreatedAt, &t.UpdatedAt,
 		)
 		if err != nil {

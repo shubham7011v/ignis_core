@@ -1,11 +1,10 @@
 import 'package:equatable/equatable.dart';
-import '../../../../core/enums/template_enums.dart';
 
 class Template extends Equatable {
   final String id;
   final String title;
   final String description;
-  final TemplateCategory category;
+  final String category;
   final String duration;
   final double cost;
   final String? youtubeId; // YouTube video ID for downloading
@@ -44,9 +43,7 @@ class Template extends Equatable {
       id: json['id'] as String,
       title: json['title'] as String,
       description: json['description'] as String,
-      category: TemplateCategory.fromString(
-        json['category'] as String? ?? 'Modern',
-      ),
+      category: json['category'] as String,
       duration: json['duration'] as String,
       cost: priceCents / 100.0,
       youtubeId: json['youtubeId'] as String?,
@@ -58,7 +55,7 @@ class Template extends Equatable {
       'id': id,
       'title': title,
       'description': description,
-      'category': category.toServerString(),
+      'category': category,
       'duration': duration,
       'priceCents': (cost * 100).toInt(),
       'youtubeId': youtubeId,
